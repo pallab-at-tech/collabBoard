@@ -291,7 +291,7 @@ const MessagePage = () => {
                             </div>
                         );
                     })}
-                <div ref={messagesEndRef} />
+                {/* <div ref={messagesEndRef} /> */}
             </div>
 
             {/* Footer */}
