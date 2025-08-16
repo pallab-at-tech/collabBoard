@@ -1,0 +1,210 @@
+@import "tailwindcss";
+
+
+@theme {
+  --breakpoint-lg-real: 1400px;
+  --breakpoint-ipad_pro: 1020px;
+  --breakpoint-lg_md: 950px;
+  --breakpoint-mini_tab: 700px;
+}
+
+@theme {
+  --color-A-off-color: #343a4e;
+  --color-A-off-text: #E0F7E9;
+
+  --color-A-color: #E0F7E9;
+  --color-A-text: #004d1a;
+
+
+  --color-B-color: #b1bbb2;
+}
+
+:root {
+  --primary-color: #fafbfc;
+}
+
+
+/* scroll bar hideen */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* score bar width resize */
+.narrow-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.narrow-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.narrow-scrollbar::-webkit-scrollbar-thumb {
+  background: #02a956;
+  border-radius: 10px;
+}
+
+.narrow-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #02a151;
+}
+
+
+/* custom scroll bar for chat */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+
+  background: #21222b;
+  border-radius: 5px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: white;
+  border-radius: 6px;
+}
+
+/* scroll-bar for create group */
+.group-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.group-scrollbar::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background: white;
+}
+
+.group-scrollbar::-webkit-scrollbar-thumb {
+  background: #262d66;
+  border-radius: 6px;
+}
+
+
+
+/* tick mark */
+.tick {
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+
+.tick::before {
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 18px;
+  border-right: 3px solid green;
+  border-bottom: 3px solid green;
+  transform: rotate(45deg);
+}
+
+
+/* uploading */
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: fit-content;
+  text-align: center;
+  font-weight: 400;
+  font-family: monospace;
+  font-size: 16px;
+  clip-path: inset(0 3ch 0 0);
+  animation: l4 1s steps(4) infinite;
+}
+
+.loader:before {
+  content: "Uploading..."
+}
+
+@keyframes l4 {
+  to {
+    clip-path: inset(0 -1ch 0 0)
+  }
+}
+
+
+/* arrow design */
+.arrow-container {
+  position: relative;
+  width: 80px;
+  height: 60px;
+}
+
+.line {
+  position: absolute;
+  background-color: #d5d7d83f;
+}
+
+.horizontal {
+  top: 20px;
+  left: 0;
+  width: 21px;
+  height: 3px;
+}
+
+.vertical {
+  top: 20px;
+  left: 21px;
+  width: 3px;
+  height: 20px;
+}
+
+.second {
+  top: 40px;
+  left: 21px;
+  width: 30px;
+  height: 3px;
+}
+
+.arrow-head {
+  position: absolute;
+  top: 35px;
+  left: 50px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 10px solid #d5d7d83f;
+  transform: rotate(0deg);
+}
+
+
+/* loader for  image , video */
+.loader {
+  width: 50px;
+  aspect-ratio: 1;
+  display: grid;
+  mask: conic-gradient(from 15deg, #0000, #000);
+  -webkit-mask: conic-gradient(from 15deg, #0000, #000);
+
+  animation: l26 1s infinite steps(12);
+}
+
+.loader,
+.loader:before,
+.loader:after {
+  background:
+    radial-gradient(closest-side at 50% 12.5%, #da0975 96%, #0000) 50% 0/20% 80% repeat-y,
+    radial-gradient(closest-side at 12.5% 50%, #da0975 96%, #0000) 0 50%/80% 20% repeat-x;
+}
+
+.loader:before,
+.loader:after {
+  content: "";
+  grid-area: 1/1;
+  transform: rotate(30deg);
+}
+
+.loader:after {
+  transform: rotate(60deg);
+}
+
+@keyframes l26 {
+  100% { transform: rotate(1turn) }
+}
