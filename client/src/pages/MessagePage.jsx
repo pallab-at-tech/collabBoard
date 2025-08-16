@@ -180,7 +180,7 @@ const MessagePage = () => {
         })()
     }, [params?.conversation])
 
-    console.log("chat_details", chat_details)
+    console.log("chat_details",chat_details)
 
 
     // recieved message and update globally [ all chat member ]
@@ -207,7 +207,7 @@ const MessagePage = () => {
         return () => {
             socketConnection.off("receive_message");
         };
-    }, [socketConnection, dispatch]);
+    }, [socketConnection,dispatch]);
 
 
     useEffect(() => {
@@ -229,115 +229,247 @@ const MessagePage = () => {
 
 
     return (
-        <section className="h-[calc(100vh-60px)] w-full flex flex-col relative bg-[#18191f]">
+        <section className='h-[calc(100vh-60px)] w-full  grid grid-row-[64px_1fr_60px] relative overflow-hidden'>
+{/* fixed top-0 */}
+            <div className='bg-[#21222b]   z-50 pt-[13px] pb-[13px] px-4 grid grid-cols-[300px_1fr] w-full items-center text-white shadow-md shadow-[#57575765]'>
 
-            {/* Header */}
-            <div className="bg-[#21222b] fixed top-0 z-50 py-3 px-4 flex justify-between items-center w-full text-white shadow-md shadow-[#57575765]">
-                <div className="flex items-center gap-3">
-                    <RxAvatar size={38} />
-                    {isGroup ? (
-                        <p className="text-lg font-medium">{location?.allMessageDetails?.group_name}</p>
-                    ) : (
-                        <div className="flex flex-col text-sm">
-                            <p className="font-medium">{location?.allMessageDetails?.otherUser?.name}</p>
-                            <p className="text-xs opacity-70">{location?.allMessageDetails?.otherUser?.userId}</p>
-                        </div>
-                    )}
+                <div className={`flex gap-2.5 ${location?.allMessageDetails?.group_type === "GROUP" ? "items-center" : "items-start"} pl-2`}>
+                    <div className='flex items-center justify-center'>
+                        <RxAvatar size={38} />
+                    </div>
+
+                    {
+                        location?.allMessageDetails?.group_type === "GROUP" ? (
+                            <div className='text-lg'>
+                                <p>{location?.allMessageDetails?.group_name}</p>
+                            </div>
+                        ) : (
+                            <div className='flex flex-col leading-tight text-base items-start'>
+                                <p>{location?.allMessageDetails?.otherUser?.name}</p>
+                                <p>{location?.allMessageDetails?.otherUser?.userId}</p>
+                            </div>
+                        )
+                    }
+
                 </div>
-                <MdManageSearch size={28} className="cursor-pointer" />
+
+                <div className='flex items-center justify-end'>
+                    <MdManageSearch size={30} className='cursor-pointer' />
+                </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto pt-[70px] pb-[80px] px-3 chat-scrollbar">
-                {messages.map((msg, i) => {
-                    const isSelf = msg?.senderId?._id === user?._id || msg?.senderId === user?._id
-                    const time = new Date(msg?.createdAt).toLocaleString("en-IN", {
-                        timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit"
+            <div className='h-full mb-[55px] pt-[140px] overflow-y-scroll px-2.5 flex flex-col gap-2.5 py-4 chat-scrollbar relative' style={{ willChange: 'transform' }}>
+                {
+                    Array.isArray(messages) && messages.map((value, index) => {
+
+                        const isSelfMessage = value?.senderId?._id === user?._id || value?.senderId === user?._id
+                        const date = new Date(value?.createdAt)
+                        const indianTime = date.toLocaleString("en-IN", {
+                            timeZone: "Asia/Kolkata",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit"
+                        })
+
+
+                        return (
+                            <div key={`new key-${index}`} className={`bg-[#f1f1f1] w-fit text-base rounded text-blue-950  px-1 py-0.5 ${location?.allMessageDetails?.group_type === "GROUP" && index === 0 ? "self-center" : `${isSelfMessage ? "self-end" : "self-start"}`} `}>
+
+                                {
+                                    (index !== 0 && user?._id && value?.senderId !== user?._id) && (
+                                        isGroup && <div className='sm:-mb-0.5 -mb-1.5 text-sm'>
+                                            {value?.senderName}
+                                        </div>
+
+                                    )
+                                }
+
+                                <div className='pt-1 r'>
+                                    {
+                                        value?.image && <img src={value?.image} alt="" className='w-[200px]' />
+                                    }
+
+                                    {
+                                        value?.video && <video src={value?.video} controls className='w-[200px]'></video>
+                                    }
+
+                                    {value?.other_fileUrl_or_external_link && (
+                                        <button
+                                            onClick={() => window.open(value.other_fileUrl_or_external_link, "_blank")}
+                                            className="bg-blue-500 text-white px-3 py-1 rounded"
+                                        >
+                                            Open PDF
+                                        </button>
+                                    )}
+                                </div>
+                                <p className={`${(location?.allMessageDetails?.group_type === "GROUP" && index === 0) ? "text-[13px]" : "font-semibold"} `}>
+                                    {value?.text}
+                                </p>
+
+                                <p className={`text-sm opacity-[60%] ${isSelfMessage ? "text-end" : "text-start"} `}>
+                                    {indianTime}
+                                </p>
+
+                                <div ref={messagesEndRef} />
+                            </div>
+                        )
                     })
-                    return (
-                        <div key={i} className={`max-w-[85%] sm:max-w-[70%] md:max-w-[60%] break-words p-2 rounded-md text-sm mb-2 ${isSelf ? "bg-blue-500 text-white self-end ml-auto" : "bg-gray-200 text-blue-950 self-start mr-auto"}`}>
-                            {isGroup && !isSelf && <p className="text-xs font-semibold mb-1">{msg?.senderName}</p>}
-                            {msg?.image && <img src={msg.image} alt="" className="max-w-full rounded-lg mb-1" />}
-                            {msg?.video && <video src={msg.video} controls className="max-w-full rounded-lg mb-1"></video>}
-                            {msg?.other_fileUrl_or_external_link && (
-                                <button onClick={() => window.open(msg.other_fileUrl_or_external_link, "_blank")}
-                                    className="bg-blue-600 text-white text-xs px-3 py-1 rounded">
-                                    Open File
-                                </button>
-                            )}
-                            {msg?.text && <p className="whitespace-pre-wrap">{msg.text}</p>}
-                            <p className="text-[10px] opacity-70 mt-1">{time}</p>
-                            <div ref={messagesEndRef}></div>
-                        </div>
+                }
+            </div>
+{/* fixed bottom-0 */}
+
+            <div className='bg-[#1f2029]  py-3 w-full rounded-t-md grid grid-cols-[100px_1fr_100px] items-center text-white shadow-md shadow-[#154174]'>
+
+                <div className='flex items-center justify-center relative'>
+                    <MdAttachment size={29} onClick={() => setOpenAttach(true)} className='cursor-pointer' />
+
+                    {
+                        openAttach && (
+                            <div ref={attachRef} className='bg-[#f1f1f1] text-blue-950 absolute bottom-10 left-8 min-h-[110px] min-w-[100px] flex flex-col items-start px-4 gap-2 py-2 rounded-t-2xl rounded-r-2xl rounded-l-md'>
+
+                                <div className='flex gap-4 items-center justify-center'>
+
+                                    <div onClick={() => {
+                                        imgRef.current.click()
+                                    }}
+                                        className='cursor-pointer'
+                                    >
+                                        <IoImage size={42} />
+                                        <p >image</p>
+                                        <input ref={imgRef} onChange={handleAllAtachFile} type="file" accept="image/*" name='image' hidden />
+                                    </div>
+
+                                    <div onClick={() => videoRef.current.click()}
+                                        className='cursor-pointer'
+                                    >
+                                        <RiFolderVideoFill size={42} />
+                                        <p className='text-center'>video</p>
+                                        <input type="file" ref={videoRef} onChange={handleAllAtachFile} accept="video/*" name='video' hidden />
+                                    </div>
+                                </div>
+
+                                <div className='flex gap-4 items-start justify-center'>
+                                    <div onClick={() => fileUrlRef.current.click()} className='cursor-pointer'>
+                                        <FaFileAlt size={42} />
+                                        <p className='text-center'>file</p>
+                                        <input type="file" ref={fileUrlRef} onChange={handleAllAtachFile} accept="application/pdf" name='other_fileUrl_or_external_link' hidden />
+                                    </div>
+
+                                    {/* <div className='cursor-pointer'>
+                                        <HiOutlineUserGroup size={42}/>
+                                        <p className='leading-[1] text-center'>Create group</p>
+                                    </div> */}
+                                </div>
+                            </div>
+                        )
+                    }
+                </div>
+
+
+                {
+                    location?.allMessageDetails?.group_type === "PRIVATE" ? (
+                        <>
+
+                            <div>
+                                <input type="text" value={messageText}
+
+                                    onChange={e => setMessageText(e.target.value)}
+
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleOnClick();
+                                        }
+                                    }}
+
+                                    className='w-full text-[#f3f3f3] outline-none' placeholder='Type a message...'
+                                />
+                            </div>
+
+                            <div className='flex items-center justify-center cursor-pointer'>
+                                <IoSendOutline size={29} onClick={() => handleOnClick()} />
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div>
+                                <input type="text" value={messageText}
+
+                                    onChange={e => setMessageText(e.target.value)}
+
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleGroupMessageSend();
+                                        }
+                                    }}
+
+                                    className='w-full text-[#f3f3f3] outline-none' placeholder='Type a message...'
+                                />
+                            </div>
+
+                            <div className='flex items-center justify-center cursor-pointer'>
+                                <IoSendOutline size={29} onClick={() => handleGroupMessageSend()} />
+                            </div>
+                        </>
                     )
-                })}
+                }
+
             </div>
 
-            {/* Input */}
-            <div className="bg-[#1f2029] fixed bottom-0 w-full py-3 px-2 flex items-center gap-3">
-                <div className="relative" ref={attachRef}>
-                    <MdAttachment size={28} onClick={() => setOpenAttach(!openAttach)} className="cursor-pointer text-white" />
-                    {openAttach && (
-                        <div className="absolute bottom-10 left-0 bg-white text-blue-950 p-3 rounded-lg shadow-md flex gap-4 flex-wrap w-[200px] sm:w-[250px]">
-                            <div onClick={() => imgRef.current.click()} className="cursor-pointer flex flex-col items-center">
-                                <IoImage size={36} /><p className="text-xs">Image</p>
-                                <input ref={imgRef} onChange={handleAllAtachFile} type="file" accept="image/*" name="image" hidden />
-                            </div>
-                            <div onClick={() => videoRef.current.click()} className="cursor-pointer flex flex-col items-center">
-                                <RiFolderVideoFill size={36} /><p className="text-xs">Video</p>
-                                <input ref={videoRef} onChange={handleAllAtachFile} type="file" accept="video/*" name="video" hidden />
-                            </div>
-                            <div onClick={() => fileUrlRef.current.click()} className="cursor-pointer flex flex-col items-center">
-                                <FaFileAlt size={36} /><p className="text-xs">File</p>
-                                <input ref={fileUrlRef} onChange={handleAllAtachFile} type="file" accept="application/pdf" name="other_fileUrl_or_external_link" hidden />
-                            </div>
+
+            <div className={`absolute  left-[40%] bottom-0 top-[40%] ${loading ? "block" : "hidden"}`}>
+                <div className='loader'></div>
+            </div>
+
+            {
+
+                attachData.image && (
+                    <section className='fixed right-0 left-0 top-0 bottom-[58px] flex flex-col items-center justify-center z-50 bg-gray-800/75'>
+                        <div className='relative w-fit h-fit'>
+                            <IoClose size={30}
+                                onClick={() => {
+                                    setAttachData((pre) => {
+                                        return {
+                                            ...pre,
+                                            image: ""
+                                        }
+                                    })
+                                    setLoading(false)
+                                }}
+                                className='absolute text-[#cbcbcb] hover:text-[#e7e5e5] z-40 -top-10 -right-8'
+                            />
+                            <img src={attachData.image} alt="" className='h-[300px]' />
                         </div>
-                    )}
-                </div>
+                    </section>
+                )
+            }
 
-                <input
-                    type="text"
-                    value={messageText}
-                    onChange={e => setMessageText(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            isGroup ? handleGroupMessageSend() : handleOnClick();
-                        }
-                    }}
-                    placeholder="Type a message..."
-                    className="flex-1 bg-transparent outline-none text-white text-sm px-2"
-                />
+            {
+                attachData?.video && (
+                    <section className='fixed right-0 left-0 top-0 bottom-[58px] flex flex-col items-center justify-center z-50 bg-gray-800/75'>
+                        <div className='relative w-fit h-fit'>
+                            <IoClose size={30}
+                                onClick={() => {
+                                    setAttachData((pre) => {
+                                        return {
+                                            ...pre,
+                                            video: ""
+                                        }
+                                    })
 
-                <IoSendOutline size={28} onClick={() => isGroup ? handleGroupMessageSend() : handleOnClick()} className="cursor-pointer text-white" />
-            </div>
+                                    setLoading(false)
+                                }}
 
-            {/* Loading */}
-            {loading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                    <div className="loader"></div>
-                </div>
-            )}
-
-            {/* Preview Image */}
-            {attachData.image && (
-                <section className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
-                    <div className="relative">
-                        <IoClose size={30} onClick={() => setAttachData(prev => ({ ...prev, image: "" }))} className="absolute -top-10 right-0 text-white cursor-pointer" />
-                        <img src={attachData.image} alt="" className="max-h-[70vh] max-w-full rounded-lg" />
-                    </div>
-                </section>
-            )}
-
-            {/* Preview Video */}
-            {attachData.video && (
-                <section className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
-                    <div className="relative">
-                        <IoClose size={30} onClick={() => setAttachData(prev => ({ ...prev, video: "" }))} className="absolute -top-10 right-0 text-white cursor-pointer" />
-                        <video src={attachData.video} className="max-h-[70vh] max-w-full rounded-lg" controls></video>
-                    </div>
-                </section>
-            )}
+                                className='absolute text-[#cbcbcb] hover:text-[#e7e5e5] z-40 -top-10 -right-8'
+                            />
+                            <video src={attachData.video} className='h-[350px]' controls></video>
+                        </div>
+                    </section>
+                )
+            }
 
         </section>
     )
