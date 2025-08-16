@@ -12,16 +12,14 @@ import { io } from 'socket.io-client'
 export const GlobalContext = createContext(null)
 export const useGlobalContext = () => useContext(GlobalContext)
 
-// 🔹 exported reference (so Axios can reach setIsLogin)
 export let setLoginGlobal = () => { }
 
 const GlobalProvider = ({ children }) => {
     const user = useSelector(state => state.user)
     const dispatch = useDispatch()
     const [socketConnection, setSocketConnection] = useState(null)
-    const [isLogin, setIsLogin] = useState(false)
+    const [isLogin, setIsLogin] = useState(localStorage.getItem("login") === "true")
 
-    // 🔹 register setter globally
     useEffect(() => {
         setLoginGlobal = setIsLogin
     }, [setIsLogin])
@@ -49,13 +47,8 @@ const GlobalProvider = ({ children }) => {
     }
 
     useEffect(() => {
-        const login = localStorage.getItem("login")
-        setIsLogin(login === "true")
-    }, [])
-
-    useEffect(() => {
-        localStorage.setItem("login", isLogin)
-    }, [isLogin])
+        localStorage.setItem("login", isLogin);
+    }, [isLogin]);
 
     const loginUser = () => {
         localStorage.setItem("login", "true");
