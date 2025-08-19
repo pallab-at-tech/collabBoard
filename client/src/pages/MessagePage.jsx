@@ -228,6 +228,15 @@ const MessagePage = () => {
     }, []);
 
 
+    useEffect(() => {
+        const setAppHeight = () => {
+            document.documentElement.style.setProperty('--message-heigh', `${window.innerHeight - 184}px`);
+        };
+
+        setAppHeight();
+        window.addEventListener('resize', setAppHeight);
+        return () => window.removeEventListener('resize', setAppHeight);
+    }, []);
 
 
 
@@ -252,7 +261,7 @@ const MessagePage = () => {
             </div>
 
             {/* Messages */}
-            <div className="overflow-y-auto px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0 messages-container" >
+            <div className="overflow-y-auto h-[var(--message-heigh)] px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0 messages-container" >
                 {Array.isArray(messages) &&
                     messages.map((value, index) => {
                         const isSelfMessage =
