@@ -212,73 +212,11 @@ const MessagePage = () => {
 
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
-
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (attachRef.current && !attachRef.current.contains(event.target)) {
-                setOpenAttach(false);
-            }
+        if (messagesEndRef.current) {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'end' });
         }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
+    }, [messages, messages.length, messageText]);
 
-
-    useEffect(() => {
-        if (typeof window === "undefined") return;
-        const setHeight = () =>
-            document.documentElement.style.setProperty(
-                "--app-height",
-                `${window.innerHeight}px`
-            );
-
-        window.addEventListener("resize", setHeight);
-        setHeight();
-        return () => window.removeEventListener("resize", setHeight);
-    }, [messages , chat_details]);
-
-    const scrollToBottom = (behavior = "auto") => {
-        const el = messagesContainerRef.current;
-        if (!el) return;
-        el.scrollTo({ top: el.scrollHeight, behavior });
-    };
-
-    useLayoutEffect(() => {
-        scrollToBottom("auto"); 
-    }, [messages]);
-
-    useEffect(() => {
-        const container = messagesContainerRef.current;
-        if (!container) return;
-
-        const onMediaLoad = () => scrollToBottom("smooth");
-
-        const nodes = container.querySelectorAll("img, video");
-        nodes.forEach((n) => {
-            n.addEventListener("load", onMediaLoad);       // images
-            n.addEventListener("loadeddata", onMediaLoad); // videos
-        });
-
-        let ro;
-        if (typeof ResizeObserver !== "undefined") {
-            ro = new ResizeObserver(() => {
-                requestAnimationFrame(() => scrollToBottom("auto"));
-            });
-            ro.observe(container);
-        }
-
-        return () => {
-            nodes.forEach((n) => {
-                n.removeEventListener("load", onMediaLoad);
-                n.removeEventListener("loadeddata", onMediaLoad);
-            });
-            if (ro) ro.disconnect();
-        };
-    }, [messages]);
 
 
     return (
@@ -302,7 +240,7 @@ const MessagePage = () => {
             </div>
 
             {/* Messages */}
-            <div  ref={messagesContainerRef} className="overflow-y-auto px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0" >
+            <div className="overflow-y-auto px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0" >
                 {Array.isArray(messages) &&
                     messages.map((value, index) => {
                         const isSelfMessage =
@@ -319,6 +257,7 @@ const MessagePage = () => {
 
                         return (
                             <div
+                                ref={messagesEndRef}
                                 key={`msg-${index}`}
                                 className={`bg-[#f1f1f1] max-w-[75%] break-words text-base rounded text-blue-950 px-3 py-1 ${isSelfMessage ? "self-end" : "self-start"
                                     }`}
@@ -344,7 +283,7 @@ const MessagePage = () => {
                             </div>
                         );
                     })}
-                <div ref={messagesEndRef} />
+                {/* <div ref={messagesEndRef} /> */}
             </div>
 
             {/* Footer */}
