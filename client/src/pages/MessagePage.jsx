@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { IoSendOutline } from "react-icons/io5";
 import { MdAttachment } from "react-icons/md";
 import { RxAvatar } from "react-icons/rx";
@@ -40,6 +40,7 @@ const MessagePage = () => {
     const dispatch = useDispatch()
     const user = useSelector(state => state.user)
     const messagesEndRef = useRef(null);
+    const messagesContainerRef = useRef(null);
     const params = useParams()
 
     const [loading, setLoading] = useState(false)
@@ -228,19 +229,56 @@ const MessagePage = () => {
 
 
     useEffect(() => {
-        const setHeight = () => {
+        if (typeof window === "undefined") return;
+        const setHeight = () =>
             document.documentElement.style.setProperty(
                 "--app-height",
                 `${window.innerHeight}px`
             );
-        };
 
         window.addEventListener("resize", setHeight);
-        setHeight(); // run once on load
-
+        setHeight();
         return () => window.removeEventListener("resize", setHeight);
     }, []);
 
+    const scrollToBottom = (behavior = "auto") => {
+        const el = messagesContainerRef.current;
+        if (!el) return;
+        el.scrollTo({ top: el.scrollHeight, behavior });
+    };
+
+    useLayoutEffect(() => {
+        scrollToBottom("auto"); 
+    }, [messages]);
+
+    useEffect(() => {
+        const container = messagesContainerRef.current;
+        if (!container) return;
+
+        const onMediaLoad = () => scrollToBottom("smooth");
+
+        const nodes = container.querySelectorAll("img, video");
+        nodes.forEach((n) => {
+            n.addEventListener("load", onMediaLoad);       // images
+            n.addEventListener("loadeddata", onMediaLoad); // videos
+        });
+
+        let ro;
+        if (typeof ResizeObserver !== "undefined") {
+            ro = new ResizeObserver(() => {
+                requestAnimationFrame(() => scrollToBottom("auto"));
+            });
+            ro.observe(container);
+        }
+
+        return () => {
+            nodes.forEach((n) => {
+                n.removeEventListener("load", onMediaLoad);
+                n.removeEventListener("loadeddata", onMediaLoad);
+            });
+            if (ro) ro.disconnect();
+        };
+    }, [messages]);
 
 
     return (
@@ -264,7 +302,7 @@ const MessagePage = () => {
             </div>
 
             {/* Messages */}
-            <div className="overflow-y-auto px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0" >
+            <div  ref={messagesContainerRef} className="overflow-y-auto px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0" >
                 {Array.isArray(messages) &&
                     messages.map((value, index) => {
                         const isSelfMessage =
