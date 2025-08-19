@@ -229,25 +229,27 @@ const MessagePage = () => {
 
 
     return (
-        <section className='min-h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] relative'>
+        <section className="flex flex-col h-[calc(100vh-60px)]">
 
-            <div className='bg-red-700 min-h-[100px] max-h-[100px] fixed top-0 w-full z-40'>
-
+            {/* Fixed Top Bar */}
+            <div className="bg-red-700 h-[100px] w-full z-40">
+                Top Bar
             </div>
 
-            <div className="overflow-y-auto text-white absolute top-[100px] bottom-[100px] w-full">
-                <div className="h-[2000px] bg-gray-800">
+            {/* Scrollable Middle */}
+            <div className="flex-1 overflow-y-auto bg-gray-800 text-white">
+                <div className="h-[2000px]">
                     <p>hi</p>
                 </div>
             </div>
 
-
-            <div className='bg-green-800 min-h-[100px] max-h-[100px] fixed bottom-0 w-full z-40'>
-
+            {/* Fixed Bottom Bar */}
+            <div className="bg-green-800 h-[100px] w-full z-40">
+                Bottom Bar
             </div>
 
-
         </section>
+
 
     )
 }
