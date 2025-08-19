@@ -220,7 +220,7 @@ const MessagePage = () => {
 
 
     return (
-        <section className="h-[calc(var(--app-height)-60px)] w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden">
+        <section className="h-[calc(100dvh-60px)]  w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden">
             {/* Header */}
             <div className="bg-[#21222b] z-50 px-4 flex items-center justify-between text-white shadow-md shadow-[#57575765]">
                 {/* left */}
