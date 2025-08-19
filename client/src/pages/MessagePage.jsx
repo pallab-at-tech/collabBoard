@@ -214,7 +214,7 @@ const MessagePage = () => {
         if (messagesEndRef.current) {
             messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'end' });
         }
-    }, [messages, messages.length, messageText]);
+    }, [messages]);
 
 
     useEffect(() => {
@@ -226,7 +226,7 @@ const MessagePage = () => {
         };
 
         window.addEventListener("resize", setHeight);
-        setHeight(); // initial
+        setHeight(); 
 
         return () => window.removeEventListener("resize", setHeight);
     }, []);
