@@ -239,7 +239,7 @@ const MessagePage = () => {
         window.addEventListener("resize", setHeight);
         setHeight();
         return () => window.removeEventListener("resize", setHeight);
-    }, []);
+    }, [messages , chat_details]);
 
     const scrollToBottom = (behavior = "auto") => {
         const el = messagesContainerRef.current;
