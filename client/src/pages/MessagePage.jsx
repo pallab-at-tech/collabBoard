@@ -218,24 +218,21 @@ const MessagePage = () => {
 
 
     useEffect(() => {
-        const setHeight = () => {
-            document.documentElement.style.setProperty(
-                "--app-height",
-                `${window.innerHeight}px`
-            );
+        const setAppHeight = () => {
+            document.documentElement.style.setProperty('--app-height', `${window.innerHeight - 60}px`);
         };
 
-        window.addEventListener("resize", setHeight);
-        setHeight(); 
-
-        return () => window.removeEventListener("resize", setHeight);
+        setAppHeight();
+        window.addEventListener('resize', setAppHeight);
+        return () => window.removeEventListener('resize', setAppHeight);
     }, []);
 
 
 
 
+
     return (
-        <section className="h-[calc(var(--app-height)-60px)]  w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden">
+        <section className="h-[var(--app-height)]  w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden">
             {/* Header */}
             <div className="bg-[#21222b] z-50 px-4 flex items-center justify-between text-white shadow-md shadow-[#57575765]">
                 {/* left */}
