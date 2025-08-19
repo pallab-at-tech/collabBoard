@@ -229,23 +229,23 @@ const MessagePage = () => {
 
 
     return (
-        <section className="flex flex-col h-[calc(100dvh-160px)]">
+        <section className="h-[calc(100dvh-60px)] grid grid-rows-[100px_1fr_100px] overflow-hidden">
 
-            {/* Fixed Top Bar */}
-            <div className="bg-red-700 h-[100px] w-full z-40">
-                Top Bar
+            {/* Top Bar */}
+            <div className="bg-red-700 flex items-center justify-center text-white">
+                Top Bar (100px)
             </div>
 
             {/* Scrollable Middle */}
-            <div className="flex-1 overflow-y-auto bg-gray-800 text-white">
+            <div className="overflow-y-auto bg-gray-800 text-white p-4">
                 <div className="h-[2000px]">
-                    <p>hi</p>
+                    <p>Scrollable content...</p>
                 </div>
             </div>
 
-            {/* Fixed Bottom Bar */}
-            <div className="bg-green-800 h-[100px] w-full z-40">
-                Bottom Bar
+            {/* Bottom Bar */}
+            <div className="bg-green-800 flex items-center justify-center text-white">
+                Bottom Bar (100px)
             </div>
 
         </section>
