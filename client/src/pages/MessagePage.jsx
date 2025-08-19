@@ -234,8 +234,10 @@ const MessagePage = () => {
                 `${window.innerHeight}px`
             );
         };
+
         window.addEventListener("resize", setHeight);
-        setHeight();
+        setHeight(); // run once on load
+
         return () => window.removeEventListener("resize", setHeight);
     }, []);
 
@@ -262,7 +264,7 @@ const MessagePage = () => {
             </div>
 
             {/* Messages */}
-            <div className="overflow-y-auto px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar" >
+            <div className="overflow-y-auto px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0" >
                 {Array.isArray(messages) &&
                     messages.map((value, index) => {
                         const isSelfMessage =

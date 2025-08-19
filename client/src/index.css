@@ -19,6 +19,9 @@
   --color-B-color: #b1bbb2;
 }
 
+:root {
+  --app-height: 100vh; 
+}
 
 .h-app {
   height: var(--app-height);
