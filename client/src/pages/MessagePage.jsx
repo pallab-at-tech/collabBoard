@@ -40,7 +40,6 @@ const MessagePage = () => {
     const dispatch = useDispatch()
     const user = useSelector(state => state.user)
     const messagesEndRef = useRef(null);
-    const messagesContainerRef = useRef(null);
     const params = useParams()
 
     const [loading, setLoading] = useState(false)
@@ -218,9 +217,25 @@ const MessagePage = () => {
     }, [messages, messages.length, messageText]);
 
 
+    useEffect(() => {
+        const setHeight = () => {
+            document.documentElement.style.setProperty(
+                "--app-height",
+                `${window.innerHeight}px`
+            );
+        };
+
+        window.addEventListener("resize", setHeight);
+        setHeight(); // initial
+
+        return () => window.removeEventListener("resize", setHeight);
+    }, []);
+
+
+
 
     return (
-        <section className="h-[calc(100dvh-60px)]  w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden">
+        <section className="h-[calc(var(--app-height)-60px)]  w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden">
             {/* Header */}
             <div className="bg-[#21222b] z-50 px-4 flex items-center justify-between text-white shadow-md shadow-[#57575765]">
                 {/* left */}
