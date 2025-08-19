@@ -19,6 +19,10 @@
   --color-B-color: #b1bbb2;
 }
 
+.dynamic-height{
+  height: 100dvh;
+}
+
 :root {
   --primary-color: #fafbfc;
 }
