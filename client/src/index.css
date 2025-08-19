@@ -24,6 +24,20 @@
   --primary-color: #fafbfc;
 }
 
+.section-chat {
+  height: 100vh;
+  /* always full viewport */
+  display: grid;
+  grid-template-rows: 64px 1fr 60px;
+  /* header, messages, footer */
+}
+
+.messages-container {
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  /* for iPhone bottom safe area */
+}
+
 
 /* scroll bar hideen */
 .hide-scrollbar {
@@ -207,5 +221,7 @@
 }
 
 @keyframes l26 {
-  100% { transform: rotate(1turn) }
+  100% {
+    transform: rotate(1turn)
+  }
 }

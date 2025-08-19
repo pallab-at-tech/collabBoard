@@ -232,7 +232,7 @@ const MessagePage = () => {
 
 
     return (
-        <section className="h-[var(--app-height)]  w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden">
+        <section className="h-screen  w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden">
             {/* Header */}
             <div className="bg-[#21222b] z-50 px-4 flex items-center justify-between text-white shadow-md shadow-[#57575765]">
                 {/* left */}
@@ -252,7 +252,7 @@ const MessagePage = () => {
             </div>
 
             {/* Messages */}
-            <div className="overflow-y-auto px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0" >
+            <div className="overflow-y-auto messages-containe px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0" >
                 {Array.isArray(messages) &&
                     messages.map((value, index) => {
                         const isSelfMessage =
