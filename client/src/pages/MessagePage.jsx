@@ -229,7 +229,7 @@ const MessagePage = () => {
 
 
     return (
-        <section className="flex flex-col dynamic-height">
+        <section className="flex flex-col h-[calc(100dvh-160px)]">
 
             {/* Fixed Top Bar */}
             <div className="bg-red-700 h-[100px] w-full z-40">
