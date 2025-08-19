@@ -19,8 +19,9 @@
   --color-B-color: #b1bbb2;
 }
 
-.dynamic-height{
-  height: 100dvh;
+
+.h-app {
+  height: var(--app-height);
 }
 
 :root {

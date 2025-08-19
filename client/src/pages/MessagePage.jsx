@@ -227,9 +227,22 @@ const MessagePage = () => {
     }, []);
 
 
+    useEffect(() => {
+        const setHeight = () => {
+            document.documentElement.style.setProperty(
+                "--app-height",
+                `${window.innerHeight}px`
+            );
+        };
+        window.addEventListener("resize", setHeight);
+        setHeight();
+        return () => window.removeEventListener("resize", setHeight);
+    }, []);
+
+
 
     return (
-        <section className="h-[calc(100dvh-60px)] w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden" style={{ willChange: 'transform' }}>
+        <section className="h-[calc(var(--app-height)-60px)] w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden">
             {/* Header */}
             <div className="bg-[#21222b] z-50 px-4 flex items-center justify-between text-white shadow-md shadow-[#57575765]">
                 {/* left */}
@@ -249,7 +262,7 @@ const MessagePage = () => {
             </div>
 
             {/* Messages */}
-            <div className="overflow-y-auto px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar" style={{ willChange: 'transform' }}>
+            <div className="overflow-y-auto px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar" >
                 {Array.isArray(messages) &&
                     messages.map((value, index) => {
                         const isSelfMessage =
@@ -341,8 +354,6 @@ const MessagePage = () => {
                 </div>
             </div>
         </section>
-
-
     )
 }
 
