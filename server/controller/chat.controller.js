@@ -29,12 +29,9 @@ export const getPreviousChatUsers = async (request, response) => {
             return {
                 ...conv,
                 otherUser,
-                participants : conv.participants
+                participants: conv.participants
             };
         });
-
-        console.log("mergedData mergedData mergedData",mergedData)
-
 
         return response.json({
             message: 'Get all participants details',
@@ -74,6 +71,74 @@ export const fetchAllMessages = async (request, response) => {
             data: messages,
             error: false,
             success: true
+        })
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            success: false,
+            error: true
+        })
+    }
+}
+
+export const getConversationDetails = async (request, response) => {
+    try {
+
+        const userId = request?.userId
+        const { conversationID } = request.query || {}
+
+        if (!conversationID) {
+            return response.status(400).json({
+                message: "conversation ID required",
+                success: false,
+                error: true
+            })
+        }
+
+        const details = await conversationModel
+            .findById(conversationID)
+            .select("-messages")
+            .populate({
+                path: "participants",
+                select: "_id name userId avatar"
+            })
+            .lean();
+
+        // participants with admin flag
+        const participants = details.participants.map(p => ({
+            _id: p._id,
+            name: p.name,
+            userId: p.userId,
+            avatar: p.avatar,
+            admin: details.admin.some(a => a.toString() === p._id.toString())
+        }));
+
+        const currUser = participants.find(p => p._id.toString() === userId.toString());
+        const otherUser = participants.filter(p => p._id.toString() !== userId.toString());
+
+        const orderedParticipants = currUser
+            ? [currUser, ...otherUser]
+            : participants;
+
+        const data = {
+            _id: details._id,
+            group_type: details.group_type,
+            group_name: details.group_name,
+            group_image: details.group_image,
+            createdAt: details.createdAt,
+            updatedAt: details.updatedAt,
+            participants: orderedParticipants,
+            currUser,
+            otherUser
+        };
+
+        return response.json({
+            message: "Group details",
+            data: data,
+            currUser: currUser,
+            success: true,
+            error: false,
         })
 
     } catch (error) {

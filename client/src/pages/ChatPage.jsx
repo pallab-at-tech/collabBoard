@@ -10,7 +10,7 @@ import { setMessageDetails } from '../store/chatSlice';
 import { useDispatch } from 'react-redux';
 import { FiArrowUpLeft } from 'react-icons/fi'
 import { RxAvatar } from 'react-icons/rx';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { HiUserGroup } from "react-icons/hi2";
@@ -24,6 +24,7 @@ const ChatPage = () => {
     const user = useSelector(state => state.user)
     const chat_details = useSelector(state => state.chat?.all_message)
     const location = useLocation()
+    const params = useParams()
 
     const dispatch = useDispatch()
 
@@ -71,6 +72,8 @@ const ChatPage = () => {
             }
         })();
     }, [])
+
+    console.log("location start",chat_details)
 
 
     return (
@@ -161,6 +164,8 @@ const ChatPage = () => {
                                         )
                                     })
                                 }
+
+                                
                             </div>
                         )
                     }
@@ -168,10 +173,10 @@ const ChatPage = () => {
 
                 </div>
 
-                <div className={`h-[calc(100vh-60px)] w-full overflow-y-auto  ${location.state === null && "items-center justify-center ipad_pro:flex hidden"} narrow-scrollbar bg-[#282932]`} style={{ willChange: 'transform' }}>
+                <div className={`h-[calc(100vh-60px)] w-full  ${location.state === null && !location.pathname === `/chat/${params?.conversation}/edit` && "items-center justify-center ipad_pro:flex hidden"} overflow-hidden bg-[#282932]`} style={{ willChange: 'transform' }}>
 
                     {
-                        location.state === null ? (
+                        location.state === null && !location.pathname === `/chat/${params?.conversation}/edit` ? (
                             <div className='select-none'>
 
                                 <p className='text-[#979797]'>Connect in confidence, knowing your messages</p>
@@ -187,6 +192,7 @@ const ChatPage = () => {
                     }
 
                 </div>
+
 
             </div>
 

@@ -4,7 +4,7 @@ import { MdAttachment } from "react-icons/md";
 import { RxAvatar } from "react-icons/rx";
 import { MdManageSearch } from "react-icons/md";
 import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useGlobalContext } from '../provider/GlobalProvider';
 import Axios from '../utils/Axios';
 import SummaryApi from '../common/SummaryApi';
@@ -18,11 +18,14 @@ import { HiOutlineUserGroup } from "react-icons/hi";
 import uploadFile from '../utils/uploadFile';
 import { useNavigate } from 'react-router-dom';
 import { IoClose } from "react-icons/io5";
+import { FaUserGroup } from 'react-icons/fa6';
+import { Link } from 'react-router-dom';
 
 const MessagePage = () => {
 
     const chat_details = useSelector(state => state.chat?.all_message)
     const location = useLocation().state
+    const pathname = useLocation().pathname
     const navigate = useNavigate()
 
     const imgRef = useRef()
@@ -47,8 +50,6 @@ const MessagePage = () => {
     useEffect(() => {
         setIsGroup(location?.allMessageDetails?.group_type === "GROUP");
     }, [location?.allMessageDetails?.group_type]);
-
-
 
     const [messages, setMessages] = useState([])
     const [openAttach, setOpenAttach] = useState(false)
@@ -178,9 +179,7 @@ const MessagePage = () => {
             }
 
         })()
-    }, [params?.conversation])
-
-    console.log("chat_details", chat_details)
+    }, [params?.conversation, chat_details])
 
 
     // recieved message and update globally [ all chat member ]
@@ -239,121 +238,160 @@ const MessagePage = () => {
     }, []);
 
 
-
     return (
-        <section className="h-[var(--app-height)]  w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden">
-            {/* Header */}
-            <div className="bg-[#21222b] z-50 px-4 flex items-center justify-between text-white shadow-md shadow-[#57575765]">
-                {/* left */}
-                <div className="flex gap-2.5 items-center">
-                    <RxAvatar size={38} />
-                    {location?.allMessageDetails?.group_type === "GROUP" ? (
-                        <p className="text-lg">{location?.allMessageDetails?.group_name}</p>
-                    ) : (
-                        <div className="flex flex-col text-base">
-                            <p>{location?.allMessageDetails?.otherUser?.name}</p>
-                            <p className="text-sm opacity-75">{location?.allMessageDetails?.otherUser?.userId}</p>
-                        </div>
-                    )}
-                </div>
-                {/* right */}
-                <MdManageSearch size={30} className="cursor-pointer" />
-            </div>
+        <>
+            <section className={`h-[var(--app-height)] ${`/chat/${params?.conversation}` !== pathname ? "hidden" : "block"}  w-full grid grid-rows-[64px_1fr_60px] relative overflow-hidden`}>
+                {/* Header */}
+                <div className="bg-[#21222b] z-50 px-4 flex items-center justify-between text-white shadow-md shadow-[#57575765]">
+                    {/* left */}
 
-            {/* Messages */}
-            <div className="overflow-y-auto h-[var(--message-heigh)] px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0 messages-container" >
-                {Array.isArray(messages) &&
-                    messages.map((value, index) => {
-                        const isSelfMessage =
-                            value?.senderId?._id === user?._id || value?.senderId === user?._id;
-                        const date = new Date(value?.createdAt);
-                        const indianTime = date.toLocaleString("en-IN", {
-                            timeZone: "Asia/Kolkata",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                        });
+                    {
+                        isGroup ? (
+                            <Link to={`/chat/${params?.conversation}/edit`} className="flex gap-2.5 items-center">
 
-                        return (
-                            <div
-                                ref={messagesEndRef}
-                                key={`msg-${index}`}
-                                className={`bg-[#f1f1f1] max-w-[75%] break-words text-base rounded text-blue-950 px-3 py-1 ${isSelfMessage ? "self-end" : "self-start"
-                                    }`}
-                            >
-                                {isGroup && !isSelfMessage && (
-                                    <p className="text-xs font-medium text-gray-600">{value?.senderName}</p>
+                                {
+                                    isGroup ? (
+                                        <FaUserGroup size={30} />
+                                    ) : (
+                                        <RxAvatar size={38} />
+                                    )
+                                }
+
+                                {location?.allMessageDetails?.group_type === "GROUP" ? (
+                                    <p className="text-lg">{location?.allMessageDetails?.group_name}</p>
+                                ) : (
+                                    <div className="flex flex-col text-base">
+                                        <p>{location?.allMessageDetails?.otherUser?.name}</p>
+                                        <p className="text-sm opacity-75">{location?.allMessageDetails?.otherUser?.userId}</p>
+                                    </div>
                                 )}
+                            </Link>
+                        ) : (
+                            <div className="flex gap-2.5 items-center">
+                                {
+                                    isGroup ? (
+                                        <FaUserGroup size={30} />
+                                    ) : (
+                                        <RxAvatar size={38} />
+                                    )
+                                }
 
-                                {value?.image && <img src={value.image} alt="" className="w-[200px] rounded-md" />}
-                                {value?.video && <video src={value.video} controls className="w-[200px] rounded-md"></video>}
-                                {value?.other_fileUrl_or_external_link && (
-                                    <button
-                                        onClick={() => window.open(value.other_fileUrl_or_external_link, "_blank")}
-                                        className="bg-blue-500 text-white px-3 py-1 rounded mt-1"
-                                    >
-                                        Open File
-                                    </button>
+                                {location?.allMessageDetails?.group_type === "GROUP" ? (
+                                    <p className="text-lg">{location?.allMessageDetails?.group_name}</p>
+                                ) : (
+                                    <div className="flex flex-col text-base">
+                                        <p>{location?.allMessageDetails?.otherUser?.name}</p>
+                                        <p className="text-sm opacity-75">{location?.allMessageDetails?.otherUser?.userId}</p>
+                                    </div>
                                 )}
+                            </div>
+                        )
+                    }
 
-                                {value?.text && <p className="mt-1">{value.text}</p>}
-
-                                <p className="text-xs opacity-60 text-right">{indianTime}</p>
-                            </div>
-                        );
-                    })}
-                {/* <div ref={messagesEndRef} /> */}
-            </div>
-
-            {/* Footer */}
-            <div className="bg-[#1f2029] py-3 w-full grid grid-cols-[60px_1fr_60px] items-center text-white shadow-md shadow-[#154174]">
-                {/* Attachments */}
-                <div className="flex items-center justify-center relative">
-                    <MdAttachment size={26} onClick={() => setOpenAttach(!openAttach)} className="cursor-pointer" />
-                    {openAttach && (
-                        <div ref={attachRef} className="absolute bottom-12 left-6 bg-white text-blue-950 rounded-lg p-3 flex gap-4">
-                            <div onClick={() => imgRef.current.click()} className="cursor-pointer flex flex-col items-center">
-                                <IoImage size={32} />
-                                <p className="text-xs">Image</p>
-                                <input ref={imgRef} onChange={handleAllAtachFile} type="file" accept="image/*" name="image" hidden />
-                            </div>
-                            <div onClick={() => videoRef.current.click()} className="cursor-pointer flex flex-col items-center">
-                                <RiFolderVideoFill size={32} />
-                                <p className="text-xs">Video</p>
-                                <input ref={videoRef} onChange={handleAllAtachFile} type="file" accept="video/*" name="video" hidden />
-                            </div>
-                            <div onClick={() => fileUrlRef.current.click()} className="cursor-pointer flex flex-col items-center">
-                                <FaFileAlt size={32} />
-                                <p className="text-xs">File</p>
-                                <input ref={fileUrlRef} onChange={handleAllAtachFile} type="file" accept="application/pdf" name="other_fileUrl_or_external_link" hidden />
-                            </div>
-                        </div>
-                    )}
+                    {/* right */}
+                    <MdManageSearch size={30} className="cursor-pointer" />
                 </div>
 
-                {/* Input */}
-                <input
-                    type="text"
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            isGroup ? handleGroupMessageSend() : handleOnClick();
-                        }
-                    }}
-                    className="w-full bg-transparent outline-none px-2 text-white"
-                    placeholder="Type a message..."
-                />
+                {/* Messages */}
+                <div className="overflow-y-auto h-[var(--message-heigh)] px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0 messages-container" >
+                    {Array.isArray(messages) &&
+                        messages.map((value, index) => {
+                            const isSelfMessage =
+                                value?.senderId?._id === user?._id || value?.senderId === user?._id;
+                            const date = new Date(value?.createdAt);
+                            const indianTime = date.toLocaleString("en-IN", {
+                                timeZone: "Asia/Kolkata",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                            });
+                            // 
+                            return (
+                                <div
+                                    ref={messagesEndRef}
+                                    key={`msg-${index}`}
+                                    className={` max-w-[75%] break-words text-base rounded text-blue-950 px-2.5 py-1  ${isGroup && index === 0 ? "self-center" : isSelfMessage ? "self-end bg-[#f1f1f1]" : "self-start bg-[#f1f1f1]"
+                                        }`}
+                                >
+                                    {isGroup && !isSelfMessage && (
+                                        <p className="text-xs font-medium text-gray-600 -mb-1">{value?.senderName}</p>
+                                    )}
 
-                {/* Send */}
-                <div className="flex items-center justify-center cursor-pointer">
-                    <IoSendOutline size={26} onClick={() => (isGroup ? handleGroupMessageSend() : handleOnClick())} />
+                                    {value?.image && <img src={value.image} alt="" className="w-[200px] rounded-md" />}
+                                    {value?.video && <video src={value.video} controls className="w-[200px] rounded-md"></video>}
+                                    {value?.other_fileUrl_or_external_link && (
+                                        <button
+                                            onClick={() => window.open(value.other_fileUrl_or_external_link, "_blank")}
+                                            className="bg-blue-500 text-white px-3 py-1 rounded mt-1"
+                                        >
+                                            Open File
+                                        </button>
+                                    )}
+
+                                    {value?.text && <p className={`mt-1 ${isGroup && index === 0 && "text-[#dedede] leading-[19px]"}`}>{value.text}</p>}
+
+                                    <p className={`text-xs opacity-60  ${isSelfMessage ? "text-right" : "text-left"}`}>{indianTime}</p>
+                                </div>
+                            );
+                        })}
                 </div>
+
+                {/* Footer */}
+                <div className="bg-[#1f2029] py-3 w-full grid grid-cols-[60px_1fr_60px] items-center text-white shadow-md shadow-[#154174]">
+                    {/* Attachments */}
+                    <div className="flex items-center justify-center relative">
+                        <MdAttachment size={26} onClick={() => setOpenAttach(!openAttach)} className="cursor-pointer" />
+                        {openAttach && (
+                            <div ref={attachRef} className="absolute bottom-12 left-6 bg-white text-blue-950 rounded-lg p-3 flex gap-4">
+                                <div onClick={() => imgRef.current.click()} className="cursor-pointer flex flex-col items-center">
+                                    <IoImage size={32} />
+                                    <p className="text-xs">Image</p>
+                                    <input ref={imgRef} onChange={handleAllAtachFile} type="file" accept="image/*" name="image" hidden />
+                                </div>
+                                <div onClick={() => videoRef.current.click()} className="cursor-pointer flex flex-col items-center">
+                                    <RiFolderVideoFill size={32} />
+                                    <p className="text-xs">Video</p>
+                                    <input ref={videoRef} onChange={handleAllAtachFile} type="file" accept="video/*" name="video" hidden />
+                                </div>
+                                <div onClick={() => fileUrlRef.current.click()} className="cursor-pointer flex flex-col items-center">
+                                    <FaFileAlt size={32} />
+                                    <p className="text-xs">File</p>
+                                    <input ref={fileUrlRef} onChange={handleAllAtachFile} type="file" accept="application/pdf" name="other_fileUrl_or_external_link" hidden />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Input */}
+                    <input
+                        type="text"
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                isGroup ? handleGroupMessageSend() : handleOnClick();
+                            }
+                        }}
+                        className="w-full bg-transparent outline-none px-2 text-white"
+                        placeholder="Type a message..."
+                    />
+
+                    {/* Send */}
+                    <div className="flex items-center justify-center cursor-pointer">
+                        <IoSendOutline size={26} onClick={() => (isGroup ? handleGroupMessageSend() : handleOnClick())} />
+                    </div>
+                </div>
+            </section>
+
+            <div className={`${`/chat/${params?.conversation}/edit` !== pathname && "hidden"} w-full`}>
+                {
+                    <Outlet />
+                }
             </div>
-        </section>
+        </>
     )
 }
 

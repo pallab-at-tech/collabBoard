@@ -14,6 +14,7 @@ import CollabBoard from "../pages/CollabBoard"
 import ProfileTeamRequest from '../pages/ProfileTeamRequest'
 import ChatPage from '../pages/ChatPage'
 import MessagePage from '../pages/MessagePage'
+import MessageEdit from '../components/messageComponenet/MessageEdit'
 
 const router = createBrowserRouter([
     {
@@ -30,8 +31,8 @@ const router = createBrowserRouter([
                 element: <CollabBoard />,
                 children: [
                     {
-                        path : '',
-                        element : <MobileForCollabBoard/>
+                        path: '',
+                        element: <MobileForCollabBoard />
                     },
                     {
                         path: ':team',
@@ -42,45 +43,55 @@ const router = createBrowserRouter([
                                 element: <MainTeamBoard />
                             },
                             {
-                                path : 'edit',
-                                element : <TeamBoardEdit/>
+                                path: 'edit',
+                                element: <TeamBoardEdit />
                             }
                         ]
                     },
                 ]
-                
+
             },
             {
-                path : "/profile/:user",
-                element : <ProfilePage/>,
-                children : [
+                path: "/profile/:user",
+                element: <ProfilePage />,
+                children: [
                     // {
                     //     path : '',
                     //     element : <Timeline/>
                     // },
                     // /profile/:user/request
                     {
-                        path : "",
-                        element : <ProfileTeamRequest/>
+                        path: "",
+                        element: <ProfileTeamRequest />
                     },
                     {
-                        path : "/profile/:user/chat",
-                        element : <ChatPage/>
+                        path: "/profile/:user/chat",
+                        element: <ChatPage />
                     },
                     {
-                        path : '/profile/:user/edit',
-                        element : <EditProfile/>
+                        path: '/profile/:user/edit',
+                        element: <EditProfile />
                     }
                 ]
             },
             {
-                path : "/chat",
-                element : <ChatPage/>,
-                children : [
+                path: "/chat",
+                element: <ChatPage />,
+                children: [
                     {
-                        path : "/chat/:conversation",
-                        element : <MessagePage/>
-                    }
+                        path: "/chat/:conversation",
+                        element: <MessagePage />,
+                        children: [
+                            {
+                                path : "/chat/:conversation/edit",
+                                element : <MessageEdit/>
+                            }
+                        ]
+                    },
+                    // {
+                    //     path: "/chat/edit",
+                    //     element: <MessageEdit />
+                    // }
                 ]
             }
         ]
