@@ -132,24 +132,26 @@ const MessageEdit = () => {
                 <div>
 
                     {/* for mobile and teblet version */}
-                    <div className='lg-real:hidden flex gap-5 sm:gap-10 flex-col sm:flex-row items-start  pt-1.5 pb-5'>
+                    <div className='lg-real:hidden flex gap-3 sm:gap-10 flex-col sm:flex-row items-start  sm:pt-1.5 pb-5'>
 
                         <div className='flex gap-3 items-center'>
 
                             <div className='bg-green-500 text-white rounded-full p-1 overflow-hidden'>
-                                <RiUserAddFill size={28} className='' />
+                                <RiUserAddFill size={28} className='sm:block hidden' />
+                                <RiUserAddFill size={24} className='sm:hidden block' />
                             </div>
 
-                            <p className='text-lg'>Add member</p>
+                            <p className='sm:text-lg text-base'>Add member</p>
                         </div>
 
                         <div className='flex gap-3 items-center'>
 
                             <div className='bg-green-500 text-white rounded-full p-1 overflow-hidden'>
-                                <IoLink size={28} className='' />
+                                <IoLink size={28} className='sm:block hidden' />
+                                <IoLink size={24} className='sm:hidden block' />
                             </div>
 
-                            <p className='text-lg'>Generate group add Link</p>
+                            <p className='sm:text-lg text-base'>Generate group add Link</p>
                         </div>
 
                     </div>
@@ -160,10 +162,11 @@ const MessageEdit = () => {
 
                         <div className="flex items-center justify-between gap-3 p-3 lg-real:w-[700px] w-full rounded-xl bg-[#3a3b45] hover:bg-[#4a4b57] transition shadow-sm" >
 
-                            <div className='flex items-center gap-3'>
+                            <div className='flex items-center sm:gap-3 gap-2'>
                                 {/* Avatar */}
-                                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#2b2c36]">
-                                    <CgProfile size={32} className="text-gray-300" />
+                                <div className="flex items-center justify-center sm:w-12 sm:h-12 h-11 w-11 rounded-full bg-[#2b2c36]">
+                                    <CgProfile size={32} className="text-gray-300 sm:block hidden" />
+                                    <CgProfile size={30} className="text-gray-300 sm:hidden block" />
                                 </div>
 
                                 {/* User Info */}
@@ -173,7 +176,7 @@ const MessageEdit = () => {
                                 </div>
                             </div>
 
-                            <div className='w-[20%] flex gap-1 items-center justify-between'>
+                            <div className='ml-auto flex gap-1 items-center justify-between'>
 
                                 {
                                     all_details?.currUser?.admin && (
@@ -190,10 +193,11 @@ const MessageEdit = () => {
                                 key={i}
                                 className="flex items-center justify-between gap-3 p-3 lg-real:w-[700px] w-full rounded-xl bg-[#3a3b45] hover:bg-[#4a4b57] transition shadow-sm"
                             >
-                                <div className='flex items-center gap-3'>
+                                <div className='flex items-center sm:gap-3 gap-2'>
                                     {/* Avatar */}
                                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#2b2c36]">
-                                        <CgProfile size={32} className="text-gray-300" />
+                                        <CgProfile size={32} className="text-gray-300 sm:block hidden" />
+                                        <CgProfile size={30} className="text-gray-300 sm:hidden block" />
                                     </div>
 
                                     {/* User Info */}
@@ -204,7 +208,7 @@ const MessageEdit = () => {
                                 </div>
 
 
-                                <div className='w-[20%] flex gap-1 items-center justify-between'>
+                                <div className='ml-auto flex gap-1 items-center justify-between'>
 
                                     {
                                         v?.admin && (
@@ -274,8 +278,9 @@ const MessageEdit = () => {
                 {/* for mobile and tablet version */}
                 <div className='lg-real:hidden block pt-6 mb-1 pl-2 text-[#f43131]'>
                     <div className='flex gap-2 items-center'>
-                        <ImExit size={24} />
-                        <p className='text-[20px] text-[#fe4949]'>Exit Group</p>
+                        <ImExit size={24} className='sm:block hidden'/>
+                        <ImExit size={22} className='sm:hidden block'/>
+                        <p className='sm:text-[20px] text-[17px] text-[#fe4949]'>Exit Group</p>
                     </div>
                 </div>
 
