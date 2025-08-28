@@ -12,6 +12,7 @@ import { ImExit } from "react-icons/im";
 import { RiUserAddFill } from "react-icons/ri";
 import { IoLink } from "react-icons/io5";
 import { FiEdit3 } from "react-icons/fi";
+import { LuCircleFadingPlus } from "react-icons/lu";
 
 const MessageEdit = () => {
     const chat_details = useSelector(state => state.chat?.all_message)
@@ -82,7 +83,9 @@ const MessageEdit = () => {
             <div className="flex items-center gap-8 p-4 rounded-2xl bg-[#2b2c36] shadow-lg">
 
                 {/* Avatar with edit button */}
-                <div className="relative">
+
+                {/* for tablet and desktop version */}
+                <div className="relative sm:block hidden">
                     <div className="relative  rounded-full border-2 border-gray-400 h-[80px] w-[80px] flex items-center justify-center bg-[#3a3b45] overflow-hidden">
                         <FaUserGroup size={80} className="text-gray-200 absolute top-1.5" />
                     </div>
@@ -91,15 +94,30 @@ const MessageEdit = () => {
                     </button>
                 </div>
 
+                {/* for mobile version */}
+                <div className='relative sm:hidden block'>
+
+                    <div className="relative  rounded-full border-2 border-gray-400 h-[50px] w-[50px] flex items-center justify-center bg-[#3a3b45] overflow-hidden">
+                        <FaUserGroup size={50} className="text-gray-200 absolute top-1.5" />
+                    </div>
+
+                    <button className='absolute -bottom-1 right-0 text-[#e3e3e3] w-fit h-fit bg-amber-950 rounded-full'>
+                        <LuCircleFadingPlus size={25}/>
+                    </button>
+
+                </div>
+
+
                 {/* Details */}
                 <div className="flex flex-col ">
                     <p className="text-sm text-gray-400">Group Name</p>
 
                     <div className='flex items-center gap-1'>
-                        <h2 className="text-2xl font-semibold tracking-wide">
+                        <h2 className="sm:text-2xl text-xl font-semibold tracking-wide">
                             {all_details?.group_name || "Unnamed Group"}
                         </h2>
-                        <FiEdit3 size={30} className='cursor-pointer'/>
+                        <FiEdit3 size={30} className='cursor-pointer sm:block hidden' />
+                        <FiEdit3 size={22} className='cursor-pointer sm:hidden block' />
                     </div>
 
                     <p className="text-gray-400 text-sm">
@@ -108,7 +126,7 @@ const MessageEdit = () => {
                 </div>
             </div>
 
-            <div className={`mt-6 flex justify-between lg-real:flex-row flex-col  bg-[#2b2c34] px-6 py-4 rounded-2xl shadow-md`}>
+            <div className={`sm:mt-6 mt-4 flex justify-between lg-real:flex-row flex-col  bg-[#2b2c34] px-6 py-4 rounded-2xl shadow-md`}>
 
                 {/* Left side - Title */}
                 <div>

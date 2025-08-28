@@ -73,7 +73,7 @@ const ChatPage = () => {
         })();
     }, [])
 
-    console.log("location start",chat_details)
+    console.log("location start",location)
 
 
     return (
@@ -173,10 +173,10 @@ const ChatPage = () => {
 
                 </div>
 
-                <div className={`h-[calc(100vh-60px)] w-full  ${location.state === null && !location.pathname === `/chat/${params?.conversation}/edit` && "items-center justify-center ipad_pro:flex hidden"} overflow-hidden bg-[#282932]`} style={{ willChange: 'transform' }}>
+                <div className={`h-[calc(100vh-60px)] w-full  ${location.state === null && location.pathname === `/chat` && "items-center justify-center ipad_pro:flex hidden"} overflow-hidden bg-[#282932]`} style={{ willChange: 'transform' }}>
 
                     {
-                        location.state === null && !location.pathname === `/chat/${params?.conversation}/edit` ? (
+                        location.state === null && location.pathname === `/chat` ? (
                             <div className='select-none'>
 
                                 <p className='text-[#979797]'>Connect in confidence, knowing your messages</p>
