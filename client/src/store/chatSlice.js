@@ -32,9 +32,18 @@ const chatSlice = createSlice({
             else {
                 state.all_message.unshift(conversation)
             }
+        },
+        updateGroupName: (state, action) => {
+            const { group_Id, group_name } = action.payload
+
+            const idx = state.all_message.findIndex(c => c?._id === group_Id)
+
+            if (idx != -1) {
+                state.all_message[idx].group_name = group_name
+            }
         }
     }
 })
 
-export const { setMessageDetails, addMessageDetails, updateConversationWithNewMessage } = chatSlice.actions
+export const { setMessageDetails, addMessageDetails, updateConversationWithNewMessage, updateGroupName } = chatSlice.actions
 export default chatSlice.reducer

@@ -6,7 +6,7 @@ import { HiOutlineUserAdd } from "react-icons/hi";
 import SearchNewMember from './SearchNewMember';
 import Axios from '../utils/Axios';
 import SummaryApi from '../common/SummaryApi';
-import { setMessageDetails } from '../store/chatSlice';
+import { setMessageDetails, updateGroupName } from '../store/chatSlice';
 import { useDispatch } from 'react-redux';
 import { FiArrowUpLeft } from 'react-icons/fi'
 import { RxAvatar } from 'react-icons/rx';
@@ -38,6 +38,16 @@ const ChatPage = () => {
         if (!socketConnection) return
 
         socketConnection.on("receive_message", (data) => {
+
+            const { conversation, message } = data;
+
+            if (conversation?.group_name) {
+                dispatch(updateGroupName({
+                    group_Id: conversation._id,
+                    group_name: conversation.group_name,
+                }));
+            }
+
             dispatch(updateConversationWithNewMessage({
                 conversation: data.conversation,
                 message: data.message
@@ -47,8 +57,8 @@ const ChatPage = () => {
         return () => {
             socketConnection.off("receive_message");
         };
-       
-    }, [socketConnection , dispatch])
+
+    }, [socketConnection, dispatch])
 
 
     useEffect(() => {
@@ -72,9 +82,6 @@ const ChatPage = () => {
             }
         })();
     }, [])
-
-    console.log("location start",location)
-
 
     return (
         <section className='min-h-[calc(100vh-60px)] '>
@@ -165,7 +172,7 @@ const ChatPage = () => {
                                     })
                                 }
 
-                                
+
                             </div>
                         )
                     }
@@ -192,7 +199,6 @@ const ChatPage = () => {
                     }
 
                 </div>
-
 
             </div>
 

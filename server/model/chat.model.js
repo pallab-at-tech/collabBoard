@@ -9,6 +9,10 @@ const messageSchema = new mongoose.Schema({
         type : String,
         default : ""
     },
+    optional_msg : {
+        type : String,
+        default : ""
+    },
     text: {
         type: String,
         default: ""

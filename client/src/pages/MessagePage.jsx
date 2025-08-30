@@ -8,7 +8,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { useGlobalContext } from '../provider/GlobalProvider';
 import Axios from '../utils/Axios';
 import SummaryApi from '../common/SummaryApi';
-import { updateConversationWithNewMessage } from '../store/chatSlice';
+import { updateConversationWithNewMessage, updateGroupName } from '../store/chatSlice';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { FaFileAlt } from "react-icons/fa";
@@ -54,6 +54,8 @@ const MessagePage = () => {
     const [messages, setMessages] = useState([])
     const [openAttach, setOpenAttach] = useState(false)
     const attachRef = useRef(null)
+
+    const conversation = chat_details?.find(c => c._id === params?.conversation)
 
     const { socketConnection } = useGlobalContext()
 
@@ -188,8 +190,16 @@ const MessagePage = () => {
 
         socketConnection.on("receive_message", (data) => {
 
+            const { conversation, message } = data;
             dispatch(updateConversationWithNewMessage({ conversation: data.conversation, message: data?.message }))
             setMessages(prev => [...prev, data?.message]);
+
+            if (conversation?.group_name) {
+                dispatch(updateGroupName({
+                    group_Id: conversation._id,
+                    group_name: conversation.group_name,
+                }));
+            }
 
             const url = params.conversation === data?.conversation?._id
 
@@ -237,6 +247,8 @@ const MessagePage = () => {
         return () => window.removeEventListener('resize', setAppHeight);
     }, []);
 
+    console.log("messages", messages)
+
 
     return (
         <>
@@ -258,7 +270,7 @@ const MessagePage = () => {
                                 }
 
                                 {location?.allMessageDetails?.group_type === "GROUP" ? (
-                                    <p className="text-lg">{location?.allMessageDetails?.group_name}</p>
+                                    <p className="text-lg">{conversation?.group_name || location?.allMessageDetails?.group_name}</p>
                                 ) : (
                                     <div className="flex flex-col text-base">
                                         <p>{location?.allMessageDetails?.otherUser?.name}</p>
@@ -277,11 +289,11 @@ const MessagePage = () => {
                                 }
 
                                 {location?.allMessageDetails?.group_type === "GROUP" ? (
-                                    <p className="text-lg">{location?.allMessageDetails?.group_name}</p>
+                                    <p className="text-lg">{conversation?.group_name || location?.allMessageDetails?.group_name}</p>
                                 ) : (
                                     <div className="flex flex-col text-base">
-                                        <p>{location?.allMessageDetails?.otherUser?.name}</p>
-                                        <p className="text-sm opacity-75">{location?.allMessageDetails?.otherUser?.userId}</p>
+                                        <p>{conversation?.otherUser?.name || location?.allMessageDetails?.otherUser?.name}</p>
+                                        <p className="text-sm opacity-75">{conversation?.otherUser?.userId || location?.allMessageDetails?.otherUser?.userId}</p>
                                     </div>
                                 )}
                             </div>
@@ -307,17 +319,26 @@ const MessagePage = () => {
                                 month: "2-digit",
                                 day: "2-digit",
                             });
-                            // 
+
                             return (
                                 <div
                                     ref={messagesEndRef}
                                     key={`msg-${index}`}
-                                    className={` max-w-[75%] break-words text-base rounded text-blue-950 px-2.5 py-1  ${isGroup && index === 0 ? "self-center" : isSelfMessage ? "self-end bg-[#f1f1f1]" : "self-start bg-[#f1f1f1]"
+                                    className={` max-w-[75%] break-words text-base rounded text-blue-950 px-2.5 py-1  ${(isGroup && index === 0) || value?.optional_msg ? "self-center" : isSelfMessage ? "self-end bg-[#f1f1f1]" : "self-start bg-[#f1f1f1]"
                                         }`}
                                 >
                                     {isGroup && !isSelfMessage && (
                                         <p className="text-xs font-medium text-gray-600 -mb-1">{value?.senderName}</p>
                                     )}
+
+                                    <div className={`bg-[#f1f1f1] p-1 rounded-md text-sm ${value?.optional_msg ? "block" : "hidden"}`}>
+                                        <p className='text-center'>
+                                            {value?.optional_msg}
+                                        </p>
+                                        <p>
+                                            {indianTime}
+                                        </p>
+                                    </div>
 
                                     {value?.image && <img src={value.image} alt="" className="w-[200px] rounded-md" />}
                                     {value?.video && <video src={value.video} controls className="w-[200px] rounded-md"></video>}
@@ -332,7 +353,7 @@ const MessagePage = () => {
 
                                     {value?.text && <p className={`mt-1 ${isGroup && index === 0 && "text-[#dedede] leading-[19px]"}`}>{value.text}</p>}
 
-                                    <p className={`text-xs opacity-60  ${isSelfMessage ? "text-right" : "text-left"}`}>{indianTime}</p>
+                                    <p className={`text-xs opacity-60 ${value?.optional_msg ? "hidden" : "block"} ${isSelfMessage ? "text-right" : "text-left"}`}>{indianTime}</p>
                                 </div>
                             );
                         })}

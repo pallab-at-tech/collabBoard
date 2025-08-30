@@ -109,7 +109,7 @@ io.on("connection", async (socket) => {
     socket.on("create_group", async (data) => {
         try {
 
-            const { createrId, participants = [], group_image, group_name , createrUserName } = data
+            const { createrId, participants = [], group_image, group_name, createrUserName } = data
 
             if (!createrId || !group_name) {
                 return socket.emit("error", { message: "Missing required fields" });
@@ -154,8 +154,8 @@ io.on("connection", async (socket) => {
                     conversation: conversationToEmit,
                     message: populateMessage
                 })
-                io.to(pid.toString()).emit("notification",{
-                    message : `you have been joined ${createGroup.group_name} by ${createrUserName}`
+                io.to(pid.toString()).emit("notification", {
+                    message: `you have been joined ${createGroup.group_name} by ${createrUserName}`
                 })
             })
 
@@ -168,7 +168,7 @@ io.on("connection", async (socket) => {
     // send message for group
     socket.on("send_message_group", async (data) => {
 
-        const { senderId, conversationId, text, image, video, other_fileUrl_or_external_link , senderUserId , senderName } = data
+        const { senderId, conversationId, text, image, video, other_fileUrl_or_external_link, senderUserId, senderName } = data
 
         const conversation = await conversationModel.findById(conversationId)
 
@@ -179,7 +179,7 @@ io.on("connection", async (socket) => {
             video: video,
             other_fileUrl_or_external_link: other_fileUrl_or_external_link,
             readBy: [senderId],
-            senderName : senderName
+            senderName: senderName
         })
 
         conversation.messages.push(newMessage._id)
@@ -200,7 +200,8 @@ io.on("connection", async (socket) => {
             group_type: conversation.group_type,
             participants: conversation.participants,
             messages: conversation.messages,
-            otherUser
+            group_image: conversation.group_image,
+            group_name: conversation.group_name
         };
 
         const populatedMessage = await messageModel.findById(newMessage._id)
@@ -214,6 +215,71 @@ io.on("connection", async (socket) => {
                 message: populatedMessage
             })
         })
+
+    })
+
+    socket.on("update_group_details", async (data) => {
+
+        try {
+            const { group_id, userId, userName, group_image, group_name } = data || {}
+
+            if (!group_id || !userId) {
+                return socket.emit("error", { message: "Missing required fields" });
+            }
+
+            const group = await conversationModel.findById(group_id)
+
+            const isAdmin = group.admin.some(a => a.toString() === userId.toString())
+
+            if (!isAdmin) {
+                return socket.emit("update_error", { message: "Access denied" , error : true })
+            }
+
+            let optional_msg = ""
+
+            if (group_image) {
+                group.group_image = group_image;
+                optional_msg = `Group image changed by ${userName}`;
+            } else if (group_name) {
+                group.group_name = group_name;
+                optional_msg = `Group name changed by ${userName}`;
+            }
+
+            if (optional_msg) {
+                const newMessage = await messageModel.create({
+                    senderId: userId,
+                    optional_msg: optional_msg,
+                    readBy: [userId]
+                })
+
+                group.messages.push(newMessage._id)
+                await group.save()
+
+                const conversationToEmit = {
+                    _id: group._id,
+                    group_type: group.group_type,
+                    participants: group.participants,
+                    messages: group.messages,
+                    group_name: group.group_name,
+                    group_image: group.group_image
+                }
+
+                const populatedMessage = await messageModel.findById(newMessage._id)
+                    .populate("senderId", "_id name avatar userId")
+                    .lean();
+
+                group.participants.forEach(pid => {
+                    io.to(pid.toString()).emit("receive_message", {
+                        conversation: conversationToEmit,
+                        message: populatedMessage
+                    })
+                })
+            }
+
+        } catch (error) {
+            console.log("Error while update group details", error)
+            socket.emit("error", { message: "Server error while update group details" , error : true });
+        }
 
     })
 
@@ -232,4 +298,4 @@ io.on("connection", async (socket) => {
     });
 })
 
-export { app, server , io }
+export { app, server, io }

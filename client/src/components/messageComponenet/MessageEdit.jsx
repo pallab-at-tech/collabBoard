@@ -13,12 +13,15 @@ import { RiUserAddFill } from "react-icons/ri";
 import { IoLink } from "react-icons/io5";
 import { FiEdit3 } from "react-icons/fi";
 import { LuCircleFadingPlus } from "react-icons/lu";
+import GroupNameChanged from '../other/GroupNameChanged';
 
 const MessageEdit = () => {
     const chat_details = useSelector(state => state.chat?.all_message)
     const user = useSelector(state => state?.user)
-    const [all_details, setAll_details] = useState(null)
 
+    const { socketConnection } = useGlobalContext()
+
+    const [all_details, setAll_details] = useState(null)
 
 
     const dotsRef = useRef(null);
@@ -29,33 +32,36 @@ const MessageEdit = () => {
         _id: ""
     })
 
-    const { socketConnection } = useGlobalContext()
+    const [openGroupImageChanged, setOpenGroupImageChanged] = useState(false)
+    const [openGroupNameChanged, setOpenGroupNameChanged] = useState(false)
 
-    // fetch details of group
-    useEffect(() => {
-        (async () => {
-            if (!params?.conversation) return
 
-            try {
+    const fetchGroupDetails = async () => {
 
-                const response = await Axios({
-                    ...SummaryApi.get_group_details,
-                    params: {
-                        conversationID: params?.conversation
-                    }
-                })
+        if (!params?.conversation) return
 
-                const { data: responseData } = response
+        try {
 
-                if (responseData?.success) {
-                    setAll_details(responseData?.data)
+            const response = await Axios({
+                ...SummaryApi.get_group_details,
+                params: {
+                    conversationID: params?.conversation
                 }
+            })
 
-            } catch (error) {
-                console.log('group details error', error)
+            const { data: responseData } = response
+
+            if (responseData?.success) {
+                setAll_details(responseData?.data)
             }
 
-        })()
+        } catch (error) {
+            console.log('group details error', error)
+        }
+    }
+
+    useEffect(() => {
+        fetchGroupDetails()
     }, [])
 
 
@@ -102,7 +108,7 @@ const MessageEdit = () => {
                     </div>
 
                     <button className='absolute -bottom-1 right-0 text-[#e3e3e3] w-fit h-fit bg-amber-950 rounded-full'>
-                        <LuCircleFadingPlus size={25}/>
+                        <LuCircleFadingPlus size={25} />
                     </button>
 
                 </div>
@@ -113,11 +119,25 @@ const MessageEdit = () => {
                     <p className="text-sm text-gray-400">Group Name</p>
 
                     <div className='flex items-center gap-1'>
-                        <h2 className="sm:text-2xl text-xl font-semibold tracking-wide">
+
+                        <h2 className={`sm:text-2xl text-xl font-semibold tracking-wide`}>
                             {all_details?.group_name || "Unnamed Group"}
                         </h2>
-                        <FiEdit3 size={30} className='cursor-pointer sm:block hidden' />
-                        <FiEdit3 size={22} className='cursor-pointer sm:hidden block' />
+
+                        <FiEdit3 size={30}
+                            onClick={() => {
+                                setOpenGroupNameChanged(true)
+                            }}
+                            className='cursor-pointer sm:block hidden'
+                        />
+
+                        <FiEdit3 size={22}
+                            onClick={() => {
+                                setOpenGroupNameChanged(true)
+                            }}
+                            className='cursor-pointer sm:hidden block'
+                        />
+
                     </div>
 
                     <p className="text-gray-400 text-sm">
@@ -278,13 +298,24 @@ const MessageEdit = () => {
                 {/* for mobile and tablet version */}
                 <div className='lg-real:hidden block pt-6 mb-1 pl-2 text-[#f43131]'>
                     <div className='flex gap-2 items-center'>
-                        <ImExit size={24} className='sm:block hidden'/>
-                        <ImExit size={22} className='sm:hidden block'/>
+                        <ImExit size={24} className='sm:block hidden' />
+                        <ImExit size={22} className='sm:hidden block' />
                         <p className='sm:text-[20px] text-[17px] text-[#fe4949]'>Exit Group</p>
                     </div>
                 </div>
 
             </div>
+
+            {
+                openGroupNameChanged && (
+                    <GroupNameChanged close={() => setOpenGroupNameChanged(false)}
+                        initialValue={{ value: all_details?.group_name }}
+                        group_id={{ group_id: all_details?._id }}
+                        fetchGroupDetails = {()=>fetchGroupDetails()}
+                        onUpdated={(newName) => setAll_details(prev => ({ ...prev, group_name: newName }))}
+                    />
+                )
+            }
 
         </section>
     )
