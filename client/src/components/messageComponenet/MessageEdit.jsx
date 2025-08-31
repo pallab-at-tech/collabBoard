@@ -84,7 +84,7 @@ const MessageEdit = () => {
     }, []);
 
 
-    console.log("all_details", chat_details)
+    console.log("all_details", all_details)
 
     return (
         <section className='bg-[#21222b] text-white h-[calc(100vh-60px)] overflow-y-auto px-4 py-3 sm:px-6 sm:py-5'>
@@ -277,6 +277,17 @@ const MessageEdit = () => {
                                                                         ...preve,
                                                                         otherUser : preve?.otherUser?.filter((v) => v?._id !== oldObjId) || [],
                                                                         participants : preve?.participants?.filter((v) => v?._id !== oldObjId) || []
+                                                                    }))
+                                                                }}
+                                                                onUpdatedForAdmin = {(memberId)=>{
+                                                                    setAll_details((preve)=>({
+                                                                        ...preve,
+                                                                        participants : preve.participants.map((p) =>
+                                                                            p._id === memberId ? {...p ,admin : true} : p
+                                                                        ),
+                                                                        otherUser : preve.otherUser.map((p) =>
+                                                                            p._id === memberId ? {...p, admin : true} : p
+                                                                        )
                                                                     }))
                                                                 }}
                                                             />

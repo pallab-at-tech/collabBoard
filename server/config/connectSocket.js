@@ -346,12 +346,12 @@ io.on("connection", async (socket) => {
                     group_id,
                     removedMemberId: memberId,
                     removedBy: adminId,
-                    obj : {
-                        _id : memberId,
-                        name : memberName,
-                        email : memberEmail,
-                        userId : memberUserId,
-                        avatar : memberAvatar
+                    obj: {
+                        _id: memberId,
+                        name: memberName,
+                        email: memberEmail,
+                        userId: memberUserId,
+                        avatar: memberAvatar
                     }
                 })
             })
@@ -363,6 +363,7 @@ io.on("connection", async (socket) => {
         }
     })
 
+    // remove from group by admin
     socket.on("remove_member_chatGroup", async (data) => {
         try {
 
@@ -442,6 +443,74 @@ io.on("connection", async (socket) => {
         } catch (error) {
             console.log("Error while remove member in group", error)
             socket.emit("error", { message: "Server error while remove member in group", error: true });
+        }
+    })
+
+    // make group admin
+    socket.on("make_admin", async (data) => {
+        try {
+            const { group_id, member_id, member_userId, my_id, my_userId } = data || {}
+
+            if (!member_id || !group_id || !my_id) {
+                return socket.emit("error", { message: "Missing required fields" });
+            }
+
+            const group = await conversationModel.findById(group_id)
+
+            if (!group) {
+                return socket.emit("admin_error", { message: "Group is not exist." })
+            }
+
+            const isAdmin = group.admin.some(c => c.toString() === my_id.toString())
+            if (!isAdmin) {
+                return socket.emit("admin_error", { message: "Access denied" })
+            }
+
+            const isPresentInGroup = group.participants.some(c => c.toString() === member_id.toString())
+            if (!isPresentInGroup) {
+                return socket.emit("admin_error", { message: "User not present in group." })
+            }
+
+            if (!group.admin.some(c => c.toString() === member_id.toString())) {
+                group.admin.push(member_id)
+            }
+            
+            const newMessage = await messageModel.create({
+                optional_msg: `${member_userId} are made group admin by ${my_userId}`,
+                senderId: my_id,
+                readBy: [my_id]
+            })
+
+            group.messages.push(newMessage._id)
+            await group.save()
+
+            const conversationToEmit = {
+                _id: group._id,
+                group_type: group.group_type,
+                participants: group.participants,
+                messages: group.messages,
+                group_name: group.group_name,
+                group_image: group.group_image
+            }
+
+            const populatedMessage = await messageModel.findById(newMessage._id)
+                .populate("senderId", "_id name avatar userId")
+                .lean();
+
+            group.participants.forEach(pid => {
+                io.to(pid.toString()).emit("receive_message", {
+                    conversation: conversationToEmit,
+                    message: populatedMessage
+                })
+                io.to(pid.toString()).emit("adminformember", {
+                    group_id,
+                    member_id,
+                })
+            })
+
+        } catch (error) {
+            console.log("Error while make group admin", error)
+            socket.emit("error", { message: "Server error while make group admin", error: true });
         }
     })
 
