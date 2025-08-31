@@ -8,7 +8,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { useGlobalContext } from '../provider/GlobalProvider';
 import Axios from '../utils/Axios';
 import SummaryApi from '../common/SummaryApi';
-import { updateConversationWithNewMessage, updateGroupName } from '../store/chatSlice';
+import { updateConversationWithNewMessage, updateGroupImage, updateGroupName } from '../store/chatSlice';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { FaFileAlt } from "react-icons/fa";
@@ -196,9 +196,16 @@ const MessagePage = () => {
 
             if (conversation?.group_name) {
                 dispatch(updateGroupName({
-                    group_Id: conversation._id,
-                    group_name: conversation.group_name,
+                    group_Id: conversation?._id,
+                    group_name: conversation?.group_name,
                 }));
+            }
+
+            if (conversation?.group_image) {
+                dispatch(updateGroupImage({
+                    group_Id: conversation?._id,
+                    group_image: conversation?.group_image
+                }))
             }
 
             const url = params.conversation === data?.conversation?._id
@@ -247,7 +254,7 @@ const MessagePage = () => {
         return () => window.removeEventListener('resize', setAppHeight);
     }, []);
 
-    console.log("messages", messages)
+    console.log("messages", conversation)
 
 
     return (
@@ -263,7 +270,11 @@ const MessagePage = () => {
 
                                 {
                                     isGroup ? (
-                                        <FaUserGroup size={30} />
+                                        conversation?.group_image || location?.allMessageDetails?.group_image  ? (
+                                            <img src={conversation?.group_image || location?.allMessageDetails?.group_image} alt="" className='h-[36px] w-[36px] rounded-full'/>
+                                        ) : (
+                                            <FaUserGroup size={30} />
+                                        )
                                     ) : (
                                         <RxAvatar size={38} />
                                     )

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { data, useLocation, useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import { FaUserGroup } from 'react-icons/fa6';
 import { useGlobalContext } from '../../provider/GlobalProvider';
 import Axios from '../../utils/Axios';
@@ -14,6 +14,7 @@ import { IoLink } from "react-icons/io5";
 import { FiEdit3 } from "react-icons/fi";
 import { LuCircleFadingPlus } from "react-icons/lu";
 import GroupNameChanged from '../other/GroupNameChanged';
+import GroupImageChanged from '../other/GroupImageChanged';
 
 const MessageEdit = () => {
     const chat_details = useSelector(state => state.chat?.all_message)
@@ -93,9 +94,15 @@ const MessageEdit = () => {
                 {/* for tablet and desktop version */}
                 <div className="relative sm:block hidden">
                     <div className="relative  rounded-full border-2 border-gray-400 h-[80px] w-[80px] flex items-center justify-center bg-[#3a3b45] overflow-hidden">
-                        <FaUserGroup size={80} className="text-gray-200 absolute top-1.5" />
+                        {
+                            all_details?.group_image ? (
+                                <img src={all_details?.group_image} alt="" className='w-[70px] h-[70px] rounded-full'/>
+                            ) : (
+                                <FaUserGroup size={80} className="text-gray-200 absolute top-1.5" />
+                            )
+                        }
                     </div>
-                    <button className="absolute bottom-0 right-1.5 flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-black shadow-md hover:bg-green-400 transition">
+                    <button onClick={() => setOpenGroupImageChanged(true)} className="cursor-pointer absolute bottom-0 right-1.5 flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-black shadow-md hover:bg-green-400 transition">
                         ✏️
                     </button>
                 </div>
@@ -104,15 +111,20 @@ const MessageEdit = () => {
                 <div className='relative sm:hidden block'>
 
                     <div className="relative  rounded-full border-2 border-gray-400 h-[50px] w-[50px] flex items-center justify-center bg-[#3a3b45] overflow-hidden">
-                        <FaUserGroup size={50} className="text-gray-200 absolute top-1.5" />
+                        {
+                            all_details?.group_image ? (
+                                <img src={all_details?.group_image} alt="" className='w-[50px] h-[50px] rounded-full'/>
+                            ) : (
+                                <FaUserGroup size={50} className="text-gray-200 absolute top-1.5" />
+                            )
+                        }
                     </div>
 
                     <button className='absolute -bottom-1 right-0 text-[#e3e3e3] w-fit h-fit bg-amber-950 rounded-full'>
-                        <LuCircleFadingPlus size={25} />
+                        <LuCircleFadingPlus size={25} onClick={() => setOpenGroupImageChanged(true)} className='cursor-pointer'/>
                     </button>
 
                 </div>
-
 
                 {/* Details */}
                 <div className="flex flex-col ">
@@ -311,8 +323,17 @@ const MessageEdit = () => {
                     <GroupNameChanged close={() => setOpenGroupNameChanged(false)}
                         initialValue={{ value: all_details?.group_name }}
                         group_id={{ group_id: all_details?._id }}
-                        fetchGroupDetails = {()=>fetchGroupDetails()}
                         onUpdated={(newName) => setAll_details(prev => ({ ...prev, group_name: newName }))}
+                    />
+                )
+            }
+
+            {
+                openGroupImageChanged && (
+                    <GroupImageChanged close={() => setOpenGroupImageChanged(false)}
+                        initialValue={{ value: all_details?.group_image || "" }}
+                        group_id={{ group_id: all_details?._id }}
+                        onUpdated={(newImg) => setAll_details(prev => ({ ...prev, group_image: newImg }))}
                     />
                 )
             }

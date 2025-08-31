@@ -6,7 +6,7 @@ import { HiOutlineUserAdd } from "react-icons/hi";
 import SearchNewMember from './SearchNewMember';
 import Axios from '../utils/Axios';
 import SummaryApi from '../common/SummaryApi';
-import { setMessageDetails, updateGroupName } from '../store/chatSlice';
+import { setMessageDetails, updateGroupImage, updateGroupName } from '../store/chatSlice';
 import { useDispatch } from 'react-redux';
 import { FiArrowUpLeft } from 'react-icons/fi'
 import { RxAvatar } from 'react-icons/rx';
@@ -48,6 +48,13 @@ const ChatPage = () => {
                 }));
             }
 
+            if(conversation?.group_image){
+                dispatch(updateGroupImage({
+                    group_Id: conversation._id,
+                    group_image : conversation?.group_image
+                }))
+            }
+
             dispatch(updateConversationWithNewMessage({
                 conversation: data.conversation,
                 message: data.message
@@ -82,6 +89,8 @@ const ChatPage = () => {
             }
         })();
     }, [])
+
+    console.log("chat",chat_details)
 
     return (
         <section className='min-h-[calc(100vh-60px)] '>

@@ -41,9 +41,19 @@ const chatSlice = createSlice({
             if (idx != -1) {
                 state.all_message[idx].group_name = group_name
             }
+        },
+        updateGroupImage: (state, action) => {
+            const { group_Id, group_image } = action.payload
+
+            const idx = state.all_message.findIndex(c => c?._id === group_Id)
+
+            if (idx != -1) {
+                state.all_message[idx].group_image = group_image
+            }
         }
+
     }
 })
 
-export const { setMessageDetails, addMessageDetails, updateConversationWithNewMessage, updateGroupName } = chatSlice.actions
+export const { setMessageDetails, addMessageDetails, updateConversationWithNewMessage, updateGroupName, updateGroupImage } = chatSlice.actions
 export default chatSlice.reducer

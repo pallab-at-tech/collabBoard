@@ -6,7 +6,7 @@
   --breakpoint-ipad_pro: 1020px;
   --breakpoint-lg_md: 950px;
   --breakpoint-mini_tab: 700px;
-  --breakpoint-custom-sm : 640px
+  --breakpoint-custom-sm: 640px
 }
 
 @theme {
@@ -224,5 +224,36 @@
 @keyframes l26 {
   100% {
     transform: rotate(1turn)
+  }
+}
+
+
+
+.loaderforGroup {
+  width: 12px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  animation: l56 1s infinite linear alternate;
+}
+
+@keyframes l56 {
+  0% {
+    box-shadow: 20px 0 #fff, -20px 0 #0002;
+    background: #fff
+  }
+
+  33% {
+    box-shadow: 20px 0 #fff, -20px 0 #0002;
+    background: rgba(94, 93, 93, 0.133)
+  }
+
+  66% {
+    box-shadow: 20px 0 #0002, -20px 0 #fff;
+    background: rgba(94, 93, 93, 0.133)
+  }
+
+  100% {
+    box-shadow: 20px 0 #0002, -20px 0 #fff;
+    background: #fff
   }
 }

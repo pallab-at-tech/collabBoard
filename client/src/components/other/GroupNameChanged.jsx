@@ -69,17 +69,15 @@ const GroupNameChanged = ({ close, initialValue, group_id, onUpdated }) => {
 
                 <div className="flex justify-end gap-3 pt-2">
 
-                    <button
-                        type="button"
+                    <div
                         onClick={close}
-                        className="px-4 py-2 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-100 transition"
+                        className="px-4 py-2 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-100 transition cursor-pointer"
                     >
                         Cancel
-                    </button>
+                    </div>
 
                     <button
-                        type="submit"
-                        className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow-md"
+                        className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow-md cursor-pointer"
                     >
                         Save
                     </button>
