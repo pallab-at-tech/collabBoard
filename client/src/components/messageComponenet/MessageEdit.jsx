@@ -15,6 +15,7 @@ import { FiEdit3 } from "react-icons/fi";
 import { LuCircleFadingPlus } from "react-icons/lu";
 import GroupNameChanged from '../other/GroupNameChanged';
 import GroupImageChanged from '../other/GroupImageChanged';
+import AddMemberGroup from './AddMemberGroup';
 
 const MessageEdit = () => {
     const chat_details = useSelector(state => state.chat?.all_message)
@@ -35,6 +36,7 @@ const MessageEdit = () => {
 
     const [openGroupImageChanged, setOpenGroupImageChanged] = useState(false)
     const [openGroupNameChanged, setOpenGroupNameChanged] = useState(false)
+    const [openAddGRoupMember, setOpenAddGRoupMember] = useState(false)
 
 
     const fetchGroupDetails = async () => {
@@ -173,7 +175,7 @@ const MessageEdit = () => {
                                 <RiUserAddFill size={24} className='sm:hidden block' />
                             </div>
 
-                            <p className='sm:text-lg text-base'>Add member</p>
+                            <p onClick={()=>setOpenAddGRoupMember(true)} className='sm:text-lg text-base cursor-pointer'>Add member</p>
                         </div>
 
                         <div className='flex gap-3 items-center'>
@@ -291,7 +293,7 @@ const MessageEdit = () => {
 
                     <div className='flex flex-col gap-5'>
 
-                        <button className="sm:px-4 py-2.5 h-fit sm:w-[150px] block bg-green-500 hover:bg-green-600 text-white  font-medium rounded-lg shadow">
+                        <button onClick={()=>setOpenAddGRoupMember(true)} className="sm:px-4 py-2.5 h-fit cursor-pointer sm:w-[150px] block bg-green-500 hover:bg-green-600 text-white  font-medium rounded-lg shadow">
                             Add Member
                         </button>
                         <button className="sm:px-4 py-2.5 h-fit sm:w-[150px] block bg-blue-500 hover:bg-blue-600 text-white  font-medium rounded-lg shadow">
@@ -334,6 +336,18 @@ const MessageEdit = () => {
                         initialValue={{ value: all_details?.group_image || "" }}
                         group_id={{ group_id: all_details?._id }}
                         onUpdated={(newImg) => setAll_details(prev => ({ ...prev, group_image: newImg }))}
+                    />
+                )
+            }
+
+            {
+                openAddGRoupMember && (
+                    <AddMemberGroup close={()=>setOpenAddGRoupMember(false)}
+                    onUpdated = {(newData) => setAll_details((preve) =>({
+                        ...preve,
+                        otherUser : [...(preve?.otherUser || []) , newData],
+                        participants : [...(preve?.participants || []) , newData]
+                    }))}
                     />
                 )
             }

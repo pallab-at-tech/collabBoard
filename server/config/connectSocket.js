@@ -218,6 +218,7 @@ io.on("connection", async (socket) => {
 
     })
 
+    // update group details like group photo , group name
     socket.on("update_group_details", async (data) => {
 
         try {
@@ -232,7 +233,7 @@ io.on("connection", async (socket) => {
             const isAdmin = group.admin.some(a => a.toString() === userId.toString())
 
             if (!isAdmin) {
-                return socket.emit("update_error", { message: "Access denied" , error : true })
+                return socket.emit("update_error", { message: "Access denied", error: true })
             }
 
             let optional_msg = ""
@@ -278,9 +279,77 @@ io.on("connection", async (socket) => {
 
         } catch (error) {
             console.log("Error while update group details", error)
-            socket.emit("error", { message: "Server error while update group details" , error : true });
+            socket.emit("error", { message: "Server error while update group details", error: true });
         }
 
+    })
+
+    // add member in group be admin , manually
+    socket.on("add_member_chatGroup", async (data) => {
+        try {
+
+            const { group_id, memberId, memberUserId, adminUserId, adminId } = data || {}
+
+            console.log("data check",data)
+
+            if (!group_id || !memberId || !adminId) {
+                return socket.emit("error", { message: "Missing required fields" });
+            }
+
+            const group = await conversationModel.findById(group_id)
+
+            if (!group) {
+                return socket.emit("member_error", { message: "Group not found", error: true });
+            }
+
+            const isAdmin = group.admin.some((c) => c.toString() === adminId.toString())
+
+            if (!isAdmin) {
+                return socket.emit("member_error", { message: "Access denied", error: true })
+            }
+
+            const isAlreadyPresent = group.participants.some((c) => c.toString() === memberId.toString())
+
+            if (isAlreadyPresent) {
+                return socket.emit("member_error", { message: "User already present in group", error: true })
+            }
+
+            group.participants.push(memberId)
+
+            const newMessage = await messageModel.create({
+                optional_msg: `@${memberUserId} is added in group by @${adminUserId}`,
+                readBy: [adminId],
+                senderId: adminId
+            })
+
+            group.messages.push(newMessage._id)
+
+            await group.save()
+
+            const conversationToEmit = {
+                _id: group._id,
+                group_type: group.group_type,
+                participants: group.participants,
+                messages: group.messages,
+                group_name: group.group_name,
+                group_image: group.group_image
+            }
+
+            const populatedMessage = await messageModel.findById(newMessage._id)
+                .populate("senderId", "_id name avatar userId")
+                .lean();
+
+            group.participants.forEach(pid => {
+                io.to(pid.toString()).emit("receive_message", {
+                    conversation: conversationToEmit,
+                    message: populatedMessage
+                })
+            })
+
+        } catch (error) {
+            console.log("Error while add member in group", error)
+            socket.emit("error", { message: "Server error while add member in group", error: true });
+        }
     })
 
 

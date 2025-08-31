@@ -127,7 +127,6 @@ const SearchMember = ({ close }) => {
         }
     }
 
-    console.log("teamming  dddd", team)
 
     useEffect(() => {
         const newSet = new Set()
