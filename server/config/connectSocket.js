@@ -284,13 +284,11 @@ io.on("connection", async (socket) => {
 
     })
 
-    // add member in group be admin , manually
+    // add member in group by admin , manually
     socket.on("add_member_chatGroup", async (data) => {
         try {
 
-            const { group_id, memberId, memberUserId, adminUserId, adminId } = data || {}
-
-            console.log("data check",data)
+            const { group_id, memberId, memberUserId, adminUserId, adminId, memberAvatar, memberEmail, memberName } = data || {}
 
             if (!group_id || !memberId || !adminId) {
                 return socket.emit("error", { message: "Missing required fields" });
@@ -344,11 +342,106 @@ io.on("connection", async (socket) => {
                     conversation: conversationToEmit,
                     message: populatedMessage
                 })
+                io.to(pid.toString()).emit("member_added", {
+                    group_id,
+                    removedMemberId: memberId,
+                    removedBy: adminId,
+                    obj : {
+                        _id : memberId,
+                        name : memberName,
+                        email : memberEmail,
+                        userId : memberUserId,
+                        avatar : memberAvatar
+                    }
+                })
             })
+
 
         } catch (error) {
             console.log("Error while add member in group", error)
             socket.emit("error", { message: "Server error while add member in group", error: true });
+        }
+    })
+
+    socket.on("remove_member_chatGroup", async (data) => {
+        try {
+
+            const { group_id, memberId, memberUserId, adminUserId, adminId } = data || {}
+
+            if (!group_id || !memberId || !adminId) {
+                return socket.emit("error", { message: "Missing required fields" });
+            }
+
+            const group = await conversationModel.findById(group_id)
+
+            if (!group) {
+                return socket.emit("memberRemove_error", { message: "Group not found", error: true });
+            }
+
+            const isAdmin = group.admin.some((c) => c.toString() === adminId.toString())
+
+            if (!isAdmin) {
+                return socket.emit("memberRemove_error", { message: "Access denied", error: true })
+            }
+
+            const isAlreadyPresent = group.participants.some((c) => c.toString() === memberId.toString())
+
+            if (!isAlreadyPresent) {
+                return socket.emit("memberRemove_error", { message: "Internal error occurs", error: true })
+            }
+
+            if (group.admin.length === 1 && group.admin[0].toString() === memberId.toString()) {
+                return socket.emit("memberRemove_error", { message: "Cannot remove the last admin", error: true })
+            }
+
+            group.participants = group.participants.filter((id) => id.toString() !== memberId.toString())
+            group.admin = group.admin.filter((id) => id.toString() !== memberId.toString())
+
+            const newMessage = await messageModel.create({
+                optional_msg: `@${memberUserId} is removed from group by @${adminUserId}`,
+                readBy: [adminId],
+                senderId: adminId
+            })
+
+            group.messages.push(newMessage._id)
+
+            await group.save()
+
+            const conversationToEmit = {
+                _id: group._id,
+                group_type: group.group_type,
+                participants: group.participants,
+                messages: group.messages,
+                group_name: group.group_name,
+                group_image: group.group_image
+            }
+
+            const populatedMessage = await messageModel.findById(newMessage._id)
+                .populate("senderId", "_id name avatar userId")
+                .lean();
+
+            group.participants.forEach(pid => {
+                io.to(pid.toString()).emit("receive_message", {
+                    conversation: conversationToEmit,
+                    message: populatedMessage
+                })
+
+                io.to(pid.toString()).emit("member_removed", {
+                    group_id,
+                    removedMemberId: memberId,
+                    removedBy: adminId
+                })
+            })
+
+            io.to(memberId.toString()).emit("removed_from_group", {
+                group_id,
+                removedBy: adminId,
+                message: populatedMessage
+            })
+
+        } catch (error) {
+            console.log("Error while remove member in group", error)
+            socket.emit("error", { message: "Server error while remove member in group", error: true });
         }
     })
 

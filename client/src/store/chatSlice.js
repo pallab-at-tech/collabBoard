@@ -47,13 +47,45 @@ const chatSlice = createSlice({
 
             const idx = state.all_message.findIndex(c => c?._id === group_Id)
 
-            if (idx != -1) {
+            if (idx !== -1) {
                 state.all_message[idx].group_image = group_image
+            }
+        },
+        updateparticipantsForRemove: (state, action) => {
+            const { group_Id, memberId } = action.payload
+
+            const idx = state.all_message.findIndex(c => c?._id === group_Id)
+
+            if (idx !== -1) {
+                state.all_message[idx].participants = state.all_message[idx].participants.filter(p => p?._id !== memberId) || []
+            }
+
+        },
+        removeConversation: (state, action) => {
+            const group_Id = action.payload
+            state.all_message = state.all_message.filter(c => c?._id !== group_Id)
+        },
+        updateparticipantsForAdd: (state, action) => {
+            const { group_Id, memberId, obj } = action.payload
+
+            const idx = state.all_message.findIndex(c => c?._id === group_Id)
+
+            if (idx !== -1) {
+                const exists = state.all_message[idx].participants?.some(
+                    (p) => p?._id === memberId
+                )
+
+                if (!exists) {
+                    state.all_message[idx].participants = [
+                        ...(state.all_message[idx].participants || []),
+                        obj   
+                    ]
+                }
             }
         }
 
     }
 })
 
-export const { setMessageDetails, addMessageDetails, updateConversationWithNewMessage, updateGroupName, updateGroupImage } = chatSlice.actions
+export const { setMessageDetails, addMessageDetails, updateConversationWithNewMessage, updateGroupName, updateGroupImage, updateparticipantsForRemove, removeConversation , updateparticipantsForAdd } = chatSlice.actions
 export default chatSlice.reducer

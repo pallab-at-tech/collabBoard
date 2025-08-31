@@ -72,15 +72,18 @@ const AddMemberGroup = ({ close , onUpdated }) => {
             set.add(v?._id)
         })
         setChatmembers(set)
+
+        
     }, [])
 
-    const handleAddMember = async (memberId, memberUserId , name , avatar) => {
+    // _id: '688253eb8726afbde748b097', name: 'sourav', email: 'b@gmail.com', userId: 'b@XmGx', avatar: ''
+    const handleAddMember = async (memberId, memberUserId , name , memberAvatar , memberEmail , memberName) => {
 
         let errorHandled = false;
 
         // Listen for error just once
         socketConnection.once("member_error", (data) => {
-            toast.error(data?.message || "Failed to update group name");
+            toast.error(data?.message || "Failed to add group member.");
             errorHandled = true;
         });
 
@@ -90,7 +93,10 @@ const AddMemberGroup = ({ close , onUpdated }) => {
            memberId : memberId,
            memberUserId : memberUserId,
            adminUserId : user?.userId,
-           adminId : user?._id
+           adminId : user?._id,
+           memberAvatar : memberAvatar,
+           memberEmail : memberEmail,
+           memberName : memberName
         });
 
         setTimeout(()=>{
@@ -106,7 +112,7 @@ const AddMemberGroup = ({ close , onUpdated }) => {
                     _id : memberId,
                     name : name,
                     userId : memberUserId,
-                    avatar : avatar || "",
+                    avatar : memberAvatar || "",
                     admin : false
                 }
 

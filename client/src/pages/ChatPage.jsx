@@ -6,7 +6,7 @@ import { HiOutlineUserAdd } from "react-icons/hi";
 import SearchNewMember from './SearchNewMember';
 import Axios from '../utils/Axios';
 import SummaryApi from '../common/SummaryApi';
-import { setMessageDetails, updateGroupImage, updateGroupName } from '../store/chatSlice';
+import {updateparticipantsForRemove, removeConversation ,  setMessageDetails, updateGroupImage, updateGroupName, updateparticipantsForAdd,  } from '../store/chatSlice';
 import { useDispatch } from 'react-redux';
 import { FiArrowUpLeft } from 'react-icons/fi'
 import { RxAvatar } from 'react-icons/rx';
@@ -18,7 +18,7 @@ import CreateGroup from '../components/common/CreateGroup';
 import { FaUserGroup } from "react-icons/fa6";
 import { useGlobalContext } from '../provider/GlobalProvider';
 import { updateConversationWithNewMessage } from '../store/chatSlice';
-
+import toast from 'react-hot-toast';
 const ChatPage = () => {
 
     const user = useSelector(state => state.user)
@@ -48,10 +48,10 @@ const ChatPage = () => {
                 }));
             }
 
-            if(conversation?.group_image){
+            if (conversation?.group_image) {
                 dispatch(updateGroupImage({
                     group_Id: conversation._id,
-                    group_image : conversation?.group_image
+                    group_image: conversation?.group_image
                 }))
             }
 
@@ -90,7 +90,48 @@ const ChatPage = () => {
         })();
     }, [])
 
-    console.log("chat",chat_details)
+    // update for remove member for all members of group
+    useEffect(() => {
+
+        if(!socketConnection) return
+
+        socketConnection.on("member_removed", ({ group_id, removedMemberId }) => {
+            dispatch(updateparticipantsForRemove({
+                group_Id: group_id,
+                memberId: removedMemberId
+            }))
+        })
+
+        socketConnection.on("removed_from_group", ({ group_id }) => {
+            // If current user was removed
+            dispatch(removeConversation(group_id)) 
+        })
+
+        return () => {
+            socketConnection.off("member_removed")
+            socketConnection.off("removed_from_group")
+        }
+
+    }, [dispatch , socketConnection])
+
+    // update for add member for all members of group 
+    useEffect(()=>{
+
+        if(!socketConnection) return
+
+        socketConnection.on("member_added" , ({group_id , obj , removedMemberId})=>[
+            dispatch(updateparticipantsForAdd({
+                group_Id :group_id,
+                memberId : removedMemberId,
+                obj :  obj
+            }))
+        ])
+
+        return () =>{
+            socketConnection.off("member_added")
+        }
+
+    },[socketConnection , dispatch])
 
     return (
         <section className='min-h-[calc(100vh-60px)] '>

@@ -55,7 +55,7 @@ const MessagePage = () => {
     const [openAttach, setOpenAttach] = useState(false)
     const attachRef = useRef(null)
 
-    const conversation = chat_details?.find(c => c._id === params?.conversation)
+    const [conversation, setConversation] = useState(null)
 
     const { socketConnection } = useGlobalContext()
 
@@ -254,7 +254,10 @@ const MessagePage = () => {
         return () => window.removeEventListener('resize', setAppHeight);
     }, []);
 
-    console.log("messages", conversation)
+    useEffect(()=>{
+        const conversation = chat_details?.find(c => c._id === params?.conversation)
+        setConversation(conversation)
+    },[])
 
 
     return (
@@ -316,7 +319,7 @@ const MessagePage = () => {
                 </div>
 
                 {/* Messages */}
-                <div className="overflow-y-auto h-[var(--message-heigh)] px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0 messages-container" >
+                <div className="overflow-y-auto  h-[var(--message-heigh)] px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0 messages-container" >
                     {Array.isArray(messages) &&
                         messages.map((value, index) => {
                             const isSelfMessage =

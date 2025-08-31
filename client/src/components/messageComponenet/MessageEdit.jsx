@@ -84,7 +84,7 @@ const MessageEdit = () => {
     }, []);
 
 
-    console.log("all_details", all_details)
+    console.log("all_details", chat_details)
 
     return (
         <section className='bg-[#21222b] text-white h-[calc(100vh-60px)] overflow-y-auto px-4 py-3 sm:px-6 sm:py-5'>
@@ -98,7 +98,7 @@ const MessageEdit = () => {
                     <div className="relative  rounded-full border-2 border-gray-400 h-[80px] w-[80px] flex items-center justify-center bg-[#3a3b45] overflow-hidden">
                         {
                             all_details?.group_image ? (
-                                <img src={all_details?.group_image} alt="" className='w-[70px] h-[70px] rounded-full'/>
+                                <img src={all_details?.group_image} alt="" className='w-[70px] h-[70px] rounded-full' />
                             ) : (
                                 <FaUserGroup size={80} className="text-gray-200 absolute top-1.5" />
                             )
@@ -115,7 +115,7 @@ const MessageEdit = () => {
                     <div className="relative  rounded-full border-2 border-gray-400 h-[50px] w-[50px] flex items-center justify-center bg-[#3a3b45] overflow-hidden">
                         {
                             all_details?.group_image ? (
-                                <img src={all_details?.group_image} alt="" className='w-[50px] h-[50px] rounded-full'/>
+                                <img src={all_details?.group_image} alt="" className='w-[50px] h-[50px] rounded-full' />
                             ) : (
                                 <FaUserGroup size={50} className="text-gray-200 absolute top-1.5" />
                             )
@@ -123,7 +123,7 @@ const MessageEdit = () => {
                     </div>
 
                     <button className='absolute -bottom-1 right-0 text-[#e3e3e3] w-fit h-fit bg-amber-950 rounded-full'>
-                        <LuCircleFadingPlus size={25} onClick={() => setOpenGroupImageChanged(true)} className='cursor-pointer'/>
+                        <LuCircleFadingPlus size={25} onClick={() => setOpenGroupImageChanged(true)} className='cursor-pointer' />
                     </button>
 
                 </div>
@@ -175,7 +175,7 @@ const MessageEdit = () => {
                                 <RiUserAddFill size={24} className='sm:hidden block' />
                             </div>
 
-                            <p onClick={()=>setOpenAddGRoupMember(true)} className='sm:text-lg text-base cursor-pointer'>Add member</p>
+                            <p onClick={() => setOpenAddGRoupMember(true)} className='sm:text-lg text-base cursor-pointer'>Add member</p>
                         </div>
 
                         <div className='flex gap-3 items-center'>
@@ -192,7 +192,7 @@ const MessageEdit = () => {
 
                     <h1 className="text-xl font-semibold text-white mb-3">All Members</h1>
 
-                    <div className="space-y-3 max-h-[420px] overflow-y-auto chat-scrollbar pr-2">
+                    <div className="space-y-3 max-h-[420px] overflow-y-auto overflow-x-hidden chat-scrollbar pr-2">
 
                         <div className="flex items-center justify-between gap-3 p-3 lg-real:w-[700px] w-full rounded-xl bg-[#3a3b45] hover:bg-[#4a4b57] transition shadow-sm" >
 
@@ -223,6 +223,7 @@ const MessageEdit = () => {
                         </div>
 
                         {all_details?.otherUser?.map((v, i) => (
+                            
                             <div
                                 key={i}
                                 className="flex items-center justify-between gap-3 p-3 lg-real:w-[700px] w-full rounded-xl bg-[#3a3b45] hover:bg-[#4a4b57] transition shadow-sm"
@@ -240,7 +241,6 @@ const MessageEdit = () => {
                                         <p className="text-gray-400 text-sm">{v?.userId}</p>
                                     </div>
                                 </div>
-
 
                                 <div className='ml-auto flex gap-1 items-center justify-between'>
 
@@ -262,12 +262,24 @@ const MessageEdit = () => {
                                                                 _id: v?._id
                                                             }
                                                         })
-                                                    }} />
+                                                    }}
+                                                />
 
                                                 {
                                                     openDots._id === v?._id && (
                                                         <div ref={dotsRef} className='w-fit h-fit'>
-                                                            <ChatMemberSetting />
+                                                            <ChatMemberSetting
+                                                                memberId={v?._id}
+                                                                memberUserId={v?.userId}
+                                                                close={() => setOpenDots({ _id: "" })}
+                                                                onUpdated = {(oldObjId)=>{
+                                                                    setAll_details((preve)=>({
+                                                                        ...preve,
+                                                                        otherUser : preve?.otherUser?.filter((v) => v?._id !== oldObjId) || [],
+                                                                        participants : preve?.participants?.filter((v) => v?._id !== oldObjId) || []
+                                                                    }))
+                                                                }}
+                                                            />
                                                         </div>
                                                     )
                                                 }
@@ -293,7 +305,7 @@ const MessageEdit = () => {
 
                     <div className='flex flex-col gap-5'>
 
-                        <button onClick={()=>setOpenAddGRoupMember(true)} className="sm:px-4 py-2.5 h-fit cursor-pointer sm:w-[150px] block bg-green-500 hover:bg-green-600 text-white  font-medium rounded-lg shadow">
+                        <button onClick={() => setOpenAddGRoupMember(true)} className="sm:px-4 py-2.5 h-fit cursor-pointer sm:w-[150px] block bg-green-500 hover:bg-green-600 text-white  font-medium rounded-lg shadow">
                             Add Member
                         </button>
                         <button className="sm:px-4 py-2.5 h-fit sm:w-[150px] block bg-blue-500 hover:bg-blue-600 text-white  font-medium rounded-lg shadow">
@@ -342,12 +354,12 @@ const MessageEdit = () => {
 
             {
                 openAddGRoupMember && (
-                    <AddMemberGroup close={()=>setOpenAddGRoupMember(false)}
-                    onUpdated = {(newData) => setAll_details((preve) =>({
-                        ...preve,
-                        otherUser : [...(preve?.otherUser || []) , newData],
-                        participants : [...(preve?.participants || []) , newData]
-                    }))}
+                    <AddMemberGroup close={() => setOpenAddGRoupMember(false)}
+                        onUpdated={(newData) => setAll_details((preve) => ({
+                            ...preve,
+                            otherUser: [...(preve?.otherUser || []), newData],
+                            participants: [...(preve?.participants || []), newData]
+                        }))}
                     />
                 )
             }

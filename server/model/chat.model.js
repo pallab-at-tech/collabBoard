@@ -5,13 +5,13 @@ const messageSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: "user"
     },
-    senderName : {
-        type : String,
-        default : ""
+    senderName: {
+        type: String,
+        default: ""
     },
-    optional_msg : {
-        type : String,
-        default : ""
+    optional_msg: {
+        type: String,
+        default: ""
     },
     text: {
         type: String,
@@ -59,7 +59,7 @@ const conversationSchema = new mongoose.Schema({
             type: mongoose.Schema.ObjectId,
             ref: "user"
         },
-        
+
     ],
     admin: [
         {
@@ -73,7 +73,8 @@ const conversationSchema = new mongoose.Schema({
             type: mongoose.Schema.ObjectId,
             ref: "message"
         }
-    ]
+    ],
+
 }, {
     timestamps: true
 })
