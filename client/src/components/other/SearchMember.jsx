@@ -156,7 +156,7 @@ const SearchMember = ({ close }) => {
     return (
         <section className='fixed right-0 left-0 top-0 bottom-0 flex flex-col items-center justify-center z-50 bg-gray-800/70'>
 
-            <div className='min-h-[220px] max-h-[220px]  sm:min-w-[385px] min-w-[350px] bg-[#dbdbdb] rounded  px-1 relative'>
+            <div className='min-h-[220px] max-h-[220px]  sm:min-w-[385px] min-w-[350px] bg-[#dbdbdb] px-1 relative rounded-md'>
 
                 <h1 className='py-1 px-4 font-semibold'>Search member :</h1>
 
@@ -173,7 +173,7 @@ const SearchMember = ({ close }) => {
                     <input type="text" onChange={(e) => {
                         setData(e.target.value)
                     }}
-                        className='w-[90%] bg-gray-400 outline-none h-[30px] px-2 pl-10 py-2'
+                        className='w-[90%] bg-[#99a1afb7] outline-none h-[33px] px-2 pl-10 py-2 rounded-md'
                         placeholder='Type user-ID/name/email here ...'
                     />
 

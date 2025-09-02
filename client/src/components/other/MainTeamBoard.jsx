@@ -82,27 +82,35 @@ const MainTeamBoard = () => {
                     !task?._id ? (
                         <form onSubmit={handleOnSubmit} className='ipad_pro:mx-6 ipad_pro:my-4 mini_tab:mx-6 mini_tab:my-4'>
 
-                            <h1 className='font-bold mini_tab:text-[20px] text-[16px] text-[#111211] w-fit'>Enter name to create task Board :</h1>
+                            <h1 className='font-bold mini_tab:text-[20px] text-[16px] text-[#e6e8e5] w-fit '>Enter name to create task Board :</h1>
 
-                            <input type="text" name='name' value={data.name} onChange={handleOnChange} className='bg-[#6f6f6f90] mini_tab:w-[311px] w-[249px] mb-2 mt-1 outline-none rounded mini_tab:py-1.5 py-1 px-2' placeholder='Enter here ...' />
+                            <input type="text" name='name' value={data.name} onChange={handleOnChange} className='bg-[#e6e8e5d0] mini_tab:w-[311px] w-[249px] mb-2 mt-1 outline-none rounded mini_tab:py-1.5 py-1 px-2' placeholder='Enter here ...' />
 
-                            <button className='bg-[#1a801f] hover:bg-[#015f20] transition-colors text-A-off-text w-fit mini_tab:px-3 mini_tab:py-1.5 px-2 py-1 rounded cursor-pointer block'>Create</button>
+                            <button className='bg-[#3f9f13]  hover:bg-[#3b9311] transition-colors text-A-off-text w-fit mini_tab:px-3 mini_tab:py-1.5 px-2 py-1 rounded cursor-pointer block'>Create</button>
 
                         </form>
                     ) : (
                         <div>
 
                             <div className='bg-[#eaeaea] w-fit p-2.5 rounded flex  items-center gap-4 sm:text-lg text-sm'>
-                                <div onClick={() => setOpenCreateColumn(true)} className='bg-[#1a801f] hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer sm:leading-normal leading-5'>
-                                    New column
+                                <div onClick={() => setOpenCreateColumn(true)} className='bg-[#1a801f] sm:block hidden hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer sm:leading-normal leading-5'>
+                                    New Column
                                 </div>
 
-                                <div className='bg-[#1a801f] hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer sm:leading-normal leading-5'>
-                                    Track task
+                                <div onClick={() => setOpenCreateColumn(true)} className='bg-[#1a801f] sm:hidden block hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer sm:leading-normal leading-5'>
+                                    column
+                                </div>
+
+                                <div className='bg-[#1a801f] sm:hidden block hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer sm:leading-normal leading-5'>
+                                    Track
+                                </div>
+
+                                <div className='bg-[#1a801f] sm:block hidden hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer sm:leading-normal leading-5'>
+                                    Track Task
                                 </div>
 
                                 <div className='bg-[#1a801f] sm:block hidden hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer'>
-                                    Recent deadline
+                                    Deadline
                                 </div>
 
                                 <div className='bg-[#1a801f]  hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer'>
@@ -115,8 +123,6 @@ const MainTeamBoard = () => {
                                     Recent deadline
                                 </div>
                             </div>
-
-
 
                             <div className='ipad_pro:ml-8 mini_tab:ml-4 ml-1 mt-8'>
 
@@ -145,7 +151,6 @@ const MainTeamBoard = () => {
 
                             </div>
 
-
                         </div>
                     )
                 }
@@ -154,8 +159,8 @@ const MainTeamBoard = () => {
                 {
                     !task?._id && (
                         <div className='absolute inset-0 flex flex-col items-center justify-center pointer-events-none'>
-                            <img src={noTask} alt="No task" className='opacity-[40%]' />
-                            <p className='text-gray-700'>No task create yet !?</p>
+                            <img src={noTask} alt="No task" className='w-[180px]  pb-2 opacity-[40%]' />
+                            <p className='text-[#c2c2c2] text-lg font-semibold'>No task create yet !?</p>
                         </div>
                     )
                 }

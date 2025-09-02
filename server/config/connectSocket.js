@@ -172,6 +172,12 @@ io.on("connection", async (socket) => {
 
         const conversation = await conversationModel.findById(conversationId)
 
+        const isMemberOfGroup = conversation.participants.some(c => c.toString() === senderId.toString())
+
+        if(!isMemberOfGroup){
+            return socket.emit("send_message_error",{message : "You are not a member in this group anymore."})
+        }
+
         const newMessage = await messageModel.create({
             senderId: senderId,
             text: text,
@@ -474,7 +480,7 @@ io.on("connection", async (socket) => {
             if (!group.admin.some(c => c.toString() === member_id.toString())) {
                 group.admin.push(member_id)
             }
-            
+
             const newMessage = await messageModel.create({
                 optional_msg: `${member_userId} are made group admin by ${my_userId}`,
                 senderId: my_id,
@@ -502,15 +508,113 @@ io.on("connection", async (socket) => {
                     conversation: conversationToEmit,
                     message: populatedMessage
                 })
-                io.to(pid.toString()).emit("adminformember", {
-                    group_id,
-                    member_id,
-                })
             })
 
         } catch (error) {
             console.log("Error while make group admin", error)
             socket.emit("error", { message: "Server error while make group admin", error: true });
+        }
+    })
+
+    // exit from group
+    socket.on("exit_group", async (data) => {
+        try {
+            const { group_id, my_id, my_userId } = data || {}
+
+            if (!group_id || !my_id || !my_userId) {
+                return socket.emit("error", { message: "Missing required fields" })
+            }
+
+            const group = await conversationModel.findById(group_id)
+
+            if (!group) {
+                return socket.emit("exit_group_error", { message: "Group is not exist.", error: true })
+            }
+
+            const onlyParticipant = group.participants.length === 1
+            const onlyAdmin = group.admin.length === 1
+
+            let notRequire = false
+
+            if (onlyParticipant) {
+
+                group.admin = []
+                group.participants = []
+                await group.save()
+                const deleteConversation = await conversationModel.findByIdAndDelete(group_id)
+
+                notRequire = true
+            }
+            else if (onlyAdmin) {
+
+                const newAdmin = group.participants.find(c => c.toString() !== my_id.toString())
+                group.admin = [newAdmin]
+
+                group.participants = group.participants.filter(c => c.toString() !== my_id.toString())
+            }
+            else {
+
+                const isAdmin = group.admin.some(c => c.toString() === my_id.toString())
+
+                console.log("isadmin",isAdmin)
+
+                if (isAdmin) {
+                    group.admin = group.admin.filter(c => c.toString() !== my_id.toString())
+                }
+
+                group.participants = group.participants.filter(c => c.toString() !== my_id.toString())
+
+                console.log("group",group)
+            }
+
+            if (!notRequire) {
+
+                const newMessage = await messageModel.create({
+                    optional_msg: `${my_userId} left the group.`,
+                    senderId: my_id,
+                    readBy: [my_id]
+                })
+
+                group.messages.push(newMessage._id)
+                await group.save()
+
+                const conversationToEmit = {
+                    _id: group._id,
+                    group_type: group.group_type,
+                    participants: group.participants,
+                    messages: group.messages,
+                    group_name: group.group_name,
+                    group_image: group.group_image
+                }
+
+                const populatedMessage = await messageModel.findById(newMessage._id)
+                    .populate("senderId", "_id name avatar userId")
+                    .lean();
+
+                group.participants.forEach(pid => {
+                    io.to(pid.toString()).emit("receive_message", {
+                        conversation: conversationToEmit,
+                        message: populatedMessage
+                    })
+
+                    io.to(pid.toString()).emit("member_removed", {
+                        group_id,
+                        removedMemberId: my_id,
+                        removedBy: my_id
+                    })
+                })
+
+                io.to(my_id.toString()).emit("removed_from_group", {
+                    group_id,
+                    removedBy: my_id,
+                    message: populatedMessage
+                })
+
+            }
+
+        } catch (error) {
+            console.log("Error while extit from group.", error)
+            socket.emit("error", { message: "Server error while extit from group.", error: true });
         }
     })
 

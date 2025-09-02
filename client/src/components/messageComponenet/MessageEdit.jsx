@@ -16,6 +16,8 @@ import { LuCircleFadingPlus } from "react-icons/lu";
 import GroupNameChanged from '../other/GroupNameChanged';
 import GroupImageChanged from '../other/GroupImageChanged';
 import AddMemberGroup from './AddMemberGroup';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const MessageEdit = () => {
     const chat_details = useSelector(state => state.chat?.all_message)
@@ -29,6 +31,7 @@ const MessageEdit = () => {
     const dotsRef = useRef(null);
     const location = useLocation()
     const params = useParams()
+    const navigate = useNavigate()
 
     const [openDots, setOpenDots] = useState({
         _id: ""
@@ -67,7 +70,6 @@ const MessageEdit = () => {
         fetchGroupDetails()
     }, [])
 
-
     // Close if clicked outside
     useEffect(() => {
         function handleClickOutside(e) {
@@ -82,6 +84,35 @@ const MessageEdit = () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+    const handleExitFromGroup = async (group_id) => {
+
+        let errorHandled = false;
+
+        // Listen for error just once
+        socketConnection.once("exit_group_error", (data) => {
+            toast.error(data?.message || "Failed to exit from group.");
+            errorHandled = true;
+        });
+
+        // Emit the update request group_id, my_id, my_userId
+        socketConnection.emit("exit_group", {
+            group_id: group_id,
+            my_id: user?._id,
+            my_userId: user?.userId
+        });
+
+        // Small delay to see if error is returned
+        setTimeout(() => {
+            if (!errorHandled) {
+                toast.success("Successfully exit from group.");
+                setOpenDots({
+                    _id : ""
+                })
+                navigate("/chat")
+            }
+        }, 500);
+    }
 
 
     console.log("all_details", all_details)
@@ -223,7 +254,7 @@ const MessageEdit = () => {
                         </div>
 
                         {all_details?.otherUser?.map((v, i) => (
-                            
+
                             <div
                                 key={i}
                                 className="flex items-center justify-between gap-3 p-3 lg-real:w-[700px] w-full rounded-xl bg-[#3a3b45] hover:bg-[#4a4b57] transition shadow-sm"
@@ -272,21 +303,21 @@ const MessageEdit = () => {
                                                                 memberId={v?._id}
                                                                 memberUserId={v?.userId}
                                                                 close={() => setOpenDots({ _id: "" })}
-                                                                onUpdated = {(oldObjId)=>{
-                                                                    setAll_details((preve)=>({
+                                                                onUpdated={(oldObjId) => {
+                                                                    setAll_details((preve) => ({
                                                                         ...preve,
-                                                                        otherUser : preve?.otherUser?.filter((v) => v?._id !== oldObjId) || [],
-                                                                        participants : preve?.participants?.filter((v) => v?._id !== oldObjId) || []
+                                                                        otherUser: preve?.otherUser?.filter((v) => v?._id !== oldObjId) || [],
+                                                                        participants: preve?.participants?.filter((v) => v?._id !== oldObjId) || []
                                                                     }))
                                                                 }}
-                                                                onUpdatedForAdmin = {(memberId)=>{
-                                                                    setAll_details((preve)=>({
+                                                                onUpdatedForAdmin={(memberId) => {
+                                                                    setAll_details((preve) => ({
                                                                         ...preve,
-                                                                        participants : preve.participants.map((p) =>
-                                                                            p._id === memberId ? {...p ,admin : true} : p
+                                                                        participants: preve.participants.map((p) =>
+                                                                            p._id === memberId ? { ...p, admin: true } : p
                                                                         ),
-                                                                        otherUser : preve.otherUser.map((p) =>
-                                                                            p._id === memberId ? {...p, admin : true} : p
+                                                                        otherUser: preve.otherUser.map((p) =>
+                                                                            p._id === memberId ? { ...p, admin: true } : p
                                                                         )
                                                                     }))
                                                                 }}
@@ -299,8 +330,6 @@ const MessageEdit = () => {
                                         )
                                     }
                                 </div>
-
-
 
                             </div>
                         ))}
@@ -325,7 +354,7 @@ const MessageEdit = () => {
 
                     </div>
 
-                    <div className="px-4 py-2.5 h-fit w-[150px]  block bg-red-500 hover:bg-red-600 text-white  font-medium rounded-lg shadow">
+                    <div onClick={()=>handleExitFromGroup(all_details?._id)} className="px-4 py-2.5 h-fit w-[150px]  block bg-red-500 hover:bg-red-600 text-white  font-medium rounded-lg shadow cursor-pointer">
                         Exit Group
                     </div>
 
@@ -334,9 +363,9 @@ const MessageEdit = () => {
 
                 {/* for mobile and tablet version */}
                 <div className='lg-real:hidden block pt-6 mb-1 pl-2 text-[#f43131]'>
-                    <div className='flex gap-2 items-center'>
-                        <ImExit size={24} className='sm:block hidden' />
-                        <ImExit size={22} className='sm:hidden block' />
+                    <div className='flex gap-2 items-center cursor-pointer w-fit'>
+                        <ImExit onClick={()=>handleExitFromGroup(all_details?._id)} size={24} className='sm:block hidden' />
+                        <ImExit onClick={()=>handleExitFromGroup(all_details?._id)} size={22} className='sm:hidden block' />
                         <p className='sm:text-[20px] text-[17px] text-[#fe4949]'>Exit Group</p>
                     </div>
                 </div>

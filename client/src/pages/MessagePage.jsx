@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import { IoClose } from "react-icons/io5";
 import { FaUserGroup } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const MessagePage = () => {
 
@@ -144,6 +145,12 @@ const MessagePage = () => {
             senderName: user?.name.split(" ")[0]
         })
 
+        socketConnection.once("send_message_error", async (data) => {
+            toast.error(data?.message || "Fail to send message.")
+            navigate("/chat")
+            return
+        })
+
         setMessageText("")
         setAttachData({
             image: "",
@@ -254,10 +261,10 @@ const MessagePage = () => {
         return () => window.removeEventListener('resize', setAppHeight);
     }, []);
 
-    useEffect(()=>{
+    useEffect(() => {
         const conversation = chat_details?.find(c => c._id === params?.conversation)
         setConversation(conversation)
-    },[])
+    }, [])
 
 
     return (
@@ -273,8 +280,8 @@ const MessagePage = () => {
 
                                 {
                                     isGroup ? (
-                                        conversation?.group_image || location?.allMessageDetails?.group_image  ? (
-                                            <img src={conversation?.group_image || location?.allMessageDetails?.group_image} alt="" className='h-[36px] w-[36px] rounded-full'/>
+                                        conversation?.group_image || location?.allMessageDetails?.group_image ? (
+                                            <img src={conversation?.group_image || location?.allMessageDetails?.group_image} alt="" className='h-[36px] w-[36px] rounded-full' />
                                         ) : (
                                             <FaUserGroup size={30} />
                                         )

@@ -88,10 +88,6 @@ const router = createBrowserRouter([
                             }
                         ]
                     },
-                    // {
-                    //     path: "/chat/edit",
-                    //     element: <MessageEdit />
-                    // }
                 ]
             }
         ]
