@@ -42,7 +42,7 @@ Axios.interceptors.response.use(
                 localStorage.clear()
                 localStorage.setItem("login", "false")
                 setLoginGlobal(false)   //  update context
-                window.location.href = "/login"
+                window.location.href = "/"
             } else {
                 localStorage.setItem("login", "false")
                 setLoginGlobal(false)   //  update context

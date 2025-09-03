@@ -120,7 +120,7 @@ const MainTeamBoard = () => {
 
                             <div className='bg-[#eaeaea] w-fit p-2.5 rounded my-1 sm:hidden block'>
                                 <div className='bg-[#1a801f] s hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer'>
-                                    Recent deadline
+                                    Deadline
                                 </div>
                             </div>
 

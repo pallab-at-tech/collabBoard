@@ -7,7 +7,8 @@ import { RiFolderVideoFill } from "react-icons/ri";
 import { LuLink2 } from "react-icons/lu";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaAngleDown } from "react-icons/fa6";
-import { MdMovieEdit , MdAutoDelete } from "react-icons/md";
+import { MdMovieEdit, MdAutoDelete } from "react-icons/md";
+import TaskEdit from '../TaskBoard/TaskEdit';
 
 const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     const dropdownRef = useRef(null);
@@ -110,11 +111,13 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     };
 
     const [taskOpen, setTaskOpen] = useState(true)
+    const [editTaskOpen, setEditTaskOpen] = useState(false)
+    const [currentTaskToEdit, setCurrentTaskToEdit] = useState(null)
 
     const [taskLabel, setTaskLabel] = useState(new Set())
 
 
-    console.log("val only", val)
+    // console.log("val only", val)
 
 
 
@@ -142,14 +145,12 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                     <FaAngleDown onClick={() => setTaskOpen(!taskOpen)} className={`mt-1 mb-2 text-[#dbdbdb] cursor-pointer transform transition-transform duration-500 ${taskOpen ? "rotate-180" : "rotate-0"}`} size={20} />
                 </div>
 
-
                 {isOpen && (
                     <div ref={dropdownRef} className='absolute sm:-right-12 -right-[80px]  sm:-top-[115px] -top-[110px] z-10'>
                         <CoumnAllSettings columnId={val?._id} columnName={val?.name} />
                     </div>
                 )}
             </div>
-
 
             {
                 taskOpen ? (
@@ -211,9 +212,16 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
 
                                             {/* edit options */}
                                             <div className='text-white absolute sm:top-2 sm:right-1 top-0 -right-6 flex sm:flex-col flex-row'>
-                                                <MdMovieEdit size={20} className='my-1.5 mx-1.5 cursor-pointer text-[#c5e700] hover:text-[#dada01] transition-colors' title='Edit task'/>
+                                                <MdMovieEdit
+                                                    onClick={() => {
+                                                        setEditTaskOpen(true)
+                                                        setCurrentTaskToEdit(val)
+                                                    }}
+                                                    size={20}
+                                                    className='my-1.5 mx-1.5 cursor-pointer text-[#50c900] hover:text-[#409f00] transition-colors' title='Edit task'
+                                                />
 
-                                                <MdAutoDelete size={20} className='my-1.5 mx-1.5 cursor-pointer text-[#f36900] hover:text-red-500 transition-colors' title='Delete task'/>
+                                                <MdAutoDelete size={20} className='my-1.5 mx-1.5 cursor-pointer text-[#f36900] hover:text-red-500 transition-colors' title='Delete task' />
                                             </div>
 
                                             {
@@ -413,6 +421,16 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                         </div>
 
                     </section>
+                )
+            }
+
+            {
+                editTaskOpen && (
+                    <TaskEdit
+                        columnName={val?.name}
+                        close={() => setEditTaskOpen(false)}
+                        currentTask={currentTaskToEdit}
+                    />
                 )
             }
 

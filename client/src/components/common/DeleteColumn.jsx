@@ -60,7 +60,7 @@ const DeleteColumn = ({ close, columnId, columnName }) => {
                     <button
                         type="button"
                         onClick={()=>handleDelete()}
-                        className={`px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 active:scale-[0.98] transition ${loading && "pointer-events-none"}`}
+                        className={`px-4 py-2 cursor-pointer bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 active:scale-[0.98] transition ${loading && "pointer-events-none"}`}
                     >
                         Confirm
                     </button>
@@ -68,7 +68,7 @@ const DeleteColumn = ({ close, columnId, columnName }) => {
                     <button
                         type="button"
                         onClick={() => close()}
-                        className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300 active:scale-[0.98] transition"
+                        className="px-4 py-2 cursor-pointer bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300 active:scale-[0.98] transition"
                     >
                         Cancel
                     </button>
