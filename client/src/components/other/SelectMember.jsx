@@ -6,6 +6,7 @@ const SelectMember = ({ close, data, setAssignData }) => {
 
     const [selectedMembers, setSelectedMembers] = useState((data.length !== 0 && data) || []);
 
+
     const toggleSelect = (userId) => {
         setSelectedMembers((prev) =>
             prev.includes(userId)
@@ -25,6 +26,7 @@ const SelectMember = ({ close, data, setAssignData }) => {
     };
 
     const team = useSelector(state => state.team)
+    const userId = useSelector( state => state?.user?.userId)
 
     return (
         <section className='fixed right-0 left-0 top-0 bottom-0 flex flex-col items-center justify-center z-50 bg-gray-800/70'>
@@ -40,7 +42,7 @@ const SelectMember = ({ close, data, setAssignData }) => {
                         return (
                             <div
                                 key={val._id}
-                                className={`flex justify-between items-center p-3 rounded-md border ${isSelected ? "bg-green-100 border-green-400" : "bg-white border-gray-300"} transition my-1`}
+                                className={`${userId === val?.userName ? "hidden" : "block"} flex justify-between items-center p-3 rounded-md border ${isSelected ? "bg-green-100 border-green-400" : "bg-white border-gray-300"} transition my-1`}
                             >
                                 <div>
                                     <p className="text-gray-800 font-medium pb-1">{val?.userName}</p>

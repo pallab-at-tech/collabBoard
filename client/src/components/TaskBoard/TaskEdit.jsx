@@ -5,14 +5,28 @@ import { IoClose } from 'react-icons/io5'
 import { SiStagetimer } from 'react-icons/si'
 import { FaEye } from "react-icons/fa";
 import { useSelector } from 'react-redux'
+import toast from 'react-hot-toast'
+import AddLink from '../common/AddLink'
+import { useParams } from 'react-router-dom'
+import { useGlobalContext } from '../../provider/GlobalProvider'
+import uploadFile from '../../utils/uploadFile'
+import { MdDelete } from "react-icons/md";
 
-const TaskEdit = ({ close, columnName, currentTask }) => {
+const TaskEdit = ({ close, columnName, currentTask, columnId }) => {
 
     const team = useSelector(state => state?.team)
+    const userId = useSelector(state => state?.user?.userId)
+    const user_id = useSelector(state => state?.user?._id)
+
+    const { socketConnection } = useGlobalContext()
+
+    const params = useParams()
 
     const [data, setData] = useState({
-        // teamId: params?.team,
-        // columnId: columnId,
+        userId: user_id,
+        teamId: params?.team,
+        columnId: columnId,
+        taskId: currentTask._id,
         title: currentTask?.title,
         description: currentTask?.description,
         assignTo: currentTask?.assignTo || [],
@@ -21,10 +35,10 @@ const TaskEdit = ({ close, columnName, currentTask }) => {
         dueDate: currentTask?.dueDate,
         dueTime: currentTask?.dueTime,
         labels: [],
-        date: "",
         image: currentTask?.image,
         video: currentTask?.video
     })
+
 
     const imgRef = useRef(null)
     const videoRef = useRef(null)
@@ -33,12 +47,11 @@ const TaskEdit = ({ close, columnName, currentTask }) => {
     const [loadingVideo, setloadingVideo] = useState(false)
     const [openMember, setOpenMember] = useState(false)
 
+    const [loadForSubmit, setLoadForSubmit] = useState(false)
+    const [addLinkOpen, setAddLinkOpen] = useState(false)
+
     const [selectedMember, setSelectedMember] = useState(new Set())
 
-    const [seeImageAndVideo, setSeeImageAndVideo] = useState({
-        image: false,
-        video: false
-    })
 
     const isToday = () => {
         const today = new Date().toISOString().split("T")[0];
@@ -52,14 +65,143 @@ const TaskEdit = ({ close, columnName, currentTask }) => {
         return `${hours}:${minutes}`;
     };
 
-    useEffect(()=>{
+    useEffect(() => {
+        const set = new Set(currentTask?.assignTo)
+        setSelectedMember(set)
+    }, [])
 
-        const set = new Set()
-        // const isAllMemebers = data.assignTo?.length === 0 ? team?.member : data.assignTo
+    const toggleSelect = (userName) => {
+        const set = new Set(selectedMember)
 
-    },[])
+        if (set.has(userName)) {
+            set.delete(userName)
+        }
+        else {
+            set.add(userName)
+        }
 
-    console.log("current task", team?.member)
+        setSelectedMember(set)
+    }
+
+    const handleChangeData = (e) => {
+
+        const { name, value } = e.target
+
+        setData((prev) => {
+            return {
+                ...prev,
+                [name]: value
+            }
+        })
+    }
+
+    useEffect(() => {
+
+        setData((prev) => {
+            return {
+                ...prev,
+                assignTo: Array.from(selectedMember) || []
+            }
+        })
+
+    }, [selectedMember])
+
+
+    const handleOnPhoto = async (e) => {
+        const file = e.target.files?.[0]
+
+        if (!file) return
+
+        setloadingPhoto(true)
+
+        const response = await uploadFile(file)
+
+        setloadingPhoto(false)
+
+        setData((preve) => {
+            return {
+                ...preve,
+                image: response?.secure_url
+            }
+        })
+    }
+
+    const handleOnVideo = async (e) => {
+        const file = e.target.files?.[0]
+
+        if (!file) return
+
+        setloadingVideo(true)
+
+        const response = await uploadFile(file)
+
+        setloadingVideo(false)
+
+        setData((preve) => {
+            return {
+                ...preve,
+                video: response?.secure_url
+            }
+        })
+    }
+
+    const handleOnSubmit = (e) => {
+        e.preventDefault()
+        try {
+
+            setLoadForSubmit(true)
+            let errorHandled = false;
+
+            socketConnection.once("task_update_error", (data) => {
+                toast.error(data?.message)
+                errorHandled = true
+            })
+
+            setTimeout(() => {
+
+                if (!errorHandled) {
+
+                    socketConnection.emit("update_task", data)
+
+                    socketConnection.once("update_task_msg", (data) => {
+
+                        toast.success(data?.message)
+
+                        setData({
+                            userId: "",
+                            teamId: "",
+                            columnId: "",
+                            taskId: "",
+                            title: "",
+                            description: "",
+                            assignTo: [],
+                            status: "",
+                            aditional_link: [],
+                            dueDate: "",
+                            dueTime: "",
+                            labels: [],
+                            image: "",
+                            video: ""
+                        })
+                        close()
+                    })
+                }
+
+            }, 500)
+
+        } catch (error) {
+            console.log("error come for handleSubmit while update task.", error)
+        } finally {
+            setLoadForSubmit(false)
+        }
+    }
+
+
+
+    // console.log("current task id", data)
+    // console.log("current column id",columnId)
+    // console.log("current column name",columnName)
+    // console.log("current teamId",data.teamId)
 
     return (
         <section className='fixed right-0 left-0 top-0 bottom-0 flex flex-col items-center justify-center z-50 sm:bg-gray-800/75 bg-[#dbdbdb] overflow-y-auto'>
@@ -77,13 +219,13 @@ const TaskEdit = ({ close, columnName, currentTask }) => {
                         <span className='text-gray-700'>{` ( ${columnName} ) `}</span>
                     </div>
 
-                    <form className='grid sm:grid-cols-[5fr_3fr] px-4 py-4'>
+                    <form onSubmit={handleOnSubmit} className='grid sm:grid-cols-[5fr_3fr] px-4 py-4'>
 
                         <div className='flex flex-col gap-4 justify-center'>
 
                             <div className='group text-lg'>
                                 <p className='font-semibold group-hover:scale-y-105 transition-all duration-500 group-hover:-translate-y-1'>Title : </p>
-                                <input type="text" name='title' value={data.title} placeholder='type name here....' className=' w-[300px]  h-8 text-base outline-none p-2 mt-0.5 text-[#100f0f]' />
+                                <input type="text" name='title' value={data.title} onChange={(e) => handleChangeData(e)} placeholder='type name here....' className=' w-[300px]  h-8 text-base outline-none p-2 mt-0.5 text-[#100f0f]' />
                             </div>
 
                             <div className='group text-lg'>
@@ -98,7 +240,7 @@ const TaskEdit = ({ close, columnName, currentTask }) => {
 
                                 </div>
 
-                                <textarea name="description" value={data.description} placeholder='Describe your task...' className='w-[300px] max-h-[70px] min-h-[70px] text-base outline-none p-2 mt-0.5 text-[#100f0f]' />
+                                <textarea name="description" value={data.description} onChange={(e) => handleChangeData(e)} placeholder='Describe your task...' className='w-[300px] max-h-[70px] min-h-[70px] group-scrollbar text-base outline-none p-2 mt-0.5 text-[#100f0f]' />
 
                             </div>
 
@@ -108,7 +250,7 @@ const TaskEdit = ({ close, columnName, currentTask }) => {
 
                                 <div className='flex gap-2 mb-1'>
                                     <SiStagetimer size={26} className='scale-x-[-1]' />
-                                    <p className='font-semibold'>Set DeadLine : </p>
+                                    <p className='font-semibold'>Expand DeadLine : </p>
                                 </div>
 
                                 <div className='flex items-center gap-4 mb-1'>
@@ -120,7 +262,6 @@ const TaskEdit = ({ close, columnName, currentTask }) => {
                                         <input type="date"
                                             onChange={(e) => {
                                                 const { value } = e.target
-
                                                 setData((preve) => {
                                                     return {
                                                         ...preve,
@@ -185,99 +326,134 @@ const TaskEdit = ({ close, columnName, currentTask }) => {
                             </div>
 
                             {/* add image */}
-                            <div className='group text-lg'>
+                            <div className='group text-lg w-full'>
 
-                                <div onClick={() => imgRef.current.click()} className='bg-[#cc2929] relative text-white text-base w-[90%] text-center px-1 py-1 rounded cursor-pointer'>
+                                <div onClick={() => imgRef.current.click()} className='flex gap-2 items-center relative text-white text-base w-[90%] text-center'>
+
+                                    <div className={`bg-[#cc2929] px-1 py-1 rounded w-full cursor-pointer`}>
+                                        {
+                                            loadingPhoto ? (
+                                                <div className='flex items-center justify-center'>
+                                                    <div className='loader'></div>
+                                                </div>
+                                            ) : (
+                                                data.image ? (
+                                                    <div className='flex items-center justify-center'>
+                                                        uploaded
+                                                        <div className='tickForEdit'></div>
+                                                    </div>
+                                                ) : (
+                                                    <div>Add image</div>
+                                                )
+                                            )
+                                        }
+                                    </div>
 
                                     {
                                         data.image && (
-                                            <FaEye size={16}
-                                                className='w-full absolute -top-[18px] -right-14 text-gray-700'
-                                                title='See image'
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                }}
-                                            />
+                                            <div className='flex items-center gap-2 w-full text-gray-700'>
+                                                <FaEye size={18}
+                                                    className='cursor-pointer'
+                                                    title='See image'
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        if (data.image) {
+                                                            const url = data.image.startsWith("http")
+                                                                ? data.image
+                                                                : `${window.location.origin}${data.image}`;
+                                                            window.open(url, "_blank", "noopener,noreferrer");
+                                                        }
+                                                    }}
+                                                />
+                                                <MdDelete title='Remove video' size={18}
+                                                    className='cursor-pointer'
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setData((prev) => {
+                                                            return {
+                                                                ...prev,
+                                                                image: ""
+                                                            }
+                                                        })
+                                                    }}
+                                                />
+                                            </div>
                                         )
                                     }
 
-                                    {
-                                        loadingPhoto ? (
-                                            <div className='flex items-center justify-center'>
-                                                <div className='loader'></div>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                {
-                                                    data.image ? (
-                                                        <div className='flex items-center justify-center gap-1'>
-                                                            uploaded
-                                                            <div className='tick'></div>
-                                                        </div>
-                                                    ) : (
-                                                        <div>Add image</div>
-                                                    )
-                                                }
-                                            </>
-                                        )
-                                    }
+
                                 </div>
-                                {/* onChange={handleOnPhoto} */}
-                                <input type="file" ref={imgRef} accept="image/*" name='image' className='hidden' />
+                                <input type="file" ref={imgRef} onChange={handleOnPhoto} accept="image/*" name='image' className='hidden' />
 
                             </div>
 
                             {/* add video */}
                             <div className='group text-lg'>
 
-                                <div onClick={() => videoRef.current.click()} className='bg-[#cc2929] relative text-white text-base w-[90%] text-center px-1 py-1 rounded cursor-pointer'>
+                                <div onClick={() => videoRef.current.click()} className='flex gap-2 items-center relative text-white text-base w-[90%] text-center'>
+
+                                    <div className={`bg-[#cc2929] px-1 py-1 rounded w-full cursor-pointer`}>
+                                        {
+                                            loadingVideo ? (
+                                                <div className='flex items-center justify-center'>
+                                                    <div className='loader'></div>
+                                                </div>
+                                            ) : (
+                                                data.video ? (
+                                                    <div className='flex items-center justify-center'>
+                                                        uploaded
+                                                        <div className='tickForEdit'></div>
+                                                    </div>
+                                                ) : (
+                                                    <div>Add Video</div>
+                                                )
+                                            )
+                                        }
+                                    </div>
 
                                     {
-                                        data.image && (
-                                            <FaEye size={16}
-                                                className='w-full absolute -top-[18px] -right-14 text-gray-700'
-                                                title='See video'
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                }}
-                                            />
-                                        )
-                                    }
-
-                                    {
-                                        loadingVideo ? (
-                                            <div className='flex items-center justify-center'>
-                                                <div className='loader'></div>
+                                        data.video && (
+                                            <div className='flex items-center gap-2 w-full text-gray-700'>
+                                                <FaEye size={18}
+                                                    className='cursor-pointer'
+                                                    title='See video'
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        if (data.video) {
+                                                            const url = data.video.startsWith("http")
+                                                                ? data.video
+                                                                : `${window.location.origin}${data.video}`;
+                                                            window.open(url, "_blank", "noopener,noreferrer");
+                                                        }
+                                                    }}
+                                                />
+                                                <MdDelete title='Remove image' size={18}
+                                                    className='cursor-pointer'
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setData((prev) => {
+                                                            return {
+                                                                ...prev,
+                                                                video: ""
+                                                            }
+                                                        })
+                                                    }}
+                                                />
                                             </div>
-                                        ) : (
-                                            <>
-                                                {
-                                                    data.video ? (
-                                                        <div className='flex items-center justify-center gap-1'>
-                                                            uploaded
-                                                            <div className='tick'></div>
-                                                        </div>
-                                                    ) : (
-                                                        <div>Add Video</div>
-                                                    )
-                                                }
-                                            </>
                                         )
                                     }
+
                                 </div>
-                                {/* onChange={handleOnVideo} */}
-                                <input type="file" ref={videoRef} accept="video/*" name='video' className='hidden' />
+                                <input type="file" ref={videoRef} onChange={handleOnVideo} accept="video/*" name='video' className='hidden' />
 
                             </div>
 
-                            {/* onClick={() => setAddLinkOpen(true)} */}
                             {/* add link */}
                             <div className='group text-lg'>
-                                <div className='bg-[#cc2929] text-white text-base w-[90%] text-center px-1 py-1 rounded cursor-pointer'>Add Link</div>
+                                <div onClick={() => setAddLinkOpen(true)} className='bg-[#cc2929] text-white text-base w-[90%] text-center px-1 py-1 rounded cursor-pointer'>Add Link</div>
                             </div>
 
-                            {/* ${loadForSubmit ? "pointer-events-none" : "cursor-pointer"} */}
-                            <button type='submit' className={`bg-[#027d2b] hover:bg-[#027127] transition-colors duration-100 text-white w-[90%] py-2.5 px-2 rounded font-bold mb-[3%] `}>Update Task</button>
+                            <button type='submit' className={`bg-[#027d2b] hover:bg-[#027127] ${loadForSubmit ? "pointer-events-none" : "cursor-pointer"} transition-colors duration-100 text-white w-[90%] py-2.5 px-2 rounded font-bold mb-[3%] `}>Update Task</button>
                         </div>
 
                     </form>
@@ -291,17 +467,17 @@ const TaskEdit = ({ close, columnName, currentTask }) => {
                     {
                         Array.isArray(team?.member) && team?.member?.map((val, idx) => {
 
-                            
-                            const isSelected = true
+
+                            const isSelected = selectedMember.has(val?.userName)
 
                             return (
-                                <div className={`flex justify-between items-center p-3 rounded-md border transition my-1 ${isSelected ? "bg-green-100 border-green-400" : "bg-white border-gray-300"}`}>
+                                <div className={`${userId === val?.userName ? "hidden" : "flex"} justify-between items-center p-3 rounded-md border transition my-1 ${isSelected ? "bg-green-100 border-green-400" : "bg-white border-gray-300"}`}>
 
                                     <div>
                                         <p className="text-gray-800 font-medium pb-1">{val?.userName}</p>
 
                                         <button
-                                            // onClick={() => toggleSelect(val?.userName)}
+                                            onClick={() => toggleSelect(val?.userName)}
                                             className={`text-sm px-3 py-1 rounded-md font-medium transition ${isSelected
                                                 ? "bg-red-500 text-white hover:bg-red-600"
                                                 : "bg-blue-500 text-white hover:bg-blue-600"
@@ -319,6 +495,12 @@ const TaskEdit = ({ close, columnName, currentTask }) => {
                 </div>
 
             </div>
+
+            {
+                addLinkOpen && (
+                    <AddLink close={() => setAddLinkOpen(false)} data={data.aditional_link} setLinkData={setData} />
+                )
+            }
 
         </section>
     )

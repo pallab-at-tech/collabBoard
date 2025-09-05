@@ -9,12 +9,10 @@ import other from "../assets/other-banner.png"
 import { Outlet } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { VscTriangleRight } from "react-icons/vsc";
-import { useGlobalContext } from '../provider/GlobalProvider'
 
 const CollabBoard = () => {
 
   const user = useSelector(state => state.user)
-  const { fetchTaskDetails } = useGlobalContext()
 
   const bannerCombo = {
     "Engineering-IT": engineering,

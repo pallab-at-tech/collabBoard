@@ -117,7 +117,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     const [taskLabel, setTaskLabel] = useState(new Set())
 
 
-    // console.log("val only", val)
+    console.log("val only be", val)
 
 
 
@@ -430,6 +430,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                         columnName={val?.name}
                         close={() => setEditTaskOpen(false)}
                         currentTask={currentTaskToEdit}
+                        columnId = {val?._id}
                     />
                 )
             }

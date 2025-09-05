@@ -120,6 +120,23 @@
   transform: rotate(45deg);
 }
 
+/* tick mark */
+.tickForEdit {
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+
+.tickForEdit::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 14px;
+  border-right: 3px solid green;
+  border-bottom: 3px solid green;
+  transform: rotate(45deg);
+}
+
 
 /* uploading */
 

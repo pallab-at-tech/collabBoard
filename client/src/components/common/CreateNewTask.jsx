@@ -20,7 +20,10 @@ const CreateNewTask = ({ columnId, close, columnName }) => {
     const imgRef = useRef()
     const videoRef = useRef()
 
+    const user = useSelector(state => state?.user)
+
     const [data, setData] = useState({
+        userId : user?._id,
         teamId: params?.team,
         columnId: columnId,
         title: "",
@@ -43,7 +46,7 @@ const CreateNewTask = ({ columnId, close, columnName }) => {
     const [openMember, setOpenMember] = useState(false)
 
     const team = useSelector(state => state?.team)
-
+    
     const [selectedMembers, setSelectedMembers] = useState([]);
     const [selectMemberForMobile, setSelectMemberForMobile] = useState(false)
 
@@ -63,7 +66,7 @@ const CreateNewTask = ({ columnId, close, columnName }) => {
         }));
     };
 
-    const { fetchTaskDetails } = useGlobalContext()
+    const { socketConnection } = useGlobalContext()
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -127,53 +130,59 @@ const CreateNewTask = ({ columnId, close, columnName }) => {
         return data.dueDate === today;
     };
 
-    const handleOnSubmit = async (e) => {
+    const handleSubmit = async (e) => {
+
+        if (!socketConnection) return
         e.preventDefault()
 
         try {
-            setLoadForSubmit(true)
 
-            const response = await Axios({
-                ...SummaryApi.new_task_create,
-                data: data
+            setLoadForSubmit(true)
+            let errorHandled = false;
+
+            socketConnection.once("create_task_error", (data) => {
+                toast.error(data?.message)
+                errorHandled = true
             })
 
-            if (response?.data?.error) {
-                toast.error(response?.data?.message)
-            }
+            setTimeout(() => {
 
-            if (response?.data?.success) {
-                toast.success(response?.data?.message)
+                if (!errorHandled) {
+                    socketConnection.emit("create-task", data)
 
-                setData({
-                    teamId: "",
-                    columnId: "",
-                    title: "",
-                    description: "",
-                    assignTo: [],
-                    status: "",
-                    aditional_link: [],
-                    dueDate: "",
-                    dueTime: "",
-                    labels: [],
-                    date: "",
-                    image: "",
-                    video: ""
-                })
+                    socketConnection.once("task_create_success", (data) => {
+                        toast.success(data?.message)
 
-                fetchTaskDetails(params?.team)
-                close()
-            }
+                        setData({
+                            userId : "",
+                            teamId: "",
+                            columnId: "",
+                            title: "",
+                            description: "",
+                            assignTo: [],
+                            status: "",
+                            aditional_link: [],
+                            dueDate: "",
+                            dueTime: "",
+                            labels: [],
+                            date: "",
+                            image: "",
+                            video: ""
+                        })
+
+                        close()
+                    })
+                }
+
+            }, 500)
 
         } catch (error) {
-            console.log("error from create new task", error)
+            console.log("error come for handleSubmit while create task", error)
         } finally {
             setLoadForSubmit(false)
         }
     }
 
-
-    console.log("Taskdata...", data)
 
     return (
         <section className='fixed right-0 left-0 top-0 bottom-0 flex flex-col items-center justify-center z-50 sm:bg-gray-800/75 bg-[#dbdbdb] overflow-y-auto'>
@@ -188,7 +197,7 @@ const CreateNewTask = ({ columnId, close, columnName }) => {
 
                     <h1 className='text-2xl font-bold text-center py-2'>Column : {columnName}</h1>
 
-                    <form className='grid sm:grid-cols-[5fr_3fr] px-4 py-4' onSubmit={handleOnSubmit}>
+                    <form className='grid sm:grid-cols-[5fr_3fr] px-4 py-4' onSubmit={handleSubmit}>
 
                         <div className='flex flex-col gap-4 justify-center'>
 
@@ -380,7 +389,7 @@ const CreateNewTask = ({ columnId, close, columnName }) => {
                             return (
                                 <div
                                     key={val._id}
-                                    className={`flex justify-between items-center p-3 rounded-md border ${isSelected ? "bg-green-100 border-green-400" : "bg-white border-gray-300"} transition my-1`}
+                                    className={`${val?.userName === user?.userId ? "hidden" : "block"} flex justify-between items-center p-3 rounded-md border ${isSelected ? "bg-green-100 border-green-400" : "bg-white border-gray-300"} transition my-1`}
                                 >
                                     <div>
                                         <p className="text-gray-800 font-medium pb-1">{val?.userName}</p>

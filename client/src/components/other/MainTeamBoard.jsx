@@ -11,6 +11,8 @@ import VerticleLine from '../../utils/VerticleLine'
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import CoumnAllSettings from '../common/CoumnAllSettings'
 import ColumnItem from '../common/ColumnItem'
+import { useDispatch } from 'react-redux'
+import { updateColumn } from '../../store/taskSlice'
 
 
 const MainTeamBoard = () => {
@@ -21,7 +23,8 @@ const MainTeamBoard = () => {
     const [openCreateColumn, setOpenCreateColumn] = useState(false)
     const [columnSetting, setColumnSetting] = useState(null)
     const params = useParams()
-    const { fetchTaskDetails } = useGlobalContext()
+    const dispatch = useDispatch()
+    const { fetchTaskDetails , socketConnection } = useGlobalContext()
 
 
     const handleOnChange = (e) => {
@@ -71,7 +74,34 @@ const MainTeamBoard = () => {
 
     const task = useSelector(state => state.task)
 
-    console.log("task details", task)
+    // update new task for assigned members
+    useEffect(()=>{
+
+        if(!socketConnection) return
+
+        socketConnection.on("task_assigned",(data)=>{
+
+            console.log("data?.task?._id",data?.taskBoardId)
+            console.log("task?._id",task?._id)
+
+            console.log("task?._id === data?.taskBoardId",task?._id === data?.taskBoardId)
+            
+
+            if(task?._id === data?.taskBoardId){
+
+                console.log("socket data",data)
+                dispatch(updateColumn({task : data?.task ,columnId : data?.columnId }))
+            }
+
+            console.log("task details hi under socket", task)
+
+        })
+
+        return () => socketConnection.off("task_assigned")
+
+    },[socketConnection , dispatch , task?._id])
+
+    console.log("task details hi", task)
 
     return (
         <section className=''>
@@ -164,8 +194,6 @@ const MainTeamBoard = () => {
                         </div>
                     )
                 }
-
-
 
             </div>
 
