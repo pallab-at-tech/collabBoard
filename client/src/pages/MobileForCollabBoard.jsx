@@ -8,23 +8,40 @@ const MobileForCollabBoard = () => {
   const boardURL = `/board/${user?.name}-${user?._id}`
 
   return (
-    <section className='flex h-[calc(100vh-112px)] flex-col justify-center'>
+    <section className="flex h-[calc(100vh-112px)] flex-col items-center px-6">
+      {/* Heading */}
+      <h1
+        className="text-center font-extrabold py-3 text-4xl text-emerald-600 pr-4"
+        style={{ textShadow: "0 0 12px rgba(16,185,129,0.3)" }}
+      >
+        All Teams
+      </h1>
 
-      <h1 className='text-center font-bold py-1 text-3xl  text-[#024f13]'>All TEAM</h1>
-
-      <div className='grid ipad_pro:grid-cols-4 mini_tab:grid-cols-3 grid-cols-1 gap-6 hide-scrollbar overflow-y-auto max-h-[calc(100vh-110px)] pt-4 w-full' style={{ willChange: 'transform' }}>
-        {
-          user?.roles?.map((v, i) => {
-            return (
-              <Link to={`${boardURL}/${v?.teamId}`} className='mini_tab:min-h-[160px] mini_tab:max-h-[160px] mini_tab:min-w-[200px] mini_tab:max-w-[200px]  min-h-[150px] max-h-[150px]  bg-B-color rounded p-4'>
-                <h1 className='text-lg font-bold'>{v?.name}</h1>
-                <p className='text-sm text-black/70 font-semibold'>{`${v.organization_type} ${v.organization_type === "other" ? "" : "Group"}`}</p>
-              </Link>
-            )
-          })
-        }
+      {/* Teams Grid */}
+      <div
+        className="grid ipad_pro:grid-cols-4 mini_tab:grid-cols-3 grid-cols-1 gap-6 
+     overflow-y-auto max-h-[calc(100vh-150px)] pt-6 w-full pr-4"
+        style={{ willChange: "transform" }}
+      >
+        {user?.roles?.map((v, i) => (
+          <Link
+            key={i}
+            to={`${boardURL}/${v?.teamId}`}
+            className="bg-gradient-to-br from-[#4f5068] to-[#363748] rounded-2xl p-5 shadow-md border-2 border-white/10 
+        flex flex-col justify-between transition-all duration-200 
+        hover:scale-105 hover:shadow-[0_0_18px_rgba(16,185,129,0.3)] cursor-pointer"
+          >
+            <h1 className="text-lg font-semibold text-white truncate">{v?.name}</h1>
+            <p className="text-sm text-gray-400 mt-2">
+              {`${v.organization_type} ${v.organization_type === "other" ? "" : "Group"
+                }`}
+            </p>
+          </Link>
+        ))}
+        
       </div>
     </section>
+
   )
 }
 
