@@ -126,7 +126,7 @@ const MainTeamBoard = () => {
     return (
         <section className=''>
 
-            <div className='sm:border-2 border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-0.5 sm:px-6 py-8  sm:bg-[#1F2937] mini_tab:mx-10 rounded-b relative'>
+            <div className='xl:border-2 border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-0.5 xl:px-6 py-8 xl:bg-[#1F2937] mini_tab:mx-10 rounded-b relative'>
 
                 {
                     !task?._id ? (
@@ -140,11 +140,11 @@ const MainTeamBoard = () => {
 
                         </form>
                     ) : (
-                        <div>
+                        <div className='pr-2 sm:pr-4 xl:pr-2'>
 
-                            <div className="bg-[#1F2937] rounded-lg">
+                            <div className="rounded-lg">
                                 {/* Main Controls */}
-                                <div className="w-full p-3 rounded-lg flex flex-wrap items-center gap-3 sm:text-lg text-sm bg-[#374151] shadow-md">
+                                <div className="w-full sm:w-fit p-3 rounded-lg flex flex-wrap items-center gap-3 sm:text-lg text-sm bg-[#374151] shadow-md">
 
                                     {/* Create Column */}
                                     <div
@@ -188,7 +188,7 @@ const MainTeamBoard = () => {
 
                             <div className='ipad_pro:ml-8 mini_tab:ml-4 ml-1 mt-8'>
 
-                                <div className='bg-orange-700 text-white mini_tab:font-bold font-semibold mini_tab:text-lg text-base w-fit px-1 py-2 rounded'>
+                                <div className='bg-orange-700 text-white mini_tab:font-bold font-semibold mini_tab:text-lg text-base w-fit px-1.5 py-2 rounded'>
                                     {
                                         task?.name
                                     }

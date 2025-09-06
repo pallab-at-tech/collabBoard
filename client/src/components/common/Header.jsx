@@ -49,7 +49,7 @@ const Header = () => {
     >
       {/* Logo */}
       <Link to={"/"} className={`${isLogin ? "text-white" : ""} sm:pl-6 flex items-center gap-2`}>
-        <img src={logo1} alt="logo" className="h-[50px] drop-shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
+        <img src={logo1} alt="logo" className="h-[50px] drop-shadow-[0_0_10px_rgba(16,185,110,0.1)]" />
       </Link>
 
       {/* Center Navigation */}
@@ -58,13 +58,14 @@ const Header = () => {
           } font-medium tracking-wide mini_tab:flex hidden`}
       >
         <Link
-          to="/features"
+          to=""
           className="hover:text-emerald-400 transition-colors duration-200"
         >
           Features
         </Link>
+        
         <Link
-          to="/about"
+          to=""
           className="hover:text-emerald-400 transition-colors duration-200"
         >
           About

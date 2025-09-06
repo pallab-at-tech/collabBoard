@@ -158,11 +158,11 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
             {
                 taskOpen ? (
                     val?.tasks?.length === 0 ? (
-                        <div className={`sm:ml-10 flex justify-center items-center transition-opacity duration-500 ease-in-out  bg-gray-700 border border-gray-600 min-h-[200px] min-w-10 max-w-[550px]  rounded-md pr-8 pt-2 pb-6 ${taskOpen ? "opacity-100" : "opacity-0 h-0"}`}>
+                        <div className={`sm:ml-10 flex justify-center items-center transition-opacity duration-500 ease-in-out  bg-gray-700 border border-gray-600 min-h-[200px] min-w-10 sm:max-w-[550px] xl:max-w-[640px]  rounded-md pr-8 pt-2 pb-6 ${taskOpen ? "opacity-100" : "opacity-0 h-0"}`}>
                             <p className='text-[#dbdbdb] font-semibold text-lg'>No task assigned yet ?!</p>
                         </div>
                     ) : (
-                        <div className={`sm:ml-10 transition-opacity duration-500 ease-in-out  bg-gray-700 border border-gray-600 min-h-[200px] min-w-10 max-w-[550px]  rounded-md pr-8 pt-2 pb-6 ${taskOpen ? "opacity-100" : "opacity-0 h-0"}`}>
+                        <div className={`sm:ml-10 transition-opacity duration-500 ease-in-out  bg-gray-700 border border-gray-600 min-h-[200px] min-w-10 sm:max-w-[550px] xl:max-w-[640px]  rounded-md pr-8 pt-2 pb-6 ${taskOpen ? "opacity-100" : "opacity-0 h-0"}`}>
 
                             {
                                 val?.tasks?.map((val, idx) => {
@@ -194,7 +194,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                             </div>
 
                                             {/* only for mobile version */}
-                                            <div className='absolute top-6 left-0 text-[#e9e9e9e5] sm:hidden block'>
+                                            <div className='absolute top-6 left-2 text-[#e9e9e9e5] sm:hidden block'>
                                                 <FaAngleDown size={16}
                                                     onClick={() => {
                                                         const set = new Set(taskLabel)
@@ -214,7 +214,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                             </div>
 
                                             {/* edit options */}
-                                            <div className='text-white absolute sm:top-2 sm:right-1 top-0 -right-6 flex sm:flex-col flex-row'>
+                                            <div className='text-white absolute sm:top-2 sm:-right-2.5 top-0 -right-6 flex sm:flex-col flex-row'>
                                                 <MdMovieEdit
                                                     onClick={() => {
                                                         setEditTaskOpen(true)
@@ -236,7 +236,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
 
                                             {
                                                 !taskLabel.has(val?._id) ? (
-                                                    <div className='relative w-full transition-all duration-500 ease-in-out sm:ml-20 ml-6 sm:mt-3 mt-8 max-w-[400px] bg-gradient-to-l from-[#273e5b80] to-[#7e828761] border-2 border-gray-400 rounded-md px-2 py-2 ' >
+                                                    <div className='relative w-full transition-all duration-500 ease-in-out sm:ml-20 ml-10 sm:mt-3 mt-8 max-w-[400px] xl:max-w-[500px] bg-gradient-to-l from-[#273e5b80] to-[#7e828761] border-2 border-gray-400 rounded-md px-2 py-2 ' >
 
                                                         <div className='flex sm:flex-row flex-col gap-1 font-semibold text-[#d68408b9] absolute sm:-top-[26px] -top-[40px] sm:right-4 sm:left-auto left-0 text-sm'>
 
@@ -335,8 +335,8 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
 
                                                     </div>
                                                 ) : (
-                                                    <div className='h-[60px] w-full transition-all duration-500 ease-in-out flex items-center  relative sm:ml-20 ml-6 sm:mt-3 mt-8 max-w-[400px] bg-gradient-to-l from-[#273e5b80] to-[#7e828761] border-2 border-gray-400 rounded-md px-2 py-2 '>
-                                                        <h1 className='text-[#acca03] sm:text-[20px] text-[19px] font-semibold'>{val?.title}</h1>
+                                                    <div className='h-[60px] xl:h-[100px] w-full transition-all duration-500 ease-in-out flex items-center relative sm:ml-20 ml-10 sm:mt-3 mt-8 max-w-[400px] xl:max-w-[500px] bg-gradient-to-l from-[#273e5b80] to-[#7e828761] border-2 border-gray-400 rounded-md px-2 py-2 '>
+                                                        <h1 className='text-[#acca03] sm:text-[20px] text-[19px] font-semibold xl:pl-5'>{val?.title}</h1>
 
                                                         <div className='flex sm:flex-row flex-col gap-1 font-semibold text-[#d68408b9] absolute sm:-top-[26px] -top-[40px] sm:right-4 sm:left-auto left-0 text-sm'>
 
@@ -360,7 +360,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                         </div>
                     )
                 ) : (
-                    <div className={`sm:ml-10 flex items-center justify-center transition-all duration-500 ease-in-out bg-gray-700 border border-gray-600 min-h-[50px] min-w-10 max-w-[250px]  rounded-md pr-8 pt-2 pb-6 -mt-4 ${taskOpen ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
+                    <div className={`sm:ml-10 flex items-center justify-center transition-all duration-500 ease-in-out bg-gray-700 border border-gray-600 min-h-[50px] xl:min-h-[80px] min-w-10  max-w-[250px] xl:max-w-[350px]  rounded-md pr-8 pt-2 pb-6 -mt-4 ${taskOpen ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
                         <p className='text-[#dbdbdb] mt-2 font-semibold'>{`${val?.tasks?.length === 0 ? "No task assigned yet ?!" : `${val?.tasks?.length} assignment available ....`}`}</p>
                     </div>
                 )
