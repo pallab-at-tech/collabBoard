@@ -197,12 +197,6 @@ const TaskEdit = ({ close, columnName, currentTask, columnId }) => {
     }
 
 
-
-    // console.log("current task id", data)
-    // console.log("current column id",columnId)
-    // console.log("current column name",columnName)
-    // console.log("current teamId",data.teamId)
-
     return (
         <section className='fixed right-0 left-0 top-0 bottom-0 flex flex-col items-center justify-center z-50 sm:bg-gray-800/75 bg-[#dbdbdb] overflow-y-auto'>
 
@@ -328,7 +322,7 @@ const TaskEdit = ({ close, columnName, currentTask, columnId }) => {
                             {/* add image */}
                             <div className='group text-lg w-full'>
 
-                                <div onClick={() => imgRef.current.click()} className='flex gap-2 items-center relative text-white text-base w-[90%] text-center'>
+                                <div onClick={() => imgRef.current.click()} className={`grid ${data.image && "grid-cols-[1fr_50px]"} gap-2 items-center relative text-white text-base w-[90%] text-center`}>
 
                                     <div className={`bg-[#cc2929] px-1 py-1 rounded w-full cursor-pointer`}>
                                         {
@@ -388,9 +382,9 @@ const TaskEdit = ({ close, columnName, currentTask, columnId }) => {
                             </div>
 
                             {/* add video */}
-                            <div className='group text-lg'>
+                            <div className='group text-lg w-full'>
 
-                                <div onClick={() => videoRef.current.click()} className='flex gap-2 items-center relative text-white text-base w-[90%] text-center'>
+                                <div onClick={() => videoRef.current.click()} className={`grid ${data.video && "grid-cols-[1fr_50px]"} gap-2 items-center relative text-white text-base w-[90%] text-center`}>
 
                                     <div className={`bg-[#cc2929] px-1 py-1 rounded w-full cursor-pointer`}>
                                         {

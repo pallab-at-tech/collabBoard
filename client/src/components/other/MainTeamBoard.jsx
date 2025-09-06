@@ -12,7 +12,7 @@ import { HiOutlineDotsVertical } from "react-icons/hi";
 import CoumnAllSettings from '../common/CoumnAllSettings'
 import ColumnItem from '../common/ColumnItem'
 import { useDispatch } from 'react-redux'
-import { updateColumn } from '../../store/taskSlice'
+import { updateColumnByTaskUnAssign, updateColumnByTaskAssign, updateColumn } from '../../store/taskSlice'
 
 
 const MainTeamBoard = () => {
@@ -24,7 +24,7 @@ const MainTeamBoard = () => {
     const [columnSetting, setColumnSetting] = useState(null)
     const params = useParams()
     const dispatch = useDispatch()
-    const { fetchTaskDetails , socketConnection } = useGlobalContext()
+    const { fetchTaskDetails, socketConnection } = useGlobalContext()
 
 
     const handleOnChange = (e) => {
@@ -74,34 +74,54 @@ const MainTeamBoard = () => {
 
     const task = useSelector(state => state.task)
 
-    // update new task for assigned members
-    useEffect(()=>{
+    // update new task for assigned and unassign members
+    useEffect(() => {
 
-        if(!socketConnection) return
+        if (!socketConnection) return
 
-        socketConnection.on("task_assigned",(data)=>{
+        socketConnection.on("task_assigned", (data) => {
 
-            console.log("data?.task?._id",data?.taskBoardId)
-            console.log("task?._id",task?._id)
-
-            console.log("task?._id === data?.taskBoardId",task?._id === data?.taskBoardId)
-            
-
-            if(task?._id === data?.taskBoardId){
-
-                console.log("socket data",data)
-                dispatch(updateColumn({task : data?.task ,columnId : data?.columnId }))
+            if (task?._id === data?.taskBoardId) {
+                dispatch(updateColumnByTaskAssign({ task: data?.task, columnId: data?.columnId }))
             }
-
-            console.log("task details hi under socket", task)
 
         })
 
-        return () => socketConnection.off("task_assigned")
+        socketConnection.on("task_unassigned", (data) => {
 
-    },[socketConnection , dispatch , task?._id])
+            if (task?._id === data?.taskBoardId) {
+                dispatch(updateColumnByTaskUnAssign({ columnId: data?.columnId, taskId: data?.taskId }))
+            }
 
-    console.log("task details hi", task)
+        })
+
+        socketConnection.on("update_task_data", (data) => {
+
+            if (task?._id === data?.taskBoardId) {
+                console.log("updated task", data?.taskId)
+                dispatch(updateColumn({ columnId: data?.columnId, taskId: data?.taskId, task: data?.task }))
+            }
+
+        })
+
+        socketConnection.on("task_delete_success", (data) => {
+
+            if (task?._id === data?.taskBoardId) {
+                dispatch(updateColumnByTaskUnAssign({ columnId: data?.columnId, taskId: data?.taskId }))
+            }
+
+        })
+
+        return () => {
+            socketConnection.off("task_assigned")
+            socketConnection.off("task_unassigned")
+            socketConnection.off("update_task_data")
+            socketConnection.off("task_delete_success")
+        }
+
+    }, [socketConnection, dispatch, task?._id])
+
+    // console.log("task details hi", task)
 
     return (
         <section className=''>
@@ -198,14 +218,11 @@ const MainTeamBoard = () => {
             </div>
 
 
-
             {
                 openCreateColumn && (
                     <CreateNewColumn close={() => setOpenCreateColumn(false)} />
                 )
             }
-
-
 
         </section>
     )

@@ -42,62 +42,99 @@ const Header = () => {
   if (isLogin === null) return null
 
   return (
-    <header className={`${isLogin ? "bg-A-off-color" : "bg-[var(--primary-color)]"} min-h-[60px] grid mini_tab:grid-cols-[1fr_2fr_2fr] grid-cols-[140px_1fr] items-center z-50 sticky top-0 `}>
-      <Link to={"/"} className={`${isLogin ? "text-white" : ""} sm:pl-6`}>
-        <img src={logo1} alt="" className='h-[54px]' />
+    <header
+      className={`${isLogin ? "bg-[#1b1c29]/90 backdrop-blur-md" : "bg-[var(--primary-color)]/90 backdrop-blur-md"} 
+  min-h-[60px] grid mini_tab:grid-cols-[1fr_2fr_2fr] grid-cols-[140px_1fr] 
+  items-center z-50 sticky top-0 border-b border-white/10`}
+    >
+      {/* Logo */}
+      <Link to={"/"} className={`${isLogin ? "text-white" : ""} sm:pl-6 flex items-center gap-2`}>
+        <img src={logo1} alt="logo" className="h-[50px] drop-shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
       </Link>
 
-      <div className={`items-center justify-center md:gap-[20%] gap-8 ${isLogin ? "text-A-off-text" : ""} font-semibold mini_tab:flex hidden`}>
-        <div>Features</div>
-        <div>about</div>
+      {/* Center Navigation */}
+      <div
+        className={`items-center justify-center md:gap-[20%] gap-8 ${isLogin ? "text-gray-200" : "text-white"
+          } font-medium tracking-wide mini_tab:flex hidden`}
+      >
+        <Link
+          to="/features"
+          className="hover:text-emerald-400 transition-colors duration-200"
+        >
+          Features
+        </Link>
+        <Link
+          to="/about"
+          className="hover:text-emerald-400 transition-colors duration-200"
+        >
+          About
+        </Link>
       </div>
 
-      <div className='flex items-center justify-center mini_tab:gap-10 gap-6'>
+      {/* Right Side */}
+      <div className="flex items-center justify-center mini_tab:gap-10 gap-6">
         {isLogin ? (
           <>
-
+            {/* Profile / Avatar */}
             {user.avatar ? (
-              <div>IMG</div>
+              <img
+                src={user.avatar}
+                alt="profile"
+                className="w-8 h-8 rounded-full object-cover border-2 border-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
+              />
             ) : (
-              <Link to={profileURL} className='text-A-off-text'>
+              <Link to={profileURL} className="text-gray-200 hover:text-emerald-400 transition-colors">
                 <CgProfile size={24} />
               </Link>
             )}
 
+            {/* Board Links */}
             {user?.roles?.length !== 0 && (
               <>
-                <Link to={boardURL} className='text-A-off-text font-semibold lg-real:block hidden'>
+                <Link
+                  to={boardURL}
+                  className="text-gray-200 hover:text-emerald-400 font-medium lg-real:block hidden"
+                >
                   Board
                 </Link>
-                <Link to={mobileBoardURL} className='text-A-off-text font-semibold lg-real:hidden block'>
+                <Link
+                  to={mobileBoardURL}
+                  className="text-gray-200 hover:text-emerald-400 font-medium lg-real:hidden block"
+                >
                   Board
                 </Link>
               </>
             )}
 
-            <Link to={"/chat"}>
-              <IoChatbubbleEllipsesSharp size={22} className='text-white' />
+            {/* Chat */}
+            <Link to={"/chat"} className="text-gray-200 hover:text-emerald-400 transition-colors">
+              <IoChatbubbleEllipsesSharp size={22} />
             </Link>
 
-
-            <div ref={dropdownRef} onClick={() => setNotificationbarOpen(true)} className='text-A-off-text font-semibold relative'>
-              <IoIosNotifications size={24} className=' cursor-pointer' />
-
-              {
-                NotificationbarOpen && (
-                  <NotificationPopbar close={() => setNotificationbarOpen(false)} />
-                )
-              }
+            {/* Notifications */}
+            <div
+              ref={dropdownRef}
+              onClick={() => setNotificationbarOpen(true)}
+              className="text-gray-200 hover:text-emerald-400 relative cursor-pointer"
+            >
+              <IoIosNotifications size={24} />
+              {NotificationbarOpen && (
+                <NotificationPopbar close={() => setNotificationbarOpen(false)} />
+              )}
             </div>
-
           </>
         ) : (
-          <Link to={"/login"} className='bg-[#005eff] py-[7px] px-3 rounded text-white transition-all duration-150 hover:bg-[#0055e8] hover:scale-105 cursor-pointer text-center'>
-            sign in
+          <Link
+            to={"/login"}
+            className="bg-emerald-600 py-[7px] px-4 rounded-xl text-white font-medium 
+        transition-all duration-200 hover:bg-emerald-500 hover:scale-105 shadow-[0_0_12px_rgba(16,185,129,0.4)]"
+          >
+            Sign in
           </Link>
         )}
       </div>
     </header>
+
   )
 }
 

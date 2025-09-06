@@ -9,6 +9,7 @@ import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaAngleDown } from "react-icons/fa6";
 import { MdMovieEdit, MdAutoDelete } from "react-icons/md";
 import TaskEdit from '../TaskBoard/TaskEdit';
+import TaskDelete from '../TaskBoard/TaskDelete';
 
 const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     const dropdownRef = useRef(null);
@@ -113,6 +114,8 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     const [taskOpen, setTaskOpen] = useState(true)
     const [editTaskOpen, setEditTaskOpen] = useState(false)
     const [currentTaskToEdit, setCurrentTaskToEdit] = useState(null)
+
+    const [taskDeleteOpen, setTaskDeleteOpen] = useState(false)
 
     const [taskLabel, setTaskLabel] = useState(new Set())
 
@@ -221,7 +224,14 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                                     className='my-1.5 mx-1.5 cursor-pointer text-[#50c900] hover:text-[#409f00] transition-colors' title='Edit task'
                                                 />
 
-                                                <MdAutoDelete size={20} className='my-1.5 mx-1.5 cursor-pointer text-[#f36900] hover:text-red-500 transition-colors' title='Delete task' />
+                                                <MdAutoDelete
+                                                    onClick={() => {
+                                                        setTaskDeleteOpen(true)
+                                                        setCurrentTaskToEdit(val)
+                                                    }}
+                                                    className='my-1.5 mx-1.5 cursor-pointer text-[#f36900] hover:text-red-500 transition-colors' title='Delete task'
+                                                    size={20}
+                                                />
                                             </div>
 
                                             {
@@ -430,7 +440,17 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                         columnName={val?.name}
                         close={() => setEditTaskOpen(false)}
                         currentTask={currentTaskToEdit}
-                        columnId = {val?._id}
+                        columnId={val?._id}
+                    />
+                )
+            }
+
+            {
+                taskDeleteOpen && (
+                    <TaskDelete
+                        close={() => setTaskDeleteOpen(false)}
+                        currentTask={currentTaskToEdit}
+                        columnId={val?._id}
                     />
                 )
             }

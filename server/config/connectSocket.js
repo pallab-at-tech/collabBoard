@@ -788,56 +788,152 @@ io.on("connection", async (socket) => {
             const addedUser = newAssignTo.filter((id) => !oldAssignTo.includes(id))
             const removeUser = oldAssignTo.filter((id) => !newAssignTo.includes(id))
 
-            if(title && title !== undefined) task.title = title
-            if(description && description !== undefined) task.description = description
-            if(assignTo !== undefined) task.assignTo = newAssignTo || []
-            if(status && status !== undefined) task.status = status
-            if(aditional_link !== undefined) task.aditional_link = aditional_link
-            if(dueDate && dueDate !== undefined) task.dueDate = dueDate
-            if(dueTime !== undefined) task.dueTime = dueTime
-            if(labels !== undefined) task.labels = labels || []
-            if(image !== undefined) task.image = image || ""
-            if(video !== undefined) task.video = video || ""
+            if (title && title !== undefined) task.title = title
+            if (description && description !== undefined) task.description = description
+            if (assignTo !== undefined) task.assignTo = newAssignTo || []
+            if (status && status !== undefined) task.status = status
+            if (aditional_link !== undefined) task.aditional_link = aditional_link
+            if (dueDate && dueDate !== undefined) task.dueDate = dueDate
+            if (dueTime !== undefined) task.dueTime = dueTime
+            if (labels !== undefined) task.labels = labels || []
+            if (image !== undefined) task.image = image || ""
+            if (video !== undefined) task.video = video || ""
 
 
             await taskBoard.save()
 
-            io.to(userId.toString()).emit("update_task_msg",{message : "Task successfully updated."})
+            io.to(userId.toString()).emit("update_task_msg", {
+                message: "Task successfully updated."
+            })
 
-            if(addedUser.length > 0){
-                const users = await userModel.find({userId : {$in : addedUser}}, {_id : 1}).lean()
+            if (addedUser.length > 0) {
+                const users = await userModel.find({ userId: { $in: addedUser } }, { _id: 1 }).lean()
 
-                users.forEach((u)=>{
-                    io.to(u._id.toString()).emit("task_assigned",{
-                        message : "You have been assigned to a task",
-                        task : task,
-                        columnId : columnId,
-                        taskBoardId : taskBoard._id
+                users.forEach((u) => {
+                    io.to(u._id.toString()).emit("task_assigned", {
+                        message: "You have been assigned to a task",
+                        task: task,
+                        columnId: columnId,
+                        taskBoardId: taskBoard._id
                     })
                 })
             }
 
-            if(removeUser.length > 0){
-                const users = await userModel.find({userId : {$in : removeUser}},{_id : 1}).lean()
+            if (removeUser.length > 0) {
+                const users = await userModel.find({ userId: { $in: removeUser } }, { _id: 1 }).lean()
 
-                users.forEach((u)=>{
-                    io.to(u._id.toString()).emit("task_unassigned",{
-                        message : `You have been unassigned from a task ( ${task.title} )`,
+                users.forEach((u) => {
+                    io.to(u._id.toString()).emit("task_unassigned", {
+                        message: `You have been unassigned from a task ( ${task.title} )`,
                         taskId,
                         columnId,
-                        taskBoardId : taskBoard._id
+                        taskBoardId: taskBoard._id
                     })
                 })
+
             }
 
-            // when you add notification model add here just
-            // if(removeUser.length === 0 && addedUser.length === 0){
+            io.to(userId.toString()).emit("update_task_data", {
+                message: "Updated task data",
+                task: task,
+                columnId: columnId,
+                taskBoardId: taskBoard._id,
+                taskId: taskId
+            })
 
-            // }
+            const users = await userModel.find({ userId: { $in: task.assignTo } }, { _id: 1 }).lean()
+
+            users.forEach((u) => {
+                io.to(u._id.toString()).emit("update_task_data", {
+                    message: "Updated task data",
+                    task: task,
+                    columnId: columnId,
+                    taskBoardId: taskBoard._id,
+                    taskId: taskId
+                })
+            })
 
         } catch (error) {
             console.log("Error while update task.", error)
             socket.emit("error", { message: "Server error while update task", error: true });
+        }
+    })
+
+    // delete task
+    socket.on("delete_task", async (data) => {
+        try {
+            const { userId, teamId, columnId, taskId } = data || {}
+
+            if (!userId) {
+                return socket.emit("task_delete_error", { message: "User id missing." })
+            }
+
+            if (!teamId) {
+                return socket.emit("task_delete_error", { message: "Team id missing." })
+            }
+
+            if (!columnId) {
+                return socket.emit("task_delete_error", { message: "Column id missing." })
+            }
+
+            if (!taskId) {
+                return socket.emit("task_delete_error", { message: "Task id missing." })
+            }
+
+            const user = await userModel.findById(userId)
+
+            if (!user) {
+                return socket.emit("task_delete_error", { message: "User not found" })
+            }
+
+            const hasPermission = user.roles.some((role) => role.teamId.toString() === teamId && role.role !== "MEMBER")
+
+            if (!hasPermission) {
+                return socket.emit("task_delete_error", { message: "Permission Denied" })
+            }
+
+            const taskBoard = await taskModel.findOne({ teamId: teamId })
+
+            if (!taskBoard) {
+                return socket.emit("task_delete_error", { message: "Task board not found" })
+            }
+
+            const column = taskBoard.column.id(columnId)
+
+            if (!column) {
+                return socket.emit("task_delete_error", { message: "Column not found" })
+            }
+
+            const task = column.tasks.id(taskId)
+
+            if(!task){
+                return socket.emit("task_delete_error",{message : "Task not found."})
+            }
+
+            const users = await userModel.find({ userId: { $in: task.assignTo } }, { _id: 1 }).lean()
+
+            task.deleteOne()
+            await taskBoard.save()
+
+            users.forEach((u) => {
+                io.to(u._id.toString()).emit("task_delete_success", {
+                    message: `Admin delete task. Title : ( ${task.title} )`,
+                    taskId: taskId,
+                    columnId: columnId,
+                    taskBoardId: taskBoard._id
+                })
+            })
+
+            io.to(user._id.toString()).emit("task_delete_msg", {
+                message: "Task successfully deleted.",
+                taskId: taskId,
+                columnId: columnId,
+                taskBoardId: taskBoard._id
+            })
+
+        } catch (error) {
+            console.log("Error while delete task.", error)
+            socket.emit("error", { message: "Server error while delete task", error: true });
         }
     })
 
