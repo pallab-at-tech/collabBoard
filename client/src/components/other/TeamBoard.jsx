@@ -24,16 +24,17 @@ const TeamBoard = () => {
     return (
         <section className='h-full w-full grid-rows-2'>
 
-            <div className='flex items-center justify-between mini_tab:mx-10 mini_tab:px-6 px-3  py-2 mt-2 mb-1  rounded-t bg-[#b7de40e1] text-white' >
+            {/* header of task desk */}
+            <div className='flex items-center justify-between mini_tab:mx-10 mini_tab:px-6 px-3 py-2 mt-2 mb-1 rounded-t sm:bg-[#b7de40e1]  text-white sm:border-0 border border-white' >
 
                 <div className='flex flex-col'>
                     <div className='flex gap-x-1 items-center'>
-                        <Link to={`/board/${params.user}/${params.team}`} className='font-bold mini_tab:text-2xl text-xl text-[#191a19] mini_tab:max-w-[24ch] max-w-[16ch] line-clamp-1'>{`${team?.name}`}</Link>
-                        <h2 className='text-lg mini_tab:block hidden  font-semibold text-[#191a19] select-none'>{`( ${team?.organization_type} )`}</h2>
+                        <Link to={`/board/${params.user}/${params.team}`} className={`font-bold mini_tab:text-2xl text-xl text-gray-200 sm:text-[#191a19] mini_tab:max-w-[24ch] max-w-[16ch] line-clamp-1`}>{`${team?.name}`}</Link>
+                        <h2 className='text-lg mini_tab:block hidden  font-semibold text-gray-200 sm:text-[#191a19] select-none'>{`( ${team?.organization_type} )`}</h2>
                     </div>
 
                     <div>
-                        <p className='text-[#2a342c] text-base mini_tab:max-w-[46ch] max-w-[20ch] line-clamp-1'>{team?.description}</p>
+                        <p className='text-gray-400 sm:text-[#2a342c] text-base mini_tab:max-w-[46ch] max-w-[20ch] line-clamp-1'>{team?.description}</p>
                     </div>
                 </div>
 
@@ -43,14 +44,14 @@ const TeamBoard = () => {
                         <IoIosPersonAdd size={32} />
                     </div>
 
-                    <Link to={`/board/${params.user}/${params.team}/edit`} className='bg-[#2e322e] px-3 text-white py-1 rounded-md cursor-pointer'>edit</Link>
+                    <Link to={`/board/${params.user}/${params.team}/edit`} className='bg-[#2e322e] px-3 text-white py-1 rounded-md cursor-pointer sm:border-0 border border-white'>edit</Link>
 
                 </div>
 
             </div>
-            
 
 
+            {/* body of task desk */}
             <div className=''>
                 {
                     <Outlet />

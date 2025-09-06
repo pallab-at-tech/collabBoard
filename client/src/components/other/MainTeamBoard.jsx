@@ -126,7 +126,7 @@ const MainTeamBoard = () => {
     return (
         <section className=''>
 
-            <div className=' border-2 overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] border-white px-6 py-8  bg-[#1F2937] mini_tab:mx-10 rounded-b relative'>
+            <div className='sm:border-2 border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-0.5 sm:px-6 py-8  sm:bg-[#1F2937] mini_tab:mx-10 rounded-b relative'>
 
                 {
                     !task?._id ? (
@@ -142,35 +142,47 @@ const MainTeamBoard = () => {
                     ) : (
                         <div>
 
-                            <div className='bg-[#eaeaea] w-fit p-2.5 rounded flex  items-center gap-4 sm:text-lg text-sm'>
-                                <div onClick={() => setOpenCreateColumn(true)} className='bg-[#1a801f] sm:block hidden hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer sm:leading-normal leading-5'>
-                                    New Column
+                            <div className="bg-[#1F2937] rounded-lg">
+                                {/* Main Controls */}
+                                <div className="w-full p-3 rounded-lg flex flex-wrap items-center gap-3 sm:text-lg text-sm bg-[#374151] shadow-md">
+
+                                    {/* Create Column */}
+                                    <div
+                                        onClick={() => setOpenCreateColumn(true)}
+                                        className="text-center bg-green-600 hover:bg-green-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm"
+                                    >
+                                        <span className="hidden sm:block">New Column</span>
+                                        <span className="block sm:hidden">Column</span>
+                                    </div>
+
+                                    {/* Track Task */}
+                                    <div
+                                        className="text-center bg-green-600 hover:bg-green-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm"
+                                    >
+                                        <span className="hidden sm:block">Track Task</span>
+                                        <span className="block sm:hidden">Track</span>
+                                    </div>
+
+                                    {/* Deadline */}
+                                    <div
+                                        className="text-center bg-blue-600 hover:bg-blue-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm sm:block hidden"
+                                    >
+                                        Deadline
+                                    </div>
+
+                                    {/* Status */}
+                                    <div
+                                        className="text-center bg-purple-600 hover:bg-purple-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm"
+                                    >
+                                        Status
+                                    </div>
                                 </div>
 
-                                <div onClick={() => setOpenCreateColumn(true)} className='bg-[#1a801f] sm:hidden block hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer sm:leading-normal leading-5'>
-                                    column
-                                </div>
-
-                                <div className='bg-[#1a801f] sm:hidden block hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer sm:leading-normal leading-5'>
-                                    Track
-                                </div>
-
-                                <div className='bg-[#1a801f] sm:block hidden hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer sm:leading-normal leading-5'>
-                                    Track Task
-                                </div>
-
-                                <div className='bg-[#1a801f] sm:block hidden hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer'>
-                                    Deadline
-                                </div>
-
-                                <div className='bg-[#1a801f]  hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer'>
-                                    status
-                                </div>
-                            </div>
-
-                            <div className='bg-[#eaeaea] w-fit p-2.5 rounded my-1 sm:hidden block'>
-                                <div className='bg-[#1a801f] s hover:bg-[#027127] transition-colors duration-100 text-white px-1.5 py-1 rounded cursor-pointer'>
-                                    Deadline
+                                {/* Mobile-Only Extra (Deadline) */}
+                                <div className="sm:hidden mt-3">
+                                    <div className="text-center bg-blue-600 hover:bg-blue-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm">
+                                        Deadline
+                                    </div>
                                 </div>
                             </div>
 
