@@ -149,7 +149,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                 </div>
 
                 {isOpen && (
-                    <div ref={dropdownRef} className='absolute sm:-right-12 -right-[80px]  sm:-top-[115px] -top-[110px] z-10'>
+                    <div ref={dropdownRef} className='absolute sm:-right-12 -right-[120px]  sm:-top-[115px] -top-[110px] z-10'>
                         <CoumnAllSettings columnId={val?._id} columnName={val?.name} />
                     </div>
                 )}
