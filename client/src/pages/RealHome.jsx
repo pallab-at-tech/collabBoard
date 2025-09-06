@@ -9,7 +9,7 @@ const RealHome = () => {
 
     return (
         <section className="bg-gradient-to-b from-[#1b1c29] to-[#21222b] min-h-[calc(100vh-60px)] grid place-items-center px-6">
-            <div className="flex flex-col items-center gap-6 text-center sm:max-w-[420px]">
+            <div className="flex flex-col items-center gap-6 text-center sm:max-w-[420px] sm:mt-0 -mt-[70px]">
 
                 {/* Heading */}
                 <div className="pb-1">
