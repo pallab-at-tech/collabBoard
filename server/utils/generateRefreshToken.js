@@ -4,8 +4,8 @@ import userModel from '../model/user.model.js'
 dotenv.config()
 
 const generateRefreshToken = async (userId) =>{
-
-    const token = await jwt.sign({id : userId} , process.env.SECRET_KEY_REFRESSH_TOKEN , {expiresIn : '7d'})
+// , {expiresIn : '7d'}
+    const token = await jwt.sign({id : userId} , process.env.SECRET_KEY_REFRESSH_TOKEN , {expiresIn : '3m'} )
 
     const updateRefreshTokenUser = await userModel.findByIdAndUpdate(userId,{
         refresh_token : token
