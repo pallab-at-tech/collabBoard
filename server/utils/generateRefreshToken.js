@@ -5,7 +5,7 @@ dotenv.config()
 
 const generateRefreshToken = async (userId) =>{
 // , {expiresIn : '7d'}
-    const token = await jwt.sign({id : userId} , process.env.SECRET_KEY_REFRESSH_TOKEN , {expiresIn : '3m'} )
+    const token = await jwt.sign({id : userId} , process.env.SECRET_KEY_REFRESSH_TOKEN , {expiresIn : '7d'} )
 
     const updateRefreshTokenUser = await userModel.findByIdAndUpdate(userId,{
         refresh_token : token
