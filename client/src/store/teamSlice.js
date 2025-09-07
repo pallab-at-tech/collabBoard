@@ -5,22 +5,29 @@ const initialValue = {
     description: "",
     organization_type: "",
     member: [],
-    request_send : []
+    request_send: []
 }
 
 const teamSlice = createSlice({
-    name : "team",
-    initialState : initialValue,
-    reducers : {
-        setTeamDetails : (state , action) =>{
+    name: "team",
+    initialState: initialValue,
+    reducers: {
+        setTeamDetails: (state, action) => {
             state.name = action.payload?.name
             state.description = action.payload?.description
             state.organization_type = action.payload?.organization_type
             state.member = [...action.payload?.member]
             state.request_send = [...action.payload?.request_send]
+        },
+        setTeamLogOut: (state, action) => {
+            state.name = "",
+                state.description = "",
+                state.organization_type = "",
+                state.member = [],
+                state.request_send = []
         }
     }
 })
 
-export const {setTeamDetails} = teamSlice.actions
+export const { setTeamDetails, setTeamLogOut } = teamSlice.actions
 export default teamSlice.reducer

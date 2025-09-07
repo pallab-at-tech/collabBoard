@@ -1,5 +1,6 @@
 import taskModel from "../model/task.model.js"
 import userModel from "../model/user.model.js"
+import teamModel from "../model/team.model.js"
 
 export const taskBoardCreateController = async (request, response) => {
     try {
@@ -58,23 +59,63 @@ export const taskBoardCreateController = async (request, response) => {
 export const getTaskDetailsController = async (request, response) => {
     try {
         const { teamId } = request.query || {}
+        const userId = request.userId
 
         if (!teamId) {
             return response.status(400).json({
-                message: 'team ID required',
+                message: 'Team ID required',
                 error: true,
                 success: false
             })
         }
 
+        const team = await teamModel.findById(teamId)
+        const user = await userModel.findById(userId)
+
+        const userName = user.userId
+
+        if (!team) {
+            return response.status(400).json({
+                message: "Team not found",
+                error: true,
+                success: false
+            })
+        }
+
+        const isLeader = team.member.some(c => c.userId.toString() === userId && c.role.toString() !== "MEMBER")
         const data = await taskModel.findOne({ teamId: teamId })
 
-        return response.json({
-            message: 'get task details',
-            data: data,
-            error: false,
-            success: true
-        })
+        if (!isLeader) {
+
+            const filterData = {
+                _id: data._id,
+                teamId: data.teamId,
+                name: data.name,
+                createdAt: data.createdAt,
+                updatedAt: data.updatedAt,
+                column: data.column.map(c => {
+                    const userTask = c.tasks.filter(t => t.assignTo.includes(userName))
+                    return userTask.length ? { ...c.toObject?.() || c, tasks: userTask } : null
+                }).filter(Boolean) || []
+            }
+
+            return response.json({
+                message: 'Get task details',
+                data: filterData,
+                error: false,
+                success: true
+            })
+
+        } else {
+
+            return response.json({
+                message: 'Get task details',
+                data: data,
+                error: false,
+                success: true
+            })
+
+        }
 
     } catch (error) {
         return response.status(500).json({
@@ -154,8 +195,6 @@ export const createColumnController = async (request, response) => {
         })
     }
 }
-
-// export 
 
 export const createTaskController = async (request, response) => {
     try {
@@ -265,7 +304,7 @@ export const renameColumnLabelController = async (request, response) => {
     try {
 
         const userId = request.userId
-        const { columnId, taskId, columnName , teamId } = request.body || {}
+        const { columnId, taskId, columnName, teamId } = request.body || {}
 
         const user = await userModel.findById(userId).select("roles")
 
@@ -338,7 +377,7 @@ export const deleteColumnLabelController = async (request, response) => {
 
         const userId = request.userId
 
-        const { columnId, taskId , teamId } = request.body || {}
+        const { columnId, taskId, teamId } = request.body || {}
 
         const user = await userModel.findById(userId).select("roles")
 
@@ -407,7 +446,7 @@ export const deleteColumnLabelController = async (request, response) => {
         await taskModel.findByIdAndUpdate(
             taskId,
             {
-                $pull : {column : {_id : columnId}}
+                $pull: { column: { _id: columnId } }
             }
         )
 

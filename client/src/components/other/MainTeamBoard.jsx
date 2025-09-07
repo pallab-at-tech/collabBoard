@@ -76,7 +76,6 @@ const MainTeamBoard = () => {
 
     useEffect(() => {
         fetchTaskDetails(params?.team)
-        console.log("params?.team", params?.team)
     }, [params?.team])
 
     const task = useSelector(state => state.task)
@@ -121,7 +120,6 @@ const MainTeamBoard = () => {
         socketConnection.on("update_task_data", (data) => {
 
             if (task?._id === data?.taskBoardId) {
-                console.log("updated task", data?.taskId)
                 dispatch(updateColumn({ columnId: data?.columnId, taskId: data?.taskId, task: data?.task }))
             }
 
@@ -148,8 +146,6 @@ const MainTeamBoard = () => {
     useEffect(() => {
 
         if (!sortData) return
-
-        console.log("Sort Data", sortData, "  ", sortData === "createdAt")
 
         if (sortData === "createdAt") dispatch(sortColumnByCreatedAt())
         else if(sortData === "updatedAt") dispatch(sortColumnByUpdatedAt())

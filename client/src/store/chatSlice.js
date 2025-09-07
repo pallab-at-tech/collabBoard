@@ -78,14 +78,21 @@ const chatSlice = createSlice({
                 if (!exists) {
                     state.all_message[idx].participants = [
                         ...(state.all_message[idx].participants || []),
-                        obj   
+                        obj
                     ]
                 }
             }
+        },
+        setChatLogOut: (state, action) => {
+            state.all_message = []
         }
 
     }
 })
 
-export const { setMessageDetails, addMessageDetails, updateConversationWithNewMessage, updateGroupName, updateGroupImage, updateparticipantsForRemove, removeConversation , updateparticipantsForAdd } = chatSlice.actions
+export const { setMessageDetails, addMessageDetails, updateConversationWithNewMessage,
+    updateGroupName, updateGroupImage, updateparticipantsForRemove, removeConversation,
+    updateparticipantsForAdd, setChatLogOut
+} = chatSlice.actions
+
 export default chatSlice.reducer

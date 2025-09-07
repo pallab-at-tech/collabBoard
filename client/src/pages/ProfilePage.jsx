@@ -9,6 +9,9 @@ import Axios from "../utils/Axios"
 import SummaryApi from '../common/SummaryApi';
 import { useDispatch } from 'react-redux';
 import { setUserLogout } from '../store/userSlice';
+import { setChatLogOut } from '../store/chatSlice';
+import { setTaskLogOut } from '../store/taskSlice';
+import { setTeamLogOut } from '../store/teamSlice';
 import toast from 'react-hot-toast'
 import ProfileEdit from '../components/other/ProfileEdit';
 import { FaEnvelopeOpenText } from "react-icons/fa";
@@ -44,6 +47,9 @@ const ProfilePage = () => {
 
       if (response?.data?.success) {
         dispatch(setUserLogout())
+        dispatch(setChatLogOut())
+        dispatch(setTaskLogOut())
+        dispatch(setTeamLogOut())
         localStorage.clear()
 
         logoutUser();
