@@ -2,6 +2,7 @@ import express, { response } from 'express'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import dotenv from 'dotenv'
+import jwt from "jsonwebtoken"
 import { conversationModel, messageModel } from '../model/chat.model.js'
 import userModel from '../model/user.model.js'
 import taskModel from "../model/task.model.js"
@@ -19,12 +20,35 @@ const io = new Server(server, {
     }
 })
 
+io.use((socket, next) => {
+
+    const token = socket.handshake.auth?.token
+
+    console.log("Token userd", token)
+
+    if (!token) {
+        return next(new Error("Not authenticated")); // reject connection
+    }
+
+    try {
+
+        const payload = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN)
+        socket.userId = payload.id
+        next()
+
+    } catch (error) {
+        return next(new Error("Not authenticated")); // reject connection
+    }
+})
+
 
 const onlineUser = new Map()
 
 io.on("connection", async (socket) => {
 
     // socket.emit("receive_message", { message: { text: "Test message from server" } });
+
+
 
     // join in a room and online
     socket.on("join_room", (userId) => {
@@ -42,6 +66,19 @@ io.on("connection", async (socket) => {
         try {
             const { senderId, receiverId, text, image, video, other_fileUrl_or_external_link } = data;
 
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId1 = payload1.id;
 
             let conversation = await conversationModel.findOne({
                 group_type: "PRIVATE",
@@ -112,6 +149,20 @@ io.on("connection", async (socket) => {
 
             const { createrId, participants = [], group_image, group_name, createrUserName } = data
 
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId1 = payload1.id;
+
             if (!createrId || !group_name) {
                 return socket.emit("error", { message: "Missing required fields" });
             }
@@ -170,6 +221,20 @@ io.on("connection", async (socket) => {
     socket.on("send_message_group", async (data) => {
 
         const { senderId, conversationId, text, image, video, other_fileUrl_or_external_link, senderUserId, senderName } = data
+
+        const token = socket.handshake.auth?.token;
+        if (!token) {
+            return socket.emit("session_expired", { message: "No token found. Please login again." });
+        }
+
+        let payload1;
+        try {
+            payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+        } catch (err) {
+            return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+        }
+
+        const userId1 = payload1.id;
 
         const conversation = await conversationModel.findById(conversationId)
 
@@ -230,6 +295,20 @@ io.on("connection", async (socket) => {
 
         try {
             const { group_id, userId, userName, group_image, group_name } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId1 = payload1.id;
 
             if (!group_id || !userId) {
                 return socket.emit("error", { message: "Missing required fields" });
@@ -296,6 +375,20 @@ io.on("connection", async (socket) => {
         try {
 
             const { group_id, memberId, memberUserId, adminUserId, adminId, memberAvatar, memberEmail, memberName } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId1 = payload1.id;
 
             if (!group_id || !memberId || !adminId) {
                 return socket.emit("error", { message: "Missing required fields" });
@@ -375,6 +468,20 @@ io.on("connection", async (socket) => {
         try {
 
             const { group_id, memberId, memberUserId, adminUserId, adminId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId1 = payload1.id;
 
             if (!group_id || !memberId || !adminId) {
                 return socket.emit("error", { message: "Missing required fields" });
@@ -458,6 +565,20 @@ io.on("connection", async (socket) => {
         try {
             const { group_id, member_id, member_userId, my_id, my_userId } = data || {}
 
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId1 = payload1.id;
+
             if (!member_id || !group_id || !my_id) {
                 return socket.emit("error", { message: "Missing required fields" });
             }
@@ -521,6 +642,20 @@ io.on("connection", async (socket) => {
     socket.on("exit_group", async (data) => {
         try {
             const { group_id, my_id, my_userId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId1 = payload1.id;
 
             if (!group_id || !my_id || !my_userId) {
                 return socket.emit("error", { message: "Missing required fields" })
@@ -616,12 +751,29 @@ io.on("connection", async (socket) => {
         }
     })
 
+    // All task related controller start from here...
+
     // get task details
     socket.on("get_task_details", async (teamId) => {
         try {
             if (!teamId) {
                 socket.emit("get_task_error", { message: "Team ID required" })
             }
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload;
+            try {
+                payload = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                // Token invalid or expired
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload.id;
 
             const data = await taskModel.findOne({ teamId: teamId })
             return socket.emit("task_details_recieved", { data: data })
@@ -637,6 +789,22 @@ io.on("connection", async (socket) => {
         try {
 
             const { userId, teamId, columnId, title, description, assignTo, status, aditional_link, dueDate, dueTime, labels, image, video } = data || {}
+
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                // Token invalid or expired
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId1 = payload1.id;
 
             if (!title) {
                 return socket.emit("create_task_error", { message: "Please provide title" })
@@ -735,6 +903,20 @@ io.on("connection", async (socket) => {
 
             const { userId, teamId, columnId, taskId, title, description, assignTo, status,
                 aditional_link, dueDate, dueTime, labels, image, video } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId1 = payload1.id;
 
             if (!userId) {
                 return socket.emit("task_update_error", { message: "User id missing." })
@@ -864,6 +1046,20 @@ io.on("connection", async (socket) => {
         try {
             const { userId, teamId, columnId, taskId } = data || {}
 
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId1 = payload1.id;
+
             if (!userId) {
                 return socket.emit("task_delete_error", { message: "User id missing." })
             }
@@ -906,8 +1102,8 @@ io.on("connection", async (socket) => {
 
             const task = column.tasks.id(taskId)
 
-            if(!task){
-                return socket.emit("task_delete_error",{message : "Task not found."})
+            if (!task) {
+                return socket.emit("task_delete_error", { message: "Task not found." })
             }
 
             const users = await userModel.find({ userId: { $in: task.assignTo } }, { _id: 1 }).lean()
@@ -936,7 +1132,6 @@ io.on("connection", async (socket) => {
             socket.emit("error", { message: "Server error while delete task", error: true });
         }
     })
-
 
     // disconnect from the room and offline
     socket.on("disconnect", () => {

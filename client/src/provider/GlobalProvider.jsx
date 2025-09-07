@@ -8,7 +8,6 @@ import { setTeamDetails } from '../store/teamSlice'
 import { setTask } from '../store/taskSlice'
 import toast from 'react-hot-toast'
 import { io } from 'socket.io-client'
-import { data } from 'react-router-dom'
 
 export const GlobalContext = createContext(null)
 export const useGlobalContext = () => useContext(GlobalContext)
@@ -97,8 +96,31 @@ const GlobalProvider = ({ children }) => {
 
     // socket configure
     useEffect(() => {
-        if (user?._id) {
-            const socket = io(import.meta.env.VITE_BACKEND_URL, { withCredentials: true })
+        if (user?._id && localStorage.getItem("accesstoken")) {
+
+            const token = localStorage.getItem("accesstoken")
+
+            const socket = io(import.meta.env.VITE_BACKEND_URL,
+                // { withCredentials: true }
+                { auth: { token: token } }
+            )
+
+            socket.once("session_expired",(data)=>{
+                toast.error("Your session has expired. Please log in again!")
+                localStorage.clear()
+                window.location.href = "/"
+            })
+
+            socket.once("connect_error", (err) => {
+                console.log("Socket connection failed:", err.message);
+
+                if (err.message.includes("Not authenticated")) {
+                    toast.error("Your session has expired. Please log in again!")
+                    localStorage.clear()
+                    window.location.href = "/"; 
+                }
+            });
+
             setSocketConnection(socket)
             socket.emit("join_room", user._id)
 
