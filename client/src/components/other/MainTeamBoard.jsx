@@ -7,12 +7,14 @@ import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
 import { useGlobalContext } from '../../provider/GlobalProvider'
 import CreateNewColumn from '../common/CreateNewColumn'
-import VerticleLine from '../../utils/VerticleLine'
 import { HiOutlineDotsVertical } from "react-icons/hi";
-import CoumnAllSettings from '../common/CoumnAllSettings'
 import ColumnItem from '../common/ColumnItem'
 import { useDispatch } from 'react-redux'
-import { updateColumnByTaskUnAssign, updateColumnByTaskAssign, updateColumn } from '../../store/taskSlice'
+import {
+    updateColumnByTaskUnAssign, updateColumnByTaskAssign,
+    updateColumn, sortColumnByCreatedAt , sortColumnByUpdatedAt , sortColumnByDeadLine
+} from '../../store/taskSlice'
+
 
 
 const MainTeamBoard = () => {
@@ -20,6 +22,11 @@ const MainTeamBoard = () => {
     const [data, setData] = useState({
         name: ""
     })
+    const [sortData, setSortData] = useState("")
+    const [dotOpen, setDotOpen] = useState(false)
+    const dotRef = useRef(null)
+
+
     const [openCreateColumn, setOpenCreateColumn] = useState(false)
     const [columnSetting, setColumnSetting] = useState(null)
     const params = useParams()
@@ -74,6 +81,22 @@ const MainTeamBoard = () => {
 
     const task = useSelector(state => state.task)
 
+    useEffect(() => {
+
+        function handleClickOutside(e) {
+            if (dotRef.current && !dotRef.current.contains(e.target)) {
+                setDotOpen(false)
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside)
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside)
+        }
+
+    }, [])
+
     // update new task for assigned and unassign members
     useEffect(() => {
 
@@ -120,6 +143,19 @@ const MainTeamBoard = () => {
         }
 
     }, [socketConnection, dispatch, task?._id])
+
+    // control task by sorting
+    useEffect(() => {
+
+        if (!sortData) return
+
+        console.log("Sort Data", sortData, "  ", sortData === "createdAt")
+
+        if (sortData === "createdAt") dispatch(sortColumnByCreatedAt())
+        else if(sortData === "updatedAt") dispatch(sortColumnByUpdatedAt())
+        else if(sortData === "deadline") dispatch(sortColumnByDeadLine())
+
+    }, [sortData , task])
 
     // console.log("task details hi", task)
 
@@ -188,10 +224,61 @@ const MainTeamBoard = () => {
 
                             <div className='ipad_pro:ml-8 mini_tab:ml-4 ml-1 mt-8'>
 
-                                <div className='bg-orange-700 text-white mini_tab:font-bold font-semibold mini_tab:text-lg text-base w-fit px-1.5 py-2 rounded'>
-                                    {
-                                        task?.name
-                                    }
+                                <div className='flex sm:flex-row flex-col sm:items-center sm:justify-between'>
+
+                                    <div className='w-fit flex gap-2 relative items-center cursor-pointer text-gray-300 hover:text-white'>
+                                        <div className='bg-orange-700 text-white mini_tab:font-bold font-semibold mini_tab:text-lg text-base w-fit px-1.5 py-2 rounded'>
+                                            {
+                                                task?.name
+                                            }
+                                        </div>
+
+                                        <div className='relative'>
+                                            <HiOutlineDotsVertical size={22}
+                                                onClick={() => setDotOpen(!dotOpen)}
+                                            />
+
+                                            {
+                                                dotOpen && (
+                                                    <div ref={dotRef} className="absolute top-10 -left-[60px] sm:top-10 sm:-right-[160px] z-10 w-36 bg-[#c5c6c9e7] text-gray-800 rounded-lg shadow-lg border border-gray-700">
+                                                        <button
+                                                            className="w-full text-left px-4 py-2 text-sm hover:text-gray-200 hover:bg-gray-600 rounded-t-lg cursor-pointer shadow-sm"
+                                                        >
+                                                            Rename
+                                                        </button>
+                                                        <button
+                                                            className="w-full text-left px-4 py-2 text-sm  hover:bg-red-500 hover:text-white rounded-b-lg cursor-pointer"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+
+                                                )
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                    <div className="flex items-center gap-2 sm:bg-gray-700 sm:px-3 sm:py-2 py-1.5 mt-1 rounded-lg sm:shadow-md">
+                                        <select
+                                            name="sort-task"
+                                            id="sort-task"
+                                            defaultValue=""
+                                            className="bg-gray-800 cursor-pointer text-gray-200 text-sm px-3 py-1.5 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                            onChange={(e) => {
+                                                const val = e.target.value
+                                                setSortData(val)
+                                            }}
+                                        >
+                                            <option value="" disabled>Sorted By</option>
+                                            <option value="createdAt">Created At</option>
+                                            <option value="updatedAt">Updated At</option>
+                                            <option value="deadline">Deadline</option>
+                                            <option value="urgency">Urgency</option>
+                                        </select>
+                                    </div>
+
                                 </div>
 
                                 <div className='ipad_pro:ml-8 mini_tab:ml-6 -ml-1 mt-4 sm:text-base text-sm'>

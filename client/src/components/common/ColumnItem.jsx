@@ -120,9 +120,6 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     const [taskLabel, setTaskLabel] = useState(new Set())
 
 
-    console.log("val only be", val)
-
-
 
     return (
         <section>

@@ -42,18 +42,62 @@ const taskSlice = createSlice({
             const { task, taskId, columnId } = action.payload
             const columnIdx = state.column.findIndex(c => c._id === columnId)
 
-            if(columnIdx !== -1){
+            if (columnIdx !== -1) {
                 const taskIdx = state.column[columnIdx].tasks?.findIndex(c => c?._id === taskId)
 
-                if(taskIdx !== -1){
+                if (taskIdx !== -1) {
                     state.column[columnIdx].tasks[taskIdx] = task
                 }
 
             }
 
+        },
+        sortColumnByCreatedAt: (state, action) => {
+
+            state.column.forEach(c => {
+                c.tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            })
+
+            state.column.sort((a, b) => {
+                const aDate = a.tasks.length > 0 ? new Date(a.tasks[0].createdAt) : -Infinity
+                const bDate = b.tasks.length > 0 ? new Date(b.tasks[0].createdAt) : -Infinity
+
+                return bDate - aDate
+            })
+
+        },
+        sortColumnByUpdatedAt: (state, action) => {
+
+            state.column.forEach(c => {
+                c.tasks.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+            })
+
+            state.column.sort((a, b) => {
+                const aDate = a.tasks.length > 0 ? new Date(a.tasks[0].updatedAt) : -Infinity
+                const bDate = b.tasks.length > 0 ? new Date(b.tasks[0].updatedAt) : -Infinity
+
+                return bDate - aDate
+            })
+
+        },
+        sortColumnByDeadLine: (state, action) => {
+
+            state.column.forEach(c => {
+                c.tasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+            })
+
+            state.column.sort((a, b) => {
+                const aDate = a.tasks.length > 0 ? new Date(a.tasks[0].dueDate) : Infinity
+                const bDate = b.tasks.length > 0 ? new Date(b.tasks[0].dueDate) : Infinity
+
+                return aDate - bDate
+            })
         }
     }
 })
 
-export const { setTask, updateColumnByTaskAssign, updateColumnByTaskUnAssign , updateColumn } = taskSlice.actions
+export const { setTask, updateColumnByTaskAssign, updateColumnByTaskUnAssign,
+    updateColumn, sortColumnByCreatedAt, sortColumnByUpdatedAt, sortColumnByDeadLine
+} = taskSlice.actions
+
 export default taskSlice.reducer
