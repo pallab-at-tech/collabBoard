@@ -44,29 +44,62 @@ const CollabBoard = () => {
         }} className={`absolute top-4 -left-0.5 cursor-pointer w-fit text-[#d0cccc] ${slideOpen ? "rotate-180" : "rotate-0"} transition-transform duration-300`}
           title={slideOpen ? "Show team list" : "hide team list"}
         >
-          <VscTriangleRight size={28}/>
+          <VscTriangleRight size={28} />
         </div>
 
 
         <h1 className={`text-center font-bold py-4 text-3xl text-[#0ed55e] ${slideOpen ? "opacity-0" : "opacity-[100%]"} transition-opacity duration-300`} style={{ textShadow: "0 0 12px rgba(16,185,129,0.3)" }}>All TEAM</h1>
 
 
-        <div className={`${slideOpen ? "hidden" : "flex"} flex-wrap justify-center gap-6 border-l-4 border-l-[#d0cccc] pl-4 h-[calc(100vh-200px)] overflow-y-auto`} style={{ willChange: 'transform' }}>
+        <div className={`h-[calc(100vh-170px)] transition-transform duration-300 ${slideOpen ? "hidden" : "block"} overflow-y-auto px-4 py-3 space-y-4 scrollbar-thin scrollbar-thumb-gray-500`} style={{ willChange: 'transform' }}>
 
-          {
-            user?.roles?.map((v, i) => {
-              return (
-                <Link to={`${boardURL}/${v?.teamId}`} key={`${boardURL}/${v?.teamId}`} className={`min-h-[120px] max-h-[120px] w-[90%] bg-[#c9dcca] rounded p-2 pl-4 relative cursor-pointer z-10`}>
-                  <img src={bannerCombo[`${v?.organization_type}`]} alt="" className='h-[95%] absolute right-0 bottom-0 -z-50' />
-                  <h1 className='text-xl font-bold'>{v?.name}</h1>
-                  <p className='text-base text-black/70 font-semibold'>{`${v.organization_type} ${v.organization_type === "other" ? "" : "Group"}`}</p>
-                </Link>
-              )
-            })
-          }
+          {user?.roles?.map((v) => (
+            <Link
+              to={`${boardURL}/${v?.teamId}`}
+              key={v?.teamId}
+              className="relative flex items-center justify-between bg-gradient-to-r from-green-100 to-green-200 rounded-xl px-5 py-4 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all duration-200"
+            >
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">{v?.name}</h1>
+                <p className="text-sm text-gray-600 font-medium mt-1">
+                  {`${v.organization_type} ${v.organization_type === "other" ? "" : "Group"
+                    }`}
+                </p>
+              </div>
+
+              <img
+                src={bannerCombo[v?.organization_type]}
+                alt=""
+                className="h-[95%] absolute right-0 bottom-0 "
+              />
+
+            </Link>
+          ))}
 
         </div>
 
+        {/* <div className={`${slideOpen ? "hidden" : "flex"} flex-wrap justify-center gap-6 border-l-4 border-l-[#d0cccc] pl-4 h-[calc(100vh-200px)] overflow-y-auto`} style={{ willChange: 'transform' }}>
+
+          {
+            user?.roles?.map((v, i) => {
+
+              return (
+                <Link to={`${boardURL}/${v?.teamId}`} key={`${boardURL}/${v?.teamId}`}
+                  className={`min-h-[120px] max-h-[120px] w-[90%] bg-[#c9dcca] rounded p-2 pl-4 relative cursor-pointer z-10`}>
+
+                  <img src={bannerCombo[v?.organization_type]} alt="" className='h-[95%] absolute right-0 bottom-0 -z-50' />
+
+                  <h1 className='text-xl font-bold'>{v?.name}</h1>
+                  <p className='text-base text-black/70 font-semibold'>
+                    {`${v.organization_type === "other" ? "" : "Group"}`}
+                  </p>
+                </Link>
+              )
+
+            })
+          }
+
+        </div> */}
 
 
       </div>

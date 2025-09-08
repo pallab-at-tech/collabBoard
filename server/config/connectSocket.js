@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken"
 import { conversationModel, messageModel } from '../model/chat.model.js'
 import userModel from '../model/user.model.js'
 import taskModel from "../model/task.model.js"
+import teamModel from '../model/team.model.js'
 dotenv.config()
 
 
@@ -47,7 +48,6 @@ const onlineUser = new Map()
 io.on("connection", async (socket) => {
 
     // socket.emit("receive_message", { message: { text: "Test message from server" } });
-
 
 
     // join in a room and online
@@ -1130,6 +1130,138 @@ io.on("connection", async (socket) => {
         } catch (error) {
             console.log("Error while delete task.", error)
             socket.emit("error", { message: "Server error while delete task", error: true });
+        }
+    })
+
+    // rename collabdesk name
+    socket.on("collabDeskNameChange", async (data) => {
+        try {
+            const { deskId, teamId, newName } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!teamId) {
+                return socket.emit("collabNameChange_error", { message: "Team Id required !" })
+            }
+
+            if (!deskId) {
+                return socket.emit("collabNameChange_error", { message: "CollabDesk Id required !" })
+            }
+
+            const task = await taskModel.findById(deskId)
+
+            if (!task) {
+                return socket.emit("collabNameChange_error", { message: "Task not found !" })
+            }
+
+            const team = await teamModel.findById(teamId)
+
+            if (!team) {
+                return socket.emit("collabNameChange_error", { message: "Team not found !" })
+            }
+
+            const isAdmin = team.member.some((m) => m.userId.toString() === userId)
+
+            if (!isAdmin) {
+                return socket.emit("collabNameChange_error", { message: "Permission Denied." })
+            }
+
+            task.name = newName
+            await task.save()
+
+            team.member.forEach((m => {
+                io.to(m.userId.toString()).emit("collabName_success", {
+                    newName: task.name,
+                    message: "CollabDesk name successfully changed.",
+                    taskBoardId: task._id
+                })
+            }))
+
+
+        } catch (error) {
+            console.log("Error while collabDesk name change.", error)
+            socket.emit("error", { message: "Server error collabDesk name change", error: true });
+        }
+    })
+
+    socket.on("DeskDelete", async (data) => {
+        try {
+
+            const { deskId, teamId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            
+            console.log("deskId",deskId,"  teamId",teamId,"  userId",userId)
+
+            if (!teamId) {
+                return socket.emit("DeskDelete_error", { message: "Team Id required!" })
+            }
+
+            if (!deskId) {
+                return socket.emit("DeskDelete_error", { message: "CollabDesk Id required!" })
+            }
+
+            const task = await taskModel.findById(deskId)
+
+            if (!task) {
+                return socket.emit("DeskDelete_error", { message: "CollabDesk not found!" })
+            }
+
+            const team = await teamModel.findById(teamId)
+
+            if (!team) {
+                return socket.emit("DeskDelete_error", { message: "Team not found!" })
+            }
+
+            const isAdmin = team.member.some((m) => m.userId.toString() === userId.toString() && m.role !== "MEMBER")
+
+            if (!isAdmin) {
+                return socket.emit("DeskDelete_error", { message: "Permission Denied." })
+            }
+
+            const hasTasks = task.column.some((c) => c.tasks.length > 0);
+            if (hasTasks) {
+                return socket.emit("DeskDelete_error", { message: "Cannot delete a CollabDesk that still has tasks." });
+            }
+
+            await taskModel.findByIdAndDelete(deskId)
+
+            team.member.forEach((m) => {
+                io.to(m.userId.toString()).emit("DeskDelete_success", {
+                    message: "CollabDesk deleted successfully.",
+                    deskId: deskId
+                })
+            })
+
+
+        } catch (error) {
+            console.log("Error while collabDesk delete.", error)
+            socket.emit("error", { message: "Server error collabDesk delete", error: true });
         }
     })
 

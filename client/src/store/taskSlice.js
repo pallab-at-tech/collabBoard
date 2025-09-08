@@ -93,18 +93,22 @@ const taskSlice = createSlice({
                 return aDate - bDate
             })
         },
-        setTaskLogOut : (state , action) =>{
+        setTaskLogOut: (state, action) => {
             state._id = ""
             state.teamId = ""
             state.name = ""
             state.column = []
+        },
+        taskBoardNameChange: (state, action) => {
+            const { newName } = action.payload
+            state.name = newName
         }
     }
 })
 
 export const { setTask, updateColumnByTaskAssign, updateColumnByTaskUnAssign,
     updateColumn, sortColumnByCreatedAt, sortColumnByUpdatedAt, sortColumnByDeadLine,
-    setTaskLogOut
+    setTaskLogOut, taskBoardNameChange
 } = taskSlice.actions
 
 export default taskSlice.reducer

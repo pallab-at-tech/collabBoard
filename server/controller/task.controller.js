@@ -61,6 +61,8 @@ export const getTaskDetailsController = async (request, response) => {
         const { teamId } = request.query || {}
         const userId = request.userId
 
+        console.log("teamId",teamId)
+
         if (!teamId) {
             return response.status(400).json({
                 message: 'Team ID required',
@@ -85,7 +87,7 @@ export const getTaskDetailsController = async (request, response) => {
         const isLeader = team.member.some(c => c.userId.toString() === userId && c.role.toString() !== "MEMBER")
         const data = await taskModel.findOne({ teamId: teamId })
 
-        if (!isLeader) {
+        if (!isLeader && data !== null) {
 
             const filterData = {
                 _id: data._id,

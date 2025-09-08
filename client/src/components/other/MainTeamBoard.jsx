@@ -12,8 +12,12 @@ import ColumnItem from '../common/ColumnItem'
 import { useDispatch } from 'react-redux'
 import {
     updateColumnByTaskUnAssign, updateColumnByTaskAssign,
-    updateColumn, sortColumnByCreatedAt , sortColumnByUpdatedAt , sortColumnByDeadLine
+    updateColumn, sortColumnByCreatedAt, sortColumnByUpdatedAt, sortColumnByDeadLine,
+    taskBoardNameChange,
+    setTaskLogOut
 } from '../../store/taskSlice'
+import RenameCollabDesk from './RenameCollabDesk'
+import DeleteCollabDesk from '../TaskBoard/DeleteCollabDesk'
 
 
 
@@ -29,6 +33,10 @@ const MainTeamBoard = () => {
 
     const [openCreateColumn, setOpenCreateColumn] = useState(false)
     const [columnSetting, setColumnSetting] = useState(null)
+    const [renameOpen, setRenameOpen] = useState(false)
+    const [deleteColllabDeskOpen, setDeleteColllabDeskOpen] = useState(false)
+
+
     const params = useParams()
     const dispatch = useDispatch()
     const { fetchTaskDetails, socketConnection } = useGlobalContext()
@@ -133,11 +141,28 @@ const MainTeamBoard = () => {
 
         })
 
+        socketConnection.on("collabName_success", (data) => {
+
+            if (task?._id === data?.taskBoardId) {
+                dispatch(taskBoardNameChange({ newName: data?.newName }))
+            }
+
+        })
+
+        socketConnection.on("DeskDelete_success", (data) => {
+
+            if (task?._id === data?.deskId) {
+                dispatch(setTaskLogOut())
+            }
+        })
+
         return () => {
             socketConnection.off("task_assigned")
             socketConnection.off("task_unassigned")
             socketConnection.off("update_task_data")
             socketConnection.off("task_delete_success")
+            socketConnection.off("collabName_success")
+            socketConnection.off("DeskDelete_success")
         }
 
     }, [socketConnection, dispatch, task?._id])
@@ -148,12 +173,12 @@ const MainTeamBoard = () => {
         if (!sortData) return
 
         if (sortData === "createdAt") dispatch(sortColumnByCreatedAt())
-        else if(sortData === "updatedAt") dispatch(sortColumnByUpdatedAt())
-        else if(sortData === "deadline") dispatch(sortColumnByDeadLine())
+        else if (sortData === "updatedAt") dispatch(sortColumnByUpdatedAt())
+        else if (sortData === "deadline") dispatch(sortColumnByDeadLine())
 
-    }, [sortData , task])
+    }, [sortData, task])
 
-    // console.log("task details hi", task)
+    console.log("task details hi", task)
 
     return (
         <section className=''>
@@ -236,13 +261,13 @@ const MainTeamBoard = () => {
 
                                             {
                                                 dotOpen && (
-                                                    <div ref={dotRef} className="absolute top-10 -left-[60px] sm:top-10 sm:-right-[160px] z-10 w-36 bg-[#c5c6c9e7] text-gray-800 rounded-lg shadow-lg border border-gray-700">
-                                                        <button
+                                                    <div ref={dotRef} className="absolute top-10 -left-[60px] sm:-top-[90px] sm:left-[20px] z-10 w-36 bg-[#c5c6c9] text-gray-800 rounded-lg shadow-lg border border-gray-700 outline-none">
+                                                        <button onClick={() => setRenameOpen(true)}
                                                             className="w-full text-left px-4 py-2 text-sm hover:text-gray-200 hover:bg-gray-600 rounded-t-lg cursor-pointer shadow-sm"
                                                         >
                                                             Rename
                                                         </button>
-                                                        <button
+                                                        <button onClick={() => setDeleteColllabDeskOpen(true)}
                                                             className="w-full text-left px-4 py-2 text-sm  hover:bg-red-500 hover:text-white rounded-b-lg cursor-pointer"
                                                         >
                                                             Delete
@@ -316,6 +341,22 @@ const MainTeamBoard = () => {
             {
                 openCreateColumn && (
                     <CreateNewColumn close={() => setOpenCreateColumn(false)} />
+                )
+            }
+
+            {
+                renameOpen && (
+                    <RenameCollabDesk close={() => setRenameOpen(false)} deskId={task?._id} />
+                )
+            }
+
+            {
+                deleteColllabDeskOpen && (
+                    <DeleteCollabDesk
+                        close={() => setDeleteColllabDeskOpen(false)}
+                        title={task?.name}
+                        deskId={task?._id}
+                    />
                 )
             }
 
