@@ -147,55 +147,45 @@ const TaskEdit = ({ close, columnName, currentTask, columnId }) => {
 
     const handleOnSubmit = (e) => {
         e.preventDefault()
+        if(!socketConnection) return
+
         try {
-
             setLoadForSubmit(true)
-            let errorHandled = false;
 
-            socketConnection.once("task_update_error", (data) => {
-                toast.error(data?.message)
-                errorHandled = true
+            socketConnection.once("update_task_msg", (data) => {
+
+                toast.success(data?.message)
+                setData({
+                    userId: "",
+                    teamId: "",
+                    columnId: "",
+                    taskId: "",
+                    title: "",
+                    description: "",
+                    assignTo: [],
+                    status: "",
+                    aditional_link: [],
+                    dueDate: "",
+                    dueTime: "",
+                    labels: [],
+                    image: "",
+                    video: ""
+                })
+                close()
+
             })
 
-            setTimeout(() => {
+            socketConnection.once("task_update_error",(data)=>{
+                toast.error(data?.message)
+            })
 
-                if (!errorHandled) {
-
-                    socketConnection.emit("update_task", data)
-
-                    socketConnection.once("update_task_msg", (data) => {
-
-                        toast.success(data?.message)
-
-                        setData({
-                            userId: "",
-                            teamId: "",
-                            columnId: "",
-                            taskId: "",
-                            title: "",
-                            description: "",
-                            assignTo: [],
-                            status: "",
-                            aditional_link: [],
-                            dueDate: "",
-                            dueTime: "",
-                            labels: [],
-                            image: "",
-                            video: ""
-                        })
-                        close()
-                    })
-                }
-
-            }, 500)
+            socketConnection.emit("update_task",data)
 
         } catch (error) {
             console.log("error come for handleSubmit while update task.", error)
-        } finally {
             setLoadForSubmit(false)
         }
     }
-
 
     return (
         <section className='fixed right-0 left-0 top-[60px]  bottom-0 flex flex-col items-center justify-center z-50 sm:bg-gray-800/75 bg-[#dbdbdb] overflow-y-auto'>
@@ -447,7 +437,7 @@ const TaskEdit = ({ close, columnName, currentTask, columnId }) => {
                                 <div onClick={() => setAddLinkOpen(true)} className='bg-[#cc2929] text-white text-base w-[90%] text-center px-1 py-1 rounded cursor-pointer'>Add Link</div>
                             </div>
 
-                            <button type='submit' className={`bg-[#027d2b] hover:bg-[#027127] ${loadForSubmit ? "pointer-events-none" : "cursor-pointer"} transition-colors duration-100 text-white w-[90%] py-2.5 px-2 rounded font-bold mb-[3%] `}>Update Task</button>
+                            <button type='submit' className={`bg-[#027d2b] hover:bg-[#027127] ${loadForSubmit ? "cursor-not-allowed" : "cursor-pointer"} transition-colors duration-100 text-white w-[90%] py-2.5 px-2 rounded font-bold mb-[3%] `}>{loadForSubmit ? "Updating" : "Update Task"}</button>
                         </div>
 
                     </form>

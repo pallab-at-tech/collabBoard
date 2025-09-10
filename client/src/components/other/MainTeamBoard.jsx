@@ -36,6 +36,8 @@ const MainTeamBoard = () => {
     const [renameOpen, setRenameOpen] = useState(false)
     const [deleteColllabDeskOpen, setDeleteColllabDeskOpen] = useState(false)
 
+    const [creatingDesk, setCreatingDesk] = useState(false)
+
 
     const params = useParams()
     const dispatch = useDispatch()
@@ -55,32 +57,66 @@ const MainTeamBoard = () => {
 
     const handleOnSubmit = async (e) => {
         e.preventDefault()
+        if (!socketConnection) return
+        if (!data.name) return
 
         try {
-            const response = await Axios({
-                ...SummaryApi.taskBoard_create,
-                data: {
-                    name: data.name,
-                    teamId: params.team
-                }
-            })
+            setCreatingDesk(true)
 
-            if (response?.data?.error) {
-                toast.error(response?.data?.message)
-            }
-
-            if (response?.data?.success) {
-                toast.success(response?.data?.message)
+            socketConnection.once("createDeskSuccess", (data) => {
+                toast.success(data?.message)
                 setData({
                     name: ""
                 })
-                fetchTaskDetails(params?.team)
-            }
+                setCreatingDesk(false)
+            })
+
+            socketConnection.once("createDeskError", (data) => {
+                toast.error(data?.message)
+                setCreatingDesk(false)
+            })
+
+            socketConnection.emit("createDesk", {
+                name: data.name,
+                teamId: params?.team
+            })
 
         } catch (error) {
-            console.log("create task board error", error)
+            console.error("handleCollabDeskCreate", error);
+            setCreatingDesk(false);
         }
     }
+
+
+
+    // const handleOnSubmit = async (e) => {
+    //     e.preventDefault()
+
+    //     try {
+    //         const response = await Axios({
+    //             ...SummaryApi.taskBoard_create,
+    //             data: {
+    //                 name: data.name,
+    //                 teamId: params.team
+    //             }
+    //         })
+
+    //         if (response?.data?.error) {
+    //             toast.error(response?.data?.message)
+    //         }
+
+    //         if (response?.data?.success) {
+    //             toast.success(response?.data?.message)
+    //             setData({
+    //                 name: ""
+    //             })
+    //             fetchTaskDetails(params?.team)
+    //         }
+
+    //     } catch (error) {
+    //         console.log("create task board error", error)
+    //     }
+    // }
 
     useEffect(() => {
         fetchTaskDetails(params?.team)
@@ -112,7 +148,7 @@ const MainTeamBoard = () => {
         socketConnection.on("task_assigned", (data) => {
 
             if (task?._id === data?.taskBoardId) {
-                dispatch(updateColumnByTaskAssign({ task: data?.task, columnId: data?.columnId }))
+                dispatch(updateColumnByTaskAssign({ task: data?.task, columnId: data?.columnId, columnName: data?.columnName }))
             }
 
         })
@@ -156,6 +192,13 @@ const MainTeamBoard = () => {
             }
         })
 
+        socketConnection.on("createDeskSuccess", (data) => {
+
+            if (params?.team === data?.teamId) {
+                fetchTaskDetails(data?.teamId)
+            }
+        })
+
         return () => {
             socketConnection.off("task_assigned")
             socketConnection.off("task_unassigned")
@@ -163,6 +206,7 @@ const MainTeamBoard = () => {
             socketConnection.off("task_delete_success")
             socketConnection.off("collabName_success")
             socketConnection.off("DeskDelete_success")
+            socketConnection.off("createDeskSuccess")
         }
 
     }, [socketConnection, dispatch, task?._id])
@@ -193,7 +237,7 @@ const MainTeamBoard = () => {
 
                             <input type="text" name='name' value={data.name} onChange={handleOnChange} className='bg-[#e6e8e5d0] mini_tab:w-[311px] w-[249px] mb-2 mt-1 outline-none rounded mini_tab:py-1.5 py-1 px-2' placeholder='Enter here ...' />
 
-                            <button className='bg-[#3f9f13]  hover:bg-[#3b9311] transition-colors text-A-off-text w-fit mini_tab:px-3 mini_tab:py-1.5 px-2 py-1 rounded cursor-pointer block'>Create</button>
+                            <button className={`${creatingDesk ? "bg-[#4dc118ad] hover:bg-[#3f9f13] " : "bg-[#3f9f13]  hover:bg-[#3b9311]"} transition-colors text-A-off-text w-fit mini_tab:px-3 mini_tab:py-1.5 px-2 py-1 rounded ${creatingDesk ? "cursor-not-allowed" : "cursor-pointer"} block`}>{creatingDesk ? "Creating" : "Create"}</button>
 
                         </form>
                     ) : (

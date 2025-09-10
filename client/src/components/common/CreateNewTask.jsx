@@ -23,7 +23,7 @@ const CreateNewTask = ({ columnId, close, columnName }) => {
     const user = useSelector(state => state?.user)
 
     const [data, setData] = useState({
-        userId : user?._id,
+        userId: user?._id,
         teamId: params?.team,
         columnId: columnId,
         title: "",
@@ -46,7 +46,7 @@ const CreateNewTask = ({ columnId, close, columnName }) => {
     const [openMember, setOpenMember] = useState(false)
 
     const team = useSelector(state => state?.team)
-    
+
     const [selectedMembers, setSelectedMembers] = useState([]);
     const [selectMemberForMobile, setSelectMemberForMobile] = useState(false)
 
@@ -131,54 +131,44 @@ const CreateNewTask = ({ columnId, close, columnName }) => {
     };
 
     const handleSubmit = async (e) => {
-
-        if (!socketConnection) return
         e.preventDefault()
+        if (!socketConnection) return
 
         try {
-
             setLoadForSubmit(true)
-            let errorHandled = false;
 
-            socketConnection.once("create_task_error", (data) => {
-                toast.error(data?.message)
-                errorHandled = true
+            socketConnection.once("task_create_success", (data) => {
+
+                toast.success(data?.message)
+                setData({
+                    userId: "",
+                    teamId: "",
+                    columnId: "",
+                    title: "",
+                    description: "",
+                    assignTo: [],
+                    status: "",
+                    aditional_link: [],
+                    dueDate: "",
+                    dueTime: "",
+                    labels: [],
+                    date: "",
+                    image: "",
+                    video: ""
+                })
+                setLoadForSubmit(false)
+                close()
             })
 
-            setTimeout(() => {
+            socketConnection.once("create_task_error",(data)=>{
+                toast.error(data?.message)
+                setLoadForSubmit(false)
+            })
 
-                if (!errorHandled) {
-                    socketConnection.emit("create-task", data)
-
-                    socketConnection.once("task_create_success", (data) => {
-                        toast.success(data?.message)
-
-                        setData({
-                            userId : "",
-                            teamId: "",
-                            columnId: "",
-                            title: "",
-                            description: "",
-                            assignTo: [],
-                            status: "",
-                            aditional_link: [],
-                            dueDate: "",
-                            dueTime: "",
-                            labels: [],
-                            date: "",
-                            image: "",
-                            video: ""
-                        })
-
-                        close()
-                    })
-                }
-
-            }, 500)
+            socketConnection.emit("create-task",data)
 
         } catch (error) {
             console.log("error come for handleSubmit while create task", error)
-        } finally {
             setLoadForSubmit(false)
         }
     }
@@ -370,7 +360,7 @@ const CreateNewTask = ({ columnId, close, columnName }) => {
                                 <div onClick={() => setAddLinkOpen(true)} className='bg-[#cc2929] text-white text-base w-[90%] text-center px-1 py-1 rounded cursor-pointer'>Add Link</div>
                             </div>
 
-                            <button type='submit' className={`bg-[#027d2b] hover:bg-[#027127] transition-colors duration-100 text-white w-[90%] py-2.5 px-2 rounded font-bold mt-[3%] ${loadForSubmit ? "pointer-events-none" : "cursor-pointer"}`}>Create Task</button>
+                            <button type='submit' className={`bg-[#027d2b] hover:bg-[#027127] transition-colors duration-100 text-white w-[90%] py-2.5 px-2 rounded font-bold mt-[3%] ${loadForSubmit ? "cursor-not-allowed" : "cursor-pointer"}`}>{loadForSubmit ? "Creating" : "Create Task"}</button>
 
                         </div>
 

@@ -879,6 +879,7 @@ io.on("connection", async (socket) => {
                         message: "New task assigned to you",
                         task: newTask,
                         columnId: columnId,
+                        columnName : column.name,
                         taskBoardId: taskBoard._id
                     })
                 })
@@ -888,6 +889,7 @@ io.on("connection", async (socket) => {
                 message: "New task assigned to you",
                 task: newTask,
                 columnId: columnId,
+                columnName : column.name,
                 taskBoardId: taskBoard._id
             })
 
@@ -1196,6 +1198,63 @@ io.on("connection", async (socket) => {
         }
     })
 
+    // create taskDesk
+    socket.on("createDesk", async (data) => {
+        try {
+
+            const { name, teamId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+
+            if (!name) return socket.emit("createDeskError", { message: "Desk name required!" })
+            if (!teamId) return socket.emit("createDeskError", { message: "Team Id required!" })
+
+            const team = await teamModel.findById(teamId)
+
+            if (!team) return socket.emit("Team not found!")
+
+            const isTeamLeader = team.member.some((c) => c.userId.toString() === userId.toString() && c.role !== "MEMBER")
+
+            if (!isTeamLeader) return socket.emit("createDeskError", { message: "Permission Denied!" })
+
+            const desk = await taskModel.findOne({ teamId: teamId })
+
+            if (desk) return socket.emit("createDeskError", { message: "Task Desk already exist." })
+
+            const newDesk = await taskModel.create({
+                teamId: teamId,
+                name: name
+            })
+
+            await newDesk.save()
+
+            team.member.forEach((m) => {
+                io.to(m.userId.toString()).emit("createDeskSuccess", {
+                    message: "CollabDesk Created successfully",
+                    teamId: team._id
+                })
+            })
+
+        } catch (error) {
+            console.log("Error while collabDesk create.", error)
+            socket.emit("error", { message: "Server error while create collabDesk", error: true });
+        }
+    })
+
+    // delete task desk
     socket.on("DeskDelete", async (data) => {
         try {
 
@@ -1214,9 +1273,6 @@ io.on("connection", async (socket) => {
             }
 
             const userId = payload1.id;
-
-            
-            console.log("deskId",deskId,"  teamId",teamId,"  userId",userId)
 
             if (!teamId) {
                 return socket.emit("DeskDelete_error", { message: "Team Id required!" })
