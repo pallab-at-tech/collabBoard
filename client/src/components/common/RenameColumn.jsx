@@ -20,8 +20,7 @@ const RenameColumn = ({ close, columnId, columnName }) => {
         taskId: task?._id,
         teamId : params?.team
     })
-
-    console.log("data par",data)
+    const [updating, setUpdating] = useState(false)
 
     const { fetchTaskDetails } = useGlobalContext()
 
@@ -41,6 +40,8 @@ const RenameColumn = ({ close, columnId, columnName }) => {
 
         try {
 
+            setUpdating(true)
+
             const response = await Axios({
                 ...SummaryApi.task_column_rename,
                 data: data
@@ -48,17 +49,20 @@ const RenameColumn = ({ close, columnId, columnName }) => {
 
             if (response?.data?.error) {
                 toast.error(response?.data?.message)
+                setUpdating(false)
             }
 
             if (response?.data?.success) {
                 toast.success(response?.data?.message)
                 fetchTaskDetails(task?.teamId)
+                setUpdating(false)
                 close()
             }
 
         } catch (error) {
             toast.error(error?.response?.data?.message)
             console.log("handleOnSubmit for rename column", error)
+            setUpdating(false)
         }
     }
 
@@ -101,9 +105,9 @@ const RenameColumn = ({ close, columnId, columnName }) => {
                 {/* Submit */}
                 <button
                     type="submit"
-                    className="mt-5 w-full bg-blue-600 text-white text-sm font-medium py-2 rounded-md hover:bg-blue-700 active:scale-[0.98] transition"
+                    className={`mt-5 w-full bg-blue-600 text-white text-sm font-medium py-2 rounded-md hover:bg-blue-700 active:scale-[0.98] transition ${updating ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
-                    Submit
+                    {updating ? "Submiting" : "Submit"}
                 </button>
             </form>
 

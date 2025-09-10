@@ -32,18 +32,19 @@ const DeleteColumn = ({ close, columnId, columnName }) => {
 
             if (response?.data?.error) {
                 toast.error(response?.data?.message)
+                setloading(false)
             }
 
             if (response?.data?.success) {
                 toast.success(response?.data?.message)
                 fetchTaskDetails(task?.teamId)
+                setloading(false)
                 close()
             }
 
         } catch (error) {
             toast.error(error?.response?.data?.message)
             console.log("handleDelete from DeleteColumn", error)
-        } finally {
             setloading(false)
         }
     }
@@ -60,7 +61,7 @@ const DeleteColumn = ({ close, columnId, columnName }) => {
                     <button
                         type="button"
                         onClick={()=>handleDelete()}
-                        className={`px-4 py-2 cursor-pointer bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 active:scale-[0.98] transition ${loading && "pointer-events-none"}`}
+                        className={`px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 active:scale-[0.98] transition ${loading ? "cursor-not-allowed" : "cursor-pointer"}`}
                     >
                         Confirm
                     </button>
