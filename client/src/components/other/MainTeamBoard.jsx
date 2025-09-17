@@ -192,7 +192,7 @@ const MainTeamBoard = () => {
     return (
         <section className=''>
 
-            <div className='xl:border-1 xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#150a1880] xl:to-transparent mt-2 xl:border-[#596982] xl:ring-1 xl:ring-[#596982] border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-0.5 xl:px-6 py-8  mini_tab:mx-10 rounded-b relative '>
+            <div className='xl:border-1 xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#0a0a1880] xl:to-transparent mt-2 xl:border-[#596982] xl:ring-1 xl:ring-[#596982] border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-0.5 xl:px-6 py-8  mini_tab:mx-10 rounded-b relative '>
 
                 {
                     !task?._id ? (
@@ -290,12 +290,12 @@ const MainTeamBoard = () => {
 
                                     </div>
 
-                                    <div className="flex items-center gap-2 sm:bg-gray-700 xl:bg-[#4f177d61]  sm:px-2.5 sm:py-2.5 py-1.5 mt-1 rounded-lg sm:shadow-md">
+                                    <div className="flex items-center gap-2 sm:bg-gray-700  sm:px-2.5 sm:py-2.5 py-1.5 mt-1 rounded-lg sm:shadow-md">
                                         <select
                                             name="sort-task"
                                             id="sort-task"
                                             defaultValue=""
-                                            className="bg-gray-800 xl:bg-[#150a1880] cursor-pointer text-gray-200 text-sm px-3 py-1.5 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                            className="bg-[#1c1c21] cursor-pointer text-gray-200 text-sm px-3 py-1.5 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
                                             onChange={(e) => {
                                                 const val = e.target.value
                                                 setSortData(val)

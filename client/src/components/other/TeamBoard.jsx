@@ -23,15 +23,15 @@ const TeamBoard = () => {
     return (
         <section className='h-full w-full grid-rows-2'>
 
-            {/* header of task desk  */}
+            {/* header of task desk   */}
             <div className='flex items-center justify-between 
                 mini_tab:mx-10 mini_tab:px-6 px-3 py-2 mt-2 mb-1 rounded-t text-white 
-                border border-white xl:border-[#596982] xl:ring-1 xl:ring-[#596982] 
-                xl:bg-gradient-to-r xl:from-purple-600/1 xl:via-purple-500/2 xl:to-transparent' >
+                border border-white xl:border-[#596982] xl:ring-1 xl:ring-[#596982]'
+            >
 
                 <div className='flex flex-col'>
                     <div className='flex gap-x-1 items-center'>
-                        <Link to={`/board/${params.user}/${params.team}`} className={`font-bold mini_tab:text-2xl text-xl text-white xl:text-[#813ded] mini_tab:max-w-[24ch] max-w-[16ch] line-clamp-1`}>{`${team?.name}`}</Link>
+                        <Link to={`/board/${params.user}/${params.team}`} className={`font-bold mini_tab:text-2xl text-xl text-white  mini_tab:max-w-[24ch] max-w-[16ch] line-clamp-1`}>{`${team?.name}`}</Link>
                         <h2 className='text-lg mini_tab:block hidden  font-semibold text-[#60A5FA]   select-none'>{`( ${team?.organization_type} )`}</h2>
                     </div>
 
@@ -46,7 +46,7 @@ const TeamBoard = () => {
                         <IoIosPersonAdd size={32} />
                     </div>
 
-                    <Link to={`/board/${params.user}/${params.team}/edit`} className='bg-blue-700 xl:bg-[#6d28d9] xl:hover:bg-[#5e1bc9] transition-colors duration-200 px-3 text-white py-1 rounded-md cursor-pointer border border-white'>Edit</Link>
+                    <Link to={`/board/${params.user}/${params.team}/edit`} className='bg-blue-700  transition-colors duration-200 px-3 text-white py-1 rounded-md cursor-pointer border border-white'>Edit</Link>
 
                 </div>
 

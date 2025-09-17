@@ -28,7 +28,7 @@ const CollabBoard = () => {
 
 
   return (
-    <section className={`bg-[#202128] xl:bg-gradient-to-r xl:from-purple-600/1 xl:via-purple-500/5 xl:to-transparent min-h-[calc(100vh-60px)] lg-real:px-[50px] px-6 py-4 grid ${slideOpen ? "lg-real:grid-cols-[1fr_80px]" : "lg-real:grid-cols-[1fr_500px]"} transform-view duration-500`}>
+    <section className={`bg-[#202128]  min-h-[calc(100vh-60px)] lg-real:px-[50px] px-6 py-4 grid ${slideOpen ? "lg-real:grid-cols-[1fr_80px]" : "lg-real:grid-cols-[1fr_500px]"} transform-view duration-500`}>
 
       <div className=''>
         {
@@ -54,7 +54,7 @@ const CollabBoard = () => {
         {/* Heading */}
         <h1
           className={`ml-4 text-center font-extrabold py-3 text-xl tracking-wide 
-                text-[#f5f3ff] border-b-2 border-[#6d28d9] 
+                text-[#f5f3ff] border-b-2 border-[#002aff]/60
                 bg-[#1e1b29] shadow-[0_2px_0_#6d28d9] 
                 ${slideOpen ? "opacity-0" : "opacity-100"} 
                 transition-opacity duration-300`}
@@ -75,7 +75,7 @@ const CollabBoard = () => {
               to={`${boardURL}/${v?.teamId}`}
               key={v?.teamId}
               className="relative flex items-center justify-between 
-                   bg-[#2a2438] border-2 border-[#6d28d9]/60 
+                   from-[#343442] to-[#27283f] bg-gradient-to-br border-4 border-[#040c4a]/50
                    rounded-sm px-4 py-3 shadow-[3px_3px_0_#111] 
                    hover:translate-x-[2px] hover:translate-y-[2px] 
                    hover:shadow-[1px_1px_0_#111] 
