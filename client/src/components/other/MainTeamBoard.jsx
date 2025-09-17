@@ -295,7 +295,7 @@ const MainTeamBoard = () => {
                                             name="sort-task"
                                             id="sort-task"
                                             defaultValue=""
-                                            className="bg-[#1c1c21] cursor-pointer text-gray-200 text-sm px-3 py-1.5 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                            className="bg-[#1c1c21] xl:bg-[#1c1c26] cursor-pointer text-gray-200 text-sm px-3 py-1.5 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
                                             onChange={(e) => {
                                                 const val = e.target.value
                                                 setSortData(val)

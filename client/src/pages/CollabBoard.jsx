@@ -36,7 +36,7 @@ const CollabBoard = () => {
         }
       </div>
 
-      <div className="pl-4 scroll-smooth relative lg-real:block hidden ">
+      <div className="pl-4 scroll-smooth relative lg-real:block hidden mt-5">
         {/* Toggle Button */}
         <div
           onClick={(e) => {
@@ -54,8 +54,8 @@ const CollabBoard = () => {
         {/* Heading */}
         <h1
           className={`ml-4 text-center font-extrabold py-3 text-xl tracking-wide 
-                text-[#f5f3ff] border-b-2 border-[#002aff]/60
-                bg-[#1e1b29] shadow-[0_2px_0_#6d28d9] 
+                text-[#f5f3ff] border-b-2 border-[#000107]
+                shadow-[0_2px_0_#6d28d9] 
                 ${slideOpen ? "opacity-0" : "opacity-100"} 
                 transition-opacity duration-300`}
         >
@@ -75,7 +75,7 @@ const CollabBoard = () => {
               to={`${boardURL}/${v?.teamId}`}
               key={v?.teamId}
               className="relative flex items-center justify-between 
-                   from-[#343442] to-[#27283f] bg-gradient-to-br border-4 border-[#040c4a]/50
+                   from-[#424248] to-[#0c0d23] bg-gradient-to-br border-2 border-gray-600
                    rounded-sm px-4 py-3 shadow-[3px_3px_0_#111] 
                    hover:translate-x-[2px] hover:translate-y-[2px] 
                    hover:shadow-[1px_1px_0_#111] 
