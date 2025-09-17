@@ -31,11 +31,11 @@ const TeamBoard = () => {
 
                 <div className='flex flex-col'>
                     <div className='flex gap-x-1 items-center'>
-                        <Link to={`/board/${params.user}/${params.team}`} className={`font-bold mini_tab:text-2xl text-xl text-[#db16f9] mini_tab:max-w-[24ch] max-w-[16ch] line-clamp-1`}>{`${team?.name}`}</Link>
+                        <Link to={`/board/${params.user}/${params.team}`} className={`font-bold mini_tab:text-2xl text-xl text-white xl:text-[#813ded] mini_tab:max-w-[24ch] max-w-[16ch] line-clamp-1`}>{`${team?.name}`}</Link>
                         <h2 className='text-lg mini_tab:block hidden  font-semibold text-[#60A5FA]   select-none'>{`( ${team?.organization_type} )`}</h2>
                     </div>
 
-                    <div>
+                    <div className='-mt-1 xl:mt-0'>
                         <p className='text-base mini_tab:max-w-[46ch] max-w-[20ch] line-clamp-1 text-indigo-400'>{team?.description}</p>
                     </div>
                 </div>
@@ -46,7 +46,7 @@ const TeamBoard = () => {
                         <IoIosPersonAdd size={32} />
                     </div>
 
-                    <Link to={`/board/${params.user}/${params.team}/edit`} className='bg-[#ca11e6] hover:bg-[#b50fce] px-3 text-white py-1 rounded-md cursor-pointer border border-white'>Edit</Link>
+                    <Link to={`/board/${params.user}/${params.team}/edit`} className='bg-blue-700 xl:bg-[#6d28d9] xl:hover:bg-[#5e1bc9] transition-colors duration-200 px-3 text-white py-1 rounded-md cursor-pointer border border-white'>Edit</Link>
 
                 </div>
 
