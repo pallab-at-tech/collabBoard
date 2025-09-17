@@ -27,7 +27,7 @@ const MobileForCollabBoard = () => {
           <Link
             key={i}
             to={`${boardURL}/${v?.teamId}`}
-            className="bg-gradient-to-br from-[#4f5068] to-[#363748] rounded-2xl p-5 shadow-md border-2 border-white/10 
+            className="bg-gradient-to-br from-[#343442] to-[#27283f] rounded-2xl p-5 shadow-md border-2 border-white/10 
                       flex flex-col justify-between transition-all duration-200 
                       hover:scale-105 hover:shadow-[0_0_18px_rgba(16,185,129,0.3)] cursor-pointer"
           >

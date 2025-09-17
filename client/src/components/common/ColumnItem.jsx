@@ -10,12 +10,16 @@ import { FaAngleDown } from "react-icons/fa6";
 import { MdMovieEdit, MdAutoDelete } from "react-icons/md";
 import TaskEdit from '../TaskBoard/TaskEdit';
 import TaskDelete from '../TaskBoard/TaskDelete';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     const dropdownRef = useRef(null);
     const imageDropRef = useRef(null)
     const linkDropRef = useRef(null)
     const videoDropRef = useRef(null)
+
+    const navigate = useNavigate()
 
     const [imageOpen, setImageOpen] = useState({
         open: false,
@@ -155,11 +159,11 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
             {
                 taskOpen ? (
                     val?.tasks?.length === 0 ? (
-                        <div className={`sm:ml-10 flex justify-center items-center transition-opacity duration-500 ease-in-out  bg-gray-700 border border-gray-600 min-h-[200px] min-w-10 sm:max-w-[550px] xl:max-w-[640px]  rounded-md pr-8 pt-2 pb-6 ${taskOpen ? "opacity-100" : "opacity-0 h-0"}`}>
+                        <div className={`sm:ml-10 flex justify-center items-center transition-opacity duration-500 ease-in-out  bg-[#1c1c21] border-gray-700  border  xl:bg-[#150a1880] xl:border-[#9b59b6]/40 backdrop-blur-md min-h-[200px] min-w-10 sm:max-w-[550px] xl:max-w-[640px]  rounded-md pr-8 pt-2 pb-6 ${taskOpen ? "opacity-100" : "opacity-0 h-0"}`}>
                             <p className='text-[#dbdbdb] font-semibold text-lg'>No task assigned yet ?!</p>
                         </div>
                     ) : (
-                        <div className={`sm:ml-10 transition-opacity duration-500 ease-in-out  bg-gray-700 border border-gray-600 min-h-[200px] min-w-10 sm:max-w-[550px] xl:max-w-[640px]  rounded-md pr-8 pt-2 pb-6 ${taskOpen ? "opacity-100" : "opacity-0 h-0"}`}>
+                        <div className={`sm:ml-10 transition-opacity duration-500 ease-in-out bg-[#1c1c21] border-gray-700   border-2 xl:bg-[#150a1880] xl:border-[#9b59b6]/40 backdrop-blur-md min-h-[150px] min-w-10 sm:max-w-[550px] xl:max-w-[640px]  rounded-md pr-8 pt-2 pb-6 ${taskOpen ? "opacity-100" : "opacity-0 h-0"}`}>
 
                             {
                                 val?.tasks?.map((val, idx) => {
@@ -211,7 +215,16 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                             </div>
 
                                             {/* edit options */}
-                                            <div className='text-white absolute sm:top-2 sm:-right-2.5 top-0 -right-6 flex sm:flex-col flex-row'>
+                                            <div className='text-white absolute sm:top-2 sm:-right-2.5 top-0 -right-6 flex sm:flex-col flex-row items-center'>
+                                                
+                                                <Link to={`/task/task-assign-${val?._id}`} className='h-fit w-fit'>
+                                                    <FaExternalLinkAlt
+                                                        size={17}
+                                                        className='my-1.5 mx-1.5 cursor-pointer text-[#cccdcc] hover:text-[#f0f1f0] transition-colors'
+                                                        title='Open in new window'
+                                                    />
+                                                </Link>
+
                                                 <MdMovieEdit
                                                     onClick={() => {
                                                         setEditTaskOpen(true)
@@ -233,7 +246,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
 
                                             {
                                                 !taskLabel.has(val?._id) ? (
-                                                    <div className='relative w-full transition-all duration-500 ease-in-out sm:ml-20 ml-10 sm:mt-3 mt-8 max-w-[400px] xl:max-w-[500px] bg-gradient-to-l from-[#273e5b80] to-[#7e828761] border-2 border-gray-400 rounded-md px-2 py-2 ' >
+                                                    <div className='relative w-full transition-all duration-500 ease-in-out sm:ml-20 ml-10 sm:mt-3 mt-8 max-w-[400px] xl:max-w-[500px] bg-gradient-to-l from-[#263b5480] to-[#494b4e61] xl:from-[#17263980] xl:to-[#32194761] border-2 border-gray-400 rounded-md px-2 py-2 ' >
 
                                                         <div className='flex sm:flex-row flex-col gap-1 font-semibold text-[#d68408b9] absolute sm:-top-[26px] -top-[40px] sm:right-4 sm:left-auto left-0 text-sm'>
 
@@ -332,7 +345,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
 
                                                     </div>
                                                 ) : (
-                                                    <div className='h-[60px] xl:h-[100px] w-full transition-all duration-500 ease-in-out flex items-center relative sm:ml-20 ml-10 sm:mt-3 mt-8 max-w-[400px] xl:max-w-[500px] bg-gradient-to-l from-[#273e5b80] to-[#7e828761] border-2 border-gray-400 rounded-md px-2 py-2 '>
+                                                    <div className='h-[60px] xl:h-[100px] w-full transition-all duration-500 ease-in-out flex items-center relative sm:ml-20 ml-10 sm:mt-3 mt-8 max-w-[400px] xl:max-w-[500px] bg-gradient-to-l from-[#263b5480] to-[#494b4e61] xl:from-[#17263980] xl:to-[#4f177d61] border-2 border-gray-400 rounded-md px-2 py-2 '>
                                                         <h1 className='text-[#acca03] sm:text-[20px] text-[19px] font-semibold xl:pl-5'>{val?.title}</h1>
 
                                                         <div className='flex sm:flex-row flex-col gap-1 font-semibold text-[#d68408b9] absolute sm:-top-[26px] -top-[40px] sm:right-4 sm:left-auto left-0 text-sm'>
@@ -357,7 +370,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                         </div>
                     )
                 ) : (
-                    <div className={`sm:ml-10 flex items-center justify-center transition-all duration-500 ease-in-out bg-gray-700 border border-gray-600 min-h-[50px] xl:min-h-[80px] min-w-10  max-w-[250px] xl:max-w-[350px]  rounded-md pr-8 pt-2 pb-6 -mt-4 ${taskOpen ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
+                    <div className={`sm:ml-10 flex items-center justify-center transition-all duration-500 ease-in-out bg-[#1c1c21] border-gray-700  border xl:bg-[#150a1880] xl:border-[#9b59b6]/40 backdrop-blur-md min-h-[50px] xl:min-h-[80px] min-w-10  max-w-[250px] xl:max-w-[350px]  rounded-md pr-8 pt-2 pb-6 -mt-4 ${taskOpen ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
                         <p className='text-[#dbdbdb] mt-2 font-semibold'>{`${val?.tasks?.length === 0 ? "No task assigned yet ?!" : `${val?.tasks?.length} assignment available ....`}`}</p>
                     </div>
                 )

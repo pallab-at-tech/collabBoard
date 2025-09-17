@@ -15,6 +15,10 @@ import ProfileTeamRequest from '../pages/ProfileTeamRequest'
 import ChatPage from '../pages/ChatPage'
 import MessagePage from '../pages/MessagePage'
 import MessageEdit from '../components/messageComponenet/MessageEdit'
+import TrackTaskBoard from '../components/common/TrackTaskBoard'
+import DeadlineTaskBoard from '../components/common/DeadlineTaskBoard'
+import StatusTaskBoard from '../components/common/StatusTaskBoard'
+import SeparateTabForTask from '../pages/SeparateTabForTask'
 
 const router = createBrowserRouter([
     {
@@ -45,11 +49,27 @@ const router = createBrowserRouter([
                             {
                                 path: 'edit',
                                 element: <TeamBoardEdit />
+                            },
+                            {
+                                path : "track",
+                                element : <TrackTaskBoard/>
+                            },
+                            {
+                                path : "deadline",
+                                element : <DeadlineTaskBoard/>
+                            },
+                            {
+                                path : "status",
+                                element : <StatusTaskBoard/>
                             }
                         ]
                     },
                 ]
 
+            },
+            {
+                path : "/task/:id",
+                element : <SeparateTabForTask/>
             },
             {
                 path: "/profile/:user",
@@ -85,7 +105,7 @@ const router = createBrowserRouter([
                             {
                                 path : "/chat/:conversation/edit",
                                 element : <MessageEdit/>
-                            }
+                            },
                         ]
                     },
                 ]

@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import noTask from "../../assets/no-task.png"
-import { useParams } from 'react-router-dom'
-import Axios from '../../utils/Axios'
-import SummaryApi from '../../common/SummaryApi'
+import { Link, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
 import { useGlobalContext } from '../../provider/GlobalProvider'
@@ -11,10 +9,8 @@ import { HiOutlineDotsVertical } from "react-icons/hi";
 import ColumnItem from '../common/ColumnItem'
 import { useDispatch } from 'react-redux'
 import {
-    updateColumnByTaskUnAssign, updateColumnByTaskAssign,
-    updateColumn, sortColumnByCreatedAt, sortColumnByUpdatedAt, sortColumnByDeadLine,
-    taskBoardNameChange,
-    setTaskLogOut
+    updateColumnByTaskUnAssign, updateColumnByTaskAssign, sortColumnByCreatedAt,
+    sortColumnByUpdatedAt, sortColumnByDeadLine, setTaskLogOut , taskBoardNameChange
 } from '../../store/taskSlice'
 import RenameCollabDesk from './RenameCollabDesk'
 import DeleteCollabDesk from '../TaskBoard/DeleteCollabDesk'
@@ -86,37 +82,6 @@ const MainTeamBoard = () => {
             setCreatingDesk(false);
         }
     }
-
-
-
-    // const handleOnSubmit = async (e) => {
-    //     e.preventDefault()
-
-    //     try {
-    //         const response = await Axios({
-    //             ...SummaryApi.taskBoard_create,
-    //             data: {
-    //                 name: data.name,
-    //                 teamId: params.team
-    //             }
-    //         })
-
-    //         if (response?.data?.error) {
-    //             toast.error(response?.data?.message)
-    //         }
-
-    //         if (response?.data?.success) {
-    //             toast.success(response?.data?.message)
-    //             setData({
-    //                 name: ""
-    //             })
-    //             fetchTaskDetails(params?.team)
-    //         }
-
-    //     } catch (error) {
-    //         console.log("create task board error", error)
-    //     }
-    // }
 
     useEffect(() => {
         fetchTaskDetails(params?.team)
@@ -227,7 +192,7 @@ const MainTeamBoard = () => {
     return (
         <section className=''>
 
-            <div className='xl:border-2 border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-0.5 xl:px-6 py-8 xl:bg-[#1F2937] mini_tab:mx-10 rounded-b relative'>
+            <div className='xl:border-1 xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#150a1880] xl:to-transparent mt-2 xl:border-[#596982] xl:ring-1 xl:ring-[#596982] border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-0.5 xl:px-6 py-8  mini_tab:mx-10 rounded-b relative '>
 
                 {
                     !task?._id ? (
@@ -260,30 +225,30 @@ const MainTeamBoard = () => {
                                     <div
                                         className="text-center bg-green-600 hover:bg-green-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm"
                                     >
-                                        <span className="hidden sm:block">Track Task</span>
-                                        <span className="block sm:hidden">Track</span>
+                                        <Link to={`/board/${params.user}/${params.team}/track`} className="hidden sm:block">Track Task</Link>
+                                        <Link to={`/board/${params.user}/${params.team}/track`} className="block sm:hidden">Track</Link>
                                     </div>
 
                                     {/* Deadline */}
-                                    <div
+                                    <Link to={`/board/${params.user}/${params.team}/deadline`}
                                         className="text-center bg-blue-600 hover:bg-blue-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm sm:block hidden"
                                     >
                                         Deadline
-                                    </div>
+                                    </Link>
 
                                     {/* Status */}
-                                    <div
+                                    <Link to={`/board/${params.user}/${params.team}/status`}
                                         className="text-center bg-purple-600 hover:bg-purple-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm"
                                     >
                                         Status
-                                    </div>
+                                    </Link>
                                 </div>
 
                                 {/* Mobile-Only Extra (Deadline) */}
                                 <div className="sm:hidden mt-3">
-                                    <div className="text-center bg-blue-600 hover:bg-blue-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm">
+                                    <Link to={`/board/${params.user}/${params.team}/deadline`} className="text-center bg-blue-600 hover:bg-blue-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg block cursor-pointer shadow-sm">
                                         Deadline
-                                    </div>
+                                    </Link>
                                 </div>
                             </div>
 
@@ -325,18 +290,18 @@ const MainTeamBoard = () => {
 
                                     </div>
 
-                                    <div className="flex items-center gap-2 sm:bg-gray-700 sm:px-3 sm:py-2 py-1.5 mt-1 rounded-lg sm:shadow-md">
+                                    <div className="flex items-center gap-2 sm:bg-gray-700 xl:bg-[#4f177d61]  sm:px-2.5 sm:py-2.5 py-1.5 mt-1 rounded-lg sm:shadow-md">
                                         <select
                                             name="sort-task"
                                             id="sort-task"
                                             defaultValue=""
-                                            className="bg-gray-800 cursor-pointer text-gray-200 text-sm px-3 py-1.5 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                            className="bg-gray-800 xl:bg-[#150a1880] cursor-pointer text-gray-200 text-sm px-3 py-1.5 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
                                             onChange={(e) => {
                                                 const val = e.target.value
                                                 setSortData(val)
                                             }}
                                         >
-                                            <option value="" disabled>Sorted By</option>
+                                            <option value="" disabled className=''>Sorted By</option>
                                             <option value="createdAt">Created At</option>
                                             <option value="updatedAt">Updated At</option>
                                             <option value="deadline">Deadline</option>

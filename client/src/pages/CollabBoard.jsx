@@ -28,7 +28,7 @@ const CollabBoard = () => {
 
 
   return (
-    <section className={`bg-[#282932] min-h-[calc(100vh-60px)] lg-real:px-[50px] px-6 py-4 grid ${slideOpen ? "lg-real:grid-cols-[1fr_80px]" : "lg-real:grid-cols-[1fr_500px]"} transform-view duration-500`}>
+    <section className={`bg-[#202128] xl:bg-gradient-to-r xl:from-purple-600/1 xl:via-purple-500/5 xl:to-transparent min-h-[calc(100vh-60px)] lg-real:px-[50px] px-6 py-4 grid ${slideOpen ? "lg-real:grid-cols-[1fr_80px]" : "lg-real:grid-cols-[1fr_500px]"} transform-view duration-500`}>
 
       <div className=''>
         {
@@ -36,32 +36,54 @@ const CollabBoard = () => {
         }
       </div>
 
-      <div className='pl-4 scroll-smooth relative lg-real:block hidden'>
-
-        <div onClick={(e) => {
-          e.stopPropagation()
-          setSlideOpen(!slideOpen)
-        }} className={`absolute top-4 -left-0.5 cursor-pointer w-fit text-[#d0cccc] ${slideOpen ? "rotate-180" : "rotate-0"} transition-transform duration-300`}
-          title={slideOpen ? "Show team list" : "hide team list"}
+      <div className="pl-4 scroll-smooth relative lg-real:block hidden ">
+        {/* Toggle Button */}
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            setSlideOpen(!slideOpen);
+          }}
+          className={`absolute top-4 -left-0.5 cursor-pointer 
+                text-[#a78bfa] ${slideOpen ? "rotate-180" : "rotate-0"} 
+                transition-transform duration-300`}
+          title={slideOpen ? "Show team list" : "Hide team list"}
         >
           <VscTriangleRight size={28} />
         </div>
 
+        {/* Heading */}
+        <h1
+          className={`ml-4 text-center font-extrabold py-3 text-xl tracking-wide 
+                text-[#f5f3ff] border-b-2 border-[#6d28d9] 
+                bg-[#1e1b29] shadow-[0_2px_0_#6d28d9] 
+                ${slideOpen ? "opacity-0" : "opacity-100"} 
+                transition-opacity duration-300`}
+        >
+          ▓ ALL TEAMS ▓
+        </h1>
 
-        <h1 className={`text-center font-bold py-4 text-3xl text-[#0ed55e] ${slideOpen ? "opacity-0" : "opacity-[100%]"} transition-opacity duration-300`} style={{ textShadow: "0 0 12px rgba(16,185,129,0.3)" }}>All TEAM</h1>
-
-
-        <div className={`h-[calc(100vh-170px)] transition-transform duration-300 ${slideOpen ? "hidden" : "block"} overflow-y-auto px-4 py-3 space-y-4 scrollbar-thin scrollbar-thumb-gray-500`} style={{ willChange: 'transform' }}>
-
+        {/* Teams List */}
+        <div
+          className={`h-[calc(100vh-170px)] transition-transform duration-300 
+                ${slideOpen ? "hidden" : "block"} 
+                overflow-y-auto px-3 py-4 space-y-3 
+                scrollbar-thin scrollbar-thumb-[#6d28d9]/60 scrollbar-track-transparent`}
+          style={{ willChange: "transform" }}
+        >
           {user?.roles?.map((v) => (
             <Link
               to={`${boardURL}/${v?.teamId}`}
               key={v?.teamId}
-              className="relative flex items-center justify-between bg-gradient-to-r from-green-100 to-green-200 rounded-xl px-5 py-4 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all duration-200"
+              className="relative flex items-center justify-between 
+                   bg-[#2a2438] border-2 border-[#6d28d9]/60 
+                   rounded-sm px-4 py-3 shadow-[3px_3px_0_#111] 
+                   hover:translate-x-[2px] hover:translate-y-[2px] 
+                   hover:shadow-[1px_1px_0_#111] 
+                   transition-all duration-150 cursor-pointer"
             >
               <div>
-                <h1 className="text-lg font-bold text-gray-900">{v?.name}</h1>
-                <p className="text-sm text-gray-600 font-medium mt-1">
+                <h1 className="text-sm font-bold text-[#f9fafb]">{v?.name}</h1>
+                <p className="text-xs text-[#d1d5db] mt-1">
                   {`${v.organization_type} ${v.organization_type === "other" ? "" : "Group"
                     }`}
                 </p>
@@ -70,39 +92,13 @@ const CollabBoard = () => {
               <img
                 src={bannerCombo[v?.organization_type]}
                 alt=""
-                className="h-[95%] absolute right-0 bottom-0 "
+                className="h-[80%] absolute right-2 bottom-1 opacity-70"
               />
-
             </Link>
           ))}
-
         </div>
-
-        {/* <div className={`${slideOpen ? "hidden" : "flex"} flex-wrap justify-center gap-6 border-l-4 border-l-[#d0cccc] pl-4 h-[calc(100vh-200px)] overflow-y-auto`} style={{ willChange: 'transform' }}>
-
-          {
-            user?.roles?.map((v, i) => {
-
-              return (
-                <Link to={`${boardURL}/${v?.teamId}`} key={`${boardURL}/${v?.teamId}`}
-                  className={`min-h-[120px] max-h-[120px] w-[90%] bg-[#c9dcca] rounded p-2 pl-4 relative cursor-pointer z-10`}>
-
-                  <img src={bannerCombo[v?.organization_type]} alt="" className='h-[95%] absolute right-0 bottom-0 -z-50' />
-
-                  <h1 className='text-xl font-bold'>{v?.name}</h1>
-                  <p className='text-base text-black/70 font-semibold'>
-                    {`${v.organization_type === "other" ? "" : "Group"}`}
-                  </p>
-                </Link>
-              )
-
-            })
-          }
-
-        </div> */}
-
-
       </div>
+
 
     </section>
   )
