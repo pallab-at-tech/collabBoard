@@ -19,6 +19,7 @@ import TrackTaskBoard from '../components/common/TrackTaskBoard'
 import DeadlineTaskBoard from '../components/common/DeadlineTaskBoard'
 import StatusTaskBoard from '../components/common/StatusTaskBoard'
 import SeparateTabForTask from '../pages/SeparateTabForTask'
+import SubmitTaskReport from '../pages/SubmitTaskReport'
 
 const router = createBrowserRouter([
     {
@@ -51,16 +52,16 @@ const router = createBrowserRouter([
                                 element: <TeamBoardEdit />
                             },
                             {
-                                path : "track",
-                                element : <TrackTaskBoard/>
+                                path: "track",
+                                element: <TrackTaskBoard />
                             },
                             {
-                                path : "deadline",
-                                element : <DeadlineTaskBoard/>
+                                path: "deadline",
+                                element: <DeadlineTaskBoard />
                             },
                             {
-                                path : "status",
-                                element : <StatusTaskBoard/>
+                                path: "status",
+                                element: <StatusTaskBoard />
                             }
                         ]
                     },
@@ -68,8 +69,12 @@ const router = createBrowserRouter([
 
             },
             {
-                path : "/task/:id",
-                element : <SeparateTabForTask/>
+                path: "/task/:id",
+                element: <SeparateTabForTask />,
+            },
+            {
+                path: "/task/:id/report",
+                element: <SubmitTaskReport />
             },
             {
                 path: "/profile/:user",
@@ -103,8 +108,8 @@ const router = createBrowserRouter([
                         element: <MessagePage />,
                         children: [
                             {
-                                path : "/chat/:conversation/edit",
-                                element : <MessageEdit/>
+                                path: "/chat/:conversation/edit",
+                                element: <MessageEdit />
                             },
                         ]
                     },

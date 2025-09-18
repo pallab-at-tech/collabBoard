@@ -4,6 +4,7 @@ import { FaClock, FaImage, FaLink, FaPaperPlane, FaUser, FaVideo } from 'react-i
 import { LuFullscreen } from "react-icons/lu";
 import { useLocation } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 // A small, reusable component for displaying metadata in the sidebar
 const MetadataItem = ({ icon, label, value }) => (
@@ -80,14 +81,14 @@ const SeparateTabForTask = () => {
 
 
   return (
-    <section className='bg-[#282932] min-h-[calc(100vh-60px)] grid xl:grid-cols-[3fr_1fr] relative '>
+    <section className='bg-gradient-to-r from-[#21242e] xl:from-[#181b29] via-[#21232d] to-[#22232b] min-h-[calc(100vh-60px)] xl:grid xl:grid-cols-[3fr_1fr] relative '>
 
       {/* main Description section */}
       <div className='py-6 xl:pb-10 pb-5 xl:px-10 px-5'>
 
         {/* Header */}
-        <div className="pb-4 mb-6 border-b border-gray-700">
-          <h1 className="text-3xl font-bold text-emerald-400">{data?.title}</h1>
+        <div className="pb-4 mb-6 border-b border-gray-600">
+          <h1 className="text-3xl font-bold text-[#6f89ef]">{data?.title}</h1>
           {/* <p className="text-xs text-gray-500 mt-2">Task ID: {data?._id}</p> */}
         </div>
 
@@ -95,7 +96,7 @@ const SeparateTabForTask = () => {
         <div className="mb-8">
 
           <h2 className="flex items-center gap-3 text-xl sm:text-[22px] font-semibold text-gray-200">
-            <FaFileAlt className="text-emerald-400" />
+            <FaFileAlt className="text-[#6f89ef]" />
             Description
           </h2>
 
@@ -107,7 +108,7 @@ const SeparateTabForTask = () => {
           {data?.description?.length > 200 && (
             <button
               onClick={() => setLineClampConfig(!lineClampConfig)}
-              className="mt-2 text-emerald-400 hover:text-emerald-300 text-sm font-medium cursor-pointer"
+              className="mt-2 text-blue-400 hover:text-emerald-300 text-sm font-medium cursor-pointer"
             >
               {lineClampConfig ? "Show Less" : "Read More"}
             </button>
@@ -125,7 +126,7 @@ const SeparateTabForTask = () => {
           {data?.image && (
             <div className="mb-6">
 
-              <h3 className="flex w-[250px] items-center justify-between gap-2 text-md font-medium text-emerald-300 mb-2">
+              <h3 className="flex w-[250px] items-center justify-between gap-2 text-md font-medium text-[#6f89ef] mb-2">
                 <div className='flex gap-2 items-center'>
                   <FaImage size={25} /> Image
                 </div>
@@ -143,7 +144,7 @@ const SeparateTabForTask = () => {
           {data?.video && (
             <div className="mb-6">
 
-              <h3 className="flex w-[250px] items-center justify-between gap-2 text-md font-medium text-emerald-300 mb-2">
+              <h3 className="flex w-[250px] items-center justify-between gap-2 text-md font-medium text-[#6f89ef] mb-2">
                 <div className='flex gap-2 items-center'>
                   <FaVideo /> Video
                 </div>
@@ -168,7 +169,7 @@ const SeparateTabForTask = () => {
         <div>
 
           <h2 className="flex items-center gap-3 text-xl sm:text-[22px] font-semibold text-gray-200">
-            <FaLink className="text-emerald-400" />
+            <FaLink className="text-[#6f89ef]" />
             Additional Links
           </h2>
 
@@ -196,31 +197,31 @@ const SeparateTabForTask = () => {
       </div>
 
       {/* Other section */}
-      <div className='xl:min-h-[calc(100vh-60px)] xl:max-h-[calc(100vh-60px)] xl:sticky top-[60px] bg-[#171923] sm:p-8 xl:px-10 px-5 py-8  overflow-y-auto lg:border-l lg:border-gray-700 '>
+      <div className='xl:min-h-[calc(100vh-60px)] xl:max-h-[calc(100vh-60px)] xl:sticky top-[60px] bg-gradient-to-r from-[#21242e] via-[#21232d] to-[#22232b]  xl:from-[#1b1e2d] xl:via-[#171923] xl:to-[#171923] sm:p-8 xl:px-10 px-5 py-8  overflow-y-auto lg:border-l lg:border-gray-700 '>
 
         <h2 className="text-[22px] font-bold text-white text-center mb-6 border-b border-gray-600 pb-2">
           Task Details
         </h2>
 
         <MetadataItem
-          icon={<FaCalendarAlt className="text-emerald-400" />}
+          icon={<FaCalendarAlt className="text-[#91a6fd]" />}
           label="Due Date"
           value={data?.dueDate}
         />
         <MetadataItem
-          icon={<FaClock className="text-emerald-400" />}
+          icon={<FaClock className="text-[#91a6fd]" />}
           label="Due Time"
           value={data?.dueTime}
         />
         <MetadataItem
-          icon={<FaUser className="text-emerald-400" />}
+          icon={<FaUser className="text-[#91a6fd]" />}
           label="Assigned By"
           value={data?.assignby}
         />
 
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
-            <FaUser className="text-emerald-400" />
+            <FaUser className="text-[#91a6fd]" />
             <span>Assigned To</span>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -228,7 +229,7 @@ const SeparateTabForTask = () => {
               data.assignTo.map((assignee, i) => (
                 <span
                   key={i}
-                  className="bg-emerald-900/70 text-emerald-200 text-xs font-semibold px-3 py-1 rounded-full"
+                  className="text-blue-200 bg-[#1e379d]  text-xs font-semibold px-3 py-1 rounded-full"
                 >
                   {assignee}
                 </span>
@@ -241,11 +242,11 @@ const SeparateTabForTask = () => {
 
         {/* Report Button */}
         <div className="mb-auto pt-6 border-t border-gray-700">
-          <button
-            className="w-full cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 text-md transition-transform hover:scale-105"
+          <Link to={`report`}
+            className="w-full cursor-pointer bg-[#3751b8] hover:bg-[#243c9c] text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 text-md transition-transform hover:scale-105"
           >
             <FaPaperPlane /> Submit Report
-          </button>
+          </Link>
         </div>
 
       </div>
