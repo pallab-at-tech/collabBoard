@@ -68,6 +68,8 @@ const GlobalProvider = ({ children }) => {
             })
             const { data: responseData } = response
 
+            console.log("response data....",responseData)
+
             if (responseData?.error) toast.error(responseData?.message)
             if (responseData?.success) dispatch(setTeamDetails(responseData?.data))
         } catch (error) {

@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialValue = {
+    _id: "",
     name: "",
     description: "",
     organization_type: "",
@@ -13,6 +14,7 @@ const teamSlice = createSlice({
     initialState: initialValue,
     reducers: {
         setTeamDetails: (state, action) => {
+            state._id = action.payload?._id
             state.name = action.payload?.name
             state.description = action.payload?.description
             state.organization_type = action.payload?.organization_type
@@ -20,11 +22,12 @@ const teamSlice = createSlice({
             state.request_send = [...action.payload?.request_send]
         },
         setTeamLogOut: (state, action) => {
-            state.name = "",
-                state.description = "",
-                state.organization_type = "",
-                state.member = [],
-                state.request_send = []
+            state._id = ""
+            state.name = ""
+            state.description = ""
+            state.organization_type = ""
+            state.member = []
+            state.request_send = []
         }
     }
 })

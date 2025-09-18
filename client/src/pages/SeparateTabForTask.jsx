@@ -19,7 +19,10 @@ const MetadataItem = ({ icon, label, value }) => (
 
 const SeparateTabForTask = () => {
 
-  const data = useLocation().state
+  const data = useLocation().state.val
+  const columnId = useLocation().state.columnId
+  const teamId = useLocation().state.teamId
+  
   const navigate = useNavigate()
 
   const [fullImage, setFullImage] = useState(false)
@@ -30,7 +33,7 @@ const SeparateTabForTask = () => {
 
   const [lineClampConfig, setLineClampConfig] = useState(false)
 
-  console.log("location data", data)
+  // console.log("location data", useLocation().state)
 
   if (!data) {
     return (
@@ -242,7 +245,8 @@ const SeparateTabForTask = () => {
 
         {/* Report Button */}
         <div className="mb-auto pt-6 border-t border-gray-700">
-          <Link to={`report`}
+          <Link to={`report`} state={{columnId : columnId , taskId : data?._id , teamId : teamId }}
+
             className="w-full cursor-pointer bg-[#3751b8] hover:bg-[#243c9c] text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 text-md transition-transform hover:scale-105"
           >
             <FaPaperPlane /> Submit Report

@@ -1,19 +1,43 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaPlus, FaTrash, FaPaperPlane } from "react-icons/fa6";
 import uploadFile from "../utils/uploadFile";
 import { RxCross2 } from "react-icons/rx";
+import { useGlobalContext } from "../provider/GlobalProvider";
+import toast from "react-hot-toast";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-const SubmitTaskReport = ({ taskId, userId }) => {
+const SubmitTaskReport = () => {
 
     const [links, setLinks] = useState([{ name: "", url: "" }]);
     const [loading, setLoading] = useState(false);
+    const { socketConnection } = useGlobalContext()
+
+    const user = useSelector(state => state?.user)
+
+    const location = useLocation()
 
     const [data, setData] = useState({
+        teamId: location.state?.teamId || "",
+        columnId: location.state?.columnId || "",
+        taskId: location.state?.taskId || "",
+        userName: user?.userId || "",
         text: "",
         image: "",
         video: "",
         links: {},
     })
+
+    useEffect(() => {
+        setData((preve) => {
+            return {
+                ...preve,
+                userName: user?.userId
+            }
+        })
+    }, [user])
+
+    const navigate = useNavigate()
 
     const [loadingPhoto, setloadingPhoto] = useState(false)
     const [loadingVideo, setloadingVideo] = useState(false)
@@ -65,23 +89,62 @@ const SubmitTaskReport = ({ taskId, userId }) => {
         })
     }
 
+    const filterGoodObject = () => {
+        const goodObj = links.filter((m) => m.name && m.url)
+
+        setData((preve) => {
+            return {
+                ...preve,
+                links: goodObj
+            }
+        })
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!socketConnection) return
         setLoading(true);
+        filterGoodObject()
+
         try {
+
+            socketConnection.once("report-submitted", (data) => {
+                console.log("data message",data)
+                toast.success(data?.message)
+                setLoading(false)
+                setData({
+                    teamId: "",
+                    columnId: "",
+                    taskId: "",
+                    userName: "",
+                    text: "",
+                    image: "",
+                    video: "",
+                    links: {},
+                })
+                navigate(-1)
+            })
+
+            socketConnection.once("reportError", (data) => {
+                toast.error(data?.message)
+                setLoading(false)
+            })
+
+            socketConnection.emit("report-submit", data)
 
         } catch (err) {
             console.error(err);
-        } finally {
-            setLoading(false);
+            setLoading(false)
         }
     };
+
+
 
     console.log("report data", data)
 
     return (
-        <section className="min-h-[calc(100vh-60px)] bg-gradient-to-r from-[#21242e] xl:from-[#181b29] via-[#21232d] to-[#22232b] p-8 text-gray-200">
-            <h1 className="text-2xl font-bold text-[#6f89ef] mb-6 text-center">
+        <section className="min-h-[calc(100vh-60px)] bg-gradient-to-r from-[#21242e] xl:from-[#181b29] via-[#21232d] to-[#22232b] px-8 py-4 text-gray-200">
+            <h1 className="text-2xl font-bold text-[#6f89ef] mb-5 text-center">
                 Submit Task Report
             </h1>
 
@@ -315,16 +378,19 @@ const SubmitTaskReport = ({ taskId, userId }) => {
 
 
                 {/* Submit Button */}
-                <button
-                    type="submit"
-                    className={`w-full bg-[#2a48c1] hover:bg-[#243c9c] ${ (loading || loadingPhoto || loadingVideo) ? "cursor-not-allowed" : "cursor-pointer"} text-white py-3 px-4 rounded-lg flex items-center justify-center gap-2 font-bold transition-transform hover:scale-105`}
-                >
-                    <FaPaperPlane />
-                    {loading ? "Submitting..." : "Submit Report"}
-                </button>
+                <div>
+                    <p className="text-sm py-1.5 text-[#97aaf7]">Once you submit you can't remove submit again , may you edit later.</p>
+                    <button
+                        type="submit"
+                        className={`w-full bg-[#2a48c1] hover:bg-[#243c9c] ${(loading || loadingPhoto || loadingVideo) ? "cursor-not-allowed" : "cursor-pointer"} text-white py-3 px-4 rounded-lg mt-0 flex items-center justify-center gap-2 font-bold `}
+                    >
+                        <FaPaperPlane />
+                        {loading ? "Submitting..." : "Submit Report"}
+                    </button>
+                </div>
 
             </form>
-            
+
         </section>
     );
 };

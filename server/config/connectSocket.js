@@ -5,8 +5,9 @@ import dotenv from 'dotenv'
 import jwt from "jsonwebtoken"
 import { conversationModel, messageModel } from '../model/chat.model.js'
 import userModel from '../model/user.model.js'
-import taskModel from "../model/task.model.js"
+import taskModel, { reportModel } from "../model/task.model.js"
 import teamModel from '../model/team.model.js'
+import { promises } from 'dns'
 dotenv.config()
 
 
@@ -879,7 +880,7 @@ io.on("connection", async (socket) => {
                         message: "New task assigned to you",
                         task: newTask,
                         columnId: columnId,
-                        columnName : column.name,
+                        columnName: column.name,
                         taskBoardId: taskBoard._id
                     })
                 })
@@ -889,7 +890,7 @@ io.on("connection", async (socket) => {
                 message: "New task assigned to you",
                 task: newTask,
                 columnId: columnId,
-                columnName : column.name,
+                columnName: column.name,
                 taskBoardId: taskBoard._id
             })
 
@@ -1319,6 +1320,164 @@ io.on("connection", async (socket) => {
             console.log("Error while collabDesk delete.", error)
             socket.emit("error", { message: "Server error collabDesk delete", error: true });
         }
+    })
+
+    // submit report of task
+    socket.on("report-submit", async (data) => {
+
+        try {
+            const { teamId, columnId, taskId, userName, text, image, video, aditional_link } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!teamId) {
+                return socket.emit("reportError", {
+                    message: "Team Id required"
+                })
+            }
+
+            if (!columnId) {
+                return socket.emit("reportError", {
+                    message: "Column Id required"
+                })
+            }
+
+            if (!taskId) {
+                return socket.emit("reportError", {
+                    message: "Task Id required"
+                })
+            }
+
+            if (!userName) {
+                return socket.emit("reportError", {
+                    message: "User Name required."
+                })
+            }
+
+            if (!text) {
+                return socket.emit("reportError", {
+                    message: "Text missing!"
+                })
+            }
+
+            const taskBoard = await taskModel.findOne({ teamId: teamId })
+
+            if (!taskBoard) {
+                return socket.emit("reportError", {
+                    message: "TaskBoard not found"
+                })
+            }
+
+            const column = taskBoard.column.id(columnId)
+
+            if (!column) {
+                return socket.emit("reportError", {
+                    message: "Column not found"
+                })
+            }
+
+            const task = column.tasks.id(taskId)
+
+            if (!task) {
+                return socket.emit("reportError", {
+                    message: "Task not found."
+                })
+            }
+
+            const isAssignedTask = task.assignTo.some((u) => u.toString() === userName.toString())
+
+            if (!isAssignedTask) {
+                return socket.emit("reportError", {
+                    message: "Illegal Access"
+                })
+            }
+
+            const isReportSubmiAlready = column.reportSubmit.some((u) => u.taskId.toString() === taskId.toString())
+
+            if (isReportSubmiAlready) {
+                return socket.emit("reportError", {
+                    message: "Report already submitted"
+                })
+            }
+
+            const now = new Date();
+            const today = now.toISOString().split("T")[0]; // "2025-09-18" format
+            const taskDate = new Date(task.dueDate).toISOString().split("T")[0];
+
+            if (taskDate < today) {
+                return socket.emit("reportError", {
+                    message: "Deadline passed out, contact with team leader"
+                });
+            }
+            else if (taskDate === today) {
+                // Same day
+                const dueTime = task.dueTime || "23:59";
+                const dueDateTime = new Date(`${task.dueDate}T${dueTime}:00`);
+
+                if (now > dueDateTime) {
+                    return socket.emit("reportError", {
+                        message: "Deadline time passed out, contact with team leader"
+                    });
+                }
+            }
+
+            // create report model
+            const report = await reportModel.create({
+                text: text,
+                submitBy: userId,
+                submitByUserId: userName,
+                image: image || "",
+                video: video || "",
+                aditional_link: aditional_link || {}
+            })
+
+            column.reportSubmit.push({
+                taskId: taskId,
+                report_id: report._id
+            })
+
+            await taskBoard.save()
+
+            const team = await teamModel.findById(teamId)
+
+            team.member.forEach((m) => {
+                io.to(m.userId.toString()).emit("report-submitted",{
+                    message : "Report submitted successfully",
+                    deskId: taskBoard._id,
+                    reportData: report
+                })
+            })
+
+            const users = await userModel.find(
+                {userId : {$in : task.assignTo}},
+                {_id : 1}
+            )
+
+            users.forEach((m) => {
+                io.to(m._id.toString()).emit("report-submitted",{
+                    message : "Report submitted successfully",
+                    deskId: taskBoard._id,
+                    reportData: report
+                })
+            })
+
+        } catch (error) {
+            console.log("Error while submit report.", error)
+            socket.emit("error", { message: "Server error while submit report", error: true })
+        }
+
     })
 
     // disconnect from the room and offline

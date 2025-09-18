@@ -10,8 +10,8 @@ import { FaAngleDown } from "react-icons/fa6";
 import { MdMovieEdit, MdAutoDelete } from "react-icons/md";
 import TaskEdit from '../TaskBoard/TaskEdit';
 import TaskDelete from '../TaskBoard/TaskDelete';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate , Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     const dropdownRef = useRef(null);
@@ -36,6 +36,9 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
         video: ""
     })
 
+    const team = useSelector(state => state.team)
+
+    const [columnId, setColumnId] = useState(val?._id)
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -217,7 +220,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                             {/* edit options */}
                                             <div className='text-white absolute sm:top-2 sm:-right-2.5 top-0 -right-6 flex sm:flex-col flex-row items-center'>
                                                 
-                                                <Link to={`/task/task-assign-${val?._id}`} state={val} className='h-fit w-fit'>
+                                                <Link to={`/task/task-assign-${val?._id}`} state={{val : val , columnId : columnId , teamId : team?._id}} className='h-fit w-fit'>
                                                     <FaExternalLinkAlt
                                                         size={17}
                                                         className='my-1.5 mx-1.5 cursor-pointer text-[#cccdcc] hover:text-[#f0f1f0] transition-colors'

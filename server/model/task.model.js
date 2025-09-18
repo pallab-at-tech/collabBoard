@@ -50,6 +50,12 @@ const taskSchema = new mongoose.Schema({
             type: String,
             default: ""
         }
+    ],
+    report_submit: [
+        {
+            type: mongoose.Schema.ObjectId,
+            default: ""
+        }
     ]
 },
     {
@@ -63,7 +69,50 @@ const columnSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    tasks: [taskSchema]
+    tasks: [taskSchema],
+    reportSubmit : [
+        {
+            report_id : {
+                type : mongoose.Schema.ObjectId,
+                ref : "report"
+            },
+            taskId : {
+                type : mongoose.Schema.ObjectId,
+                default : ""
+            }
+        }
+    ]
+})
+
+const submitReport = new mongoose.Schema({
+    text: {
+        type: String,
+        default: ""
+    },
+    submitBy: {
+        type: mongoose.Schema.ObjectId,
+        ref: "user"
+    },
+    submitByUserId: {
+        type: String,
+        default: ""
+    },
+    image: {
+        type: String,
+        default: ""
+    },
+    video: {
+        type: String,
+        default: ""
+    },
+    aditional_link: [
+        {
+            type: Object,
+            default: {}
+        }
+    ]
+}, {
+    timestamps: true
 })
 
 const taskBoardSchema = new mongoose.Schema({
@@ -84,4 +133,9 @@ const taskBoardSchema = new mongoose.Schema({
 })
 
 const taskModel = mongoose.model("taskboard", taskBoardSchema)
+const reportModel = mongoose.model("report",submitReport)
+
 export default taskModel
+export  {
+    reportModel
+}
