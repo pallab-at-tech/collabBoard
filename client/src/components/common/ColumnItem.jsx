@@ -217,7 +217,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                             {/* edit options */}
                                             <div className='text-white absolute sm:top-2 sm:-right-2.5 top-0 -right-6 flex sm:flex-col flex-row items-center'>
                                                 
-                                                <Link to={`/task/task-assign-${val?._id}`} className='h-fit w-fit'>
+                                                <Link to={`/task/task-assign-${val?._id}`} state={val} className='h-fit w-fit'>
                                                     <FaExternalLinkAlt
                                                         size={17}
                                                         className='my-1.5 mx-1.5 cursor-pointer text-[#cccdcc] hover:text-[#f0f1f0] transition-colors'
@@ -246,7 +246,6 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
 
                                             {
                                                 !taskLabel.has(val?._id) ? (
-                                                    // xl:from-[#17263980] xl:to-[#32194761]
                                                     <div className='relative w-full transition-all duration-500 ease-in-out sm:ml-20 ml-10 sm:mt-3 mt-8 max-w-[400px] xl:max-w-[500px] bg-gradient-to-l from-[#263b5480] to-[#494b4e61]  border-2 border-gray-400 rounded-md px-2 py-2 ' >
 
                                                         <div className='flex sm:flex-row flex-col gap-1 font-semibold text-[#d68408b9] absolute sm:-top-[26px] -top-[40px] sm:right-4 sm:left-auto left-0 text-sm'>
@@ -346,7 +345,6 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
 
                                                     </div>
                                                 ) : (
-                                                    // xl:from-[#17263980] xl:to-[#4f177d61]
                                                     <div className='h-[60px] xl:h-[100px] w-full transition-all duration-500 ease-in-out flex items-center relative sm:ml-20 ml-10 sm:mt-3 mt-8 max-w-[400px] xl:max-w-[500px] bg-gradient-to-l from-[#263b5480] to-[#494b4e61] border-2 border-gray-400 rounded-md px-2 py-2 '>
                                                         <h1 className='text-[#acca03] sm:text-[20px] text-[19px] font-semibold xl:pl-5'>{val?.title}</h1>
 
