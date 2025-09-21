@@ -1,4 +1,4 @@
-import taskModel from "../model/task.model.js"
+import taskModel, { reportModel } from "../model/task.model.js"
 import userModel from "../model/user.model.js"
 import teamModel from "../model/team.model.js"
 
@@ -61,8 +61,6 @@ export const getTaskDetailsController = async (request, response) => {
         const { teamId } = request.query || {}
         const userId = request.userId
 
-        console.log("teamId",teamId)
-
         if (!teamId) {
             return response.status(400).json({
                 message: 'Team ID required',
@@ -87,6 +85,8 @@ export const getTaskDetailsController = async (request, response) => {
         const isLeader = team.member.some(c => c.userId.toString() === userId && c.role.toString() !== "MEMBER")
         const data = await taskModel.findOne({ teamId: teamId })
 
+        // console.log("check server for task data",data)
+
         if (!isLeader && data !== null) {
 
             const filterData = {
@@ -100,6 +100,8 @@ export const getTaskDetailsController = async (request, response) => {
                     return userTask.length ? { ...c.toObject?.() || c, tasks: userTask } : null
                 }).filter(Boolean) || []
             }
+
+            // console.log("Filter data",filterData)
 
             return response.json({
                 message: 'Get task details',
@@ -465,4 +467,39 @@ export const deleteColumnLabelController = async (request, response) => {
             success: false
         })
     }
+}
+
+export const fetchReportController = async (request, response) => {
+
+    try {
+
+        const { reportId } = request.query || {}
+
+        console.log("request",request.params)
+
+        if (!reportId) {
+            return response.status(400).json({
+                message: "Report id required",
+                error: true,
+                success: false
+            })
+        }
+
+        const report = await reportModel.findById(reportId)
+
+        return response.json({
+            message : "get report",
+            report : report,
+            error : false,
+            success : true
+        })
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        })
+    }
+
 }

@@ -50,12 +50,6 @@ const taskSchema = new mongoose.Schema({
             type: String,
             default: ""
         }
-    ],
-    report_submit: [
-        {
-            type: mongoose.Schema.ObjectId,
-            default: ""
-        }
     ]
 },
     {
@@ -74,11 +68,12 @@ const columnSchema = new mongoose.Schema({
         {
             report_id : {
                 type : mongoose.Schema.ObjectId,
-                ref : "report"
+                ref : "report",
+                default : null
             },
             taskId : {
                 type : mongoose.Schema.ObjectId,
-                default : ""
+                default : null
             }
         }
     ]

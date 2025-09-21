@@ -109,7 +109,7 @@ const SubmitTaskReport = () => {
         try {
 
             socketConnection.once("report-submitted", (data) => {
-                console.log("data message",data)
+                // console.log("data message",data)
                 toast.success(data?.message)
                 setLoading(false)
                 setData({
@@ -123,6 +123,7 @@ const SubmitTaskReport = () => {
                     links: {},
                 })
                 navigate(-1)
+                localStorage.setItem("success", "success")
             })
 
             socketConnection.once("reportError", (data) => {
@@ -139,8 +140,7 @@ const SubmitTaskReport = () => {
     };
 
 
-
-    console.log("report data", data)
+    // console.log("report data", location.state)
 
     return (
         <section className="min-h-[calc(100vh-60px)] bg-gradient-to-r from-[#21242e] xl:from-[#181b29] via-[#21232d] to-[#22232b] px-8 py-4 text-gray-200">

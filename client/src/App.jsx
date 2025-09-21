@@ -13,10 +13,10 @@ function App() {
   const task = useSelector(state => state.task)
   const chat = useSelector(state => state.chat)
 
-  console.log("team",team)
-  console.log("user",user)
-  console.log("task",task)
-  console.log("chat",chat)
+  // console.log("team",team)
+  // console.log("user",user)
+  // console.log("task",task)
+  // console.log("chat",chat)
 
   if (isLogin === null) return null // optional safeguard on first render
 

@@ -10,7 +10,7 @@ import { FaAngleDown } from "react-icons/fa6";
 import { MdMovieEdit, MdAutoDelete } from "react-icons/md";
 import TaskEdit from '../TaskBoard/TaskEdit';
 import TaskDelete from '../TaskBoard/TaskDelete';
-import { useNavigate , Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
@@ -18,8 +18,6 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     const imageDropRef = useRef(null)
     const linkDropRef = useRef(null)
     const videoDropRef = useRef(null)
-
-    const navigate = useNavigate()
 
     const [imageOpen, setImageOpen] = useState({
         open: false,
@@ -36,9 +34,8 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
         video: ""
     })
 
-    const team = useSelector(state => state.team)
-
-    const [columnId, setColumnId] = useState(val?._id)
+    const team = useSelector(state => state?.team)
+    const user = useSelector(state => state?.user)
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -120,13 +117,22 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
 
     const [taskOpen, setTaskOpen] = useState(true)
     const [editTaskOpen, setEditTaskOpen] = useState(false)
+
     const [currentTaskToEdit, setCurrentTaskToEdit] = useState(null)
-
     const [taskDeleteOpen, setTaskDeleteOpen] = useState(false)
-
     const [taskLabel, setTaskLabel] = useState(new Set())
 
+    const [isTeamLeader, setIsTeamLeader] = useState(false)
 
+    // check user team leader or not
+
+    useEffect(() => {
+        const x = team?.member?.some((m) => m?.userId === user?._id && m?.role === "LEADER")
+        setIsTeamLeader(x)
+    }, [])
+
+
+    // console.log("val",isTeamLeader)
 
     return (
         <section>
@@ -169,7 +175,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                         <div className={`sm:ml-10 transition-opacity duration-500 ease-in-out bg-[#1c1c21] xl:bg-[#1c1c26] border-gray-700 border-2  backdrop-blur-md min-h-[150px] min-w-10 sm:max-w-[550px] xl:max-w-[640px]  rounded-md pr-8 pt-2 pb-6 ${taskOpen ? "opacity-100" : "opacity-0 h-0"}`}>
 
                             {
-                                val?.tasks?.map((val, idx) => {
+                                val?.tasks?.map((v, idx) => {
                                     return (
                                         <div key={`task-assign-${idx}`} className='flex my-4 gap-0 items-center justify-start relative'>
 
@@ -183,17 +189,17 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                                     onClick={() => {
                                                         const set = new Set(taskLabel)
 
-                                                        if (!set.has(val?._id)) {
-                                                            set.add(val?._id)
+                                                        if (!set.has(v?._id)) {
+                                                            set.add(v?._id)
                                                         }
                                                         else {
-                                                            set.delete(val?._id)
+                                                            set.delete(v?._id)
                                                         }
 
                                                         setTaskLabel(set)
                                                     }}
 
-                                                    className={`${taskLabel.has(val?._id) ? "rotate-180" : "rotate-0"} cursor-pointer transform transition-transform duration-500`}
+                                                    className={`${taskLabel.has(v?._id) ? "rotate-180" : "rotate-0"} cursor-pointer transform transition-transform duration-500`}
                                                 />
                                             </div>
 
@@ -203,24 +209,24 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                                     onClick={() => {
                                                         const set = new Set(taskLabel)
 
-                                                        if (!set.has(val?._id)) {
-                                                            set.add(val?._id)
+                                                        if (!set.has(v?._id)) {
+                                                            set.add(v?._id)
                                                         }
                                                         else {
-                                                            set.delete(val?._id)
+                                                            set.delete(v?._id)
                                                         }
 
                                                         setTaskLabel(set)
                                                     }}
 
-                                                    className={`${taskLabel.has(val?._id) ? "rotate-180" : "rotate-0"} cursor-pointer transform transition-transform duration-500`}
+                                                    className={`${taskLabel.has(v?._id) ? "rotate-180" : "rotate-0"} cursor-pointer transform transition-transform duration-500`}
                                                 />
                                             </div>
 
                                             {/* edit options */}
                                             <div className='text-white absolute sm:top-2 sm:-right-2.5 top-0 -right-6 flex sm:flex-col flex-row items-center'>
-                                                
-                                                <Link to={`/task/task-assign-${val?._id}`} state={{val : val , columnId : columnId , teamId : team?._id}} className='h-fit w-fit'>
+
+                                                <Link to={`/task/task-assign-${v?._id}`} state={{ val: v, columnId: val?._id, teamId: team?._id, report: val?.reportSubmit || [], isLeader: isTeamLeader || false }} className='h-fit w-fit'>
                                                     <FaExternalLinkAlt
                                                         size={17}
                                                         className='my-1.5 mx-1.5 cursor-pointer text-[#cccdcc] hover:text-[#f0f1f0] transition-colors'
@@ -231,7 +237,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                                 <MdMovieEdit
                                                     onClick={() => {
                                                         setEditTaskOpen(true)
-                                                        setCurrentTaskToEdit(val)
+                                                        setCurrentTaskToEdit(v)
                                                     }}
                                                     size={20}
                                                     className='my-1.5 mx-1.5 cursor-pointer text-[#50c900] hover:text-[#409f00] transition-colors' title='Edit task'
@@ -240,7 +246,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                                 <MdAutoDelete
                                                     onClick={() => {
                                                         setTaskDeleteOpen(true)
-                                                        setCurrentTaskToEdit(val)
+                                                        setCurrentTaskToEdit(v)
                                                     }}
                                                     className='my-1.5 mx-1.5 cursor-pointer text-[#f36900] hover:text-red-500 transition-colors' title='Delete task'
                                                     size={20}
@@ -248,79 +254,67 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                             </div>
 
                                             {
-                                                !taskLabel.has(val?._id) ? (
+                                                !taskLabel.has(v?._id) ? (
                                                     <div className='relative w-full transition-all duration-500 ease-in-out sm:ml-20 ml-10 sm:mt-3 mt-8 max-w-[400px] xl:max-w-[500px] bg-gradient-to-l from-[#263b5480] to-[#494b4e61]  border-2 border-gray-400 rounded-md px-2 py-2 ' >
 
                                                         <div className='flex sm:flex-row flex-col gap-1 font-semibold text-[#d68408b9] absolute sm:-top-[26px] -top-[40px] sm:right-4 sm:left-auto left-0 text-sm'>
 
                                                             <div className='flex flex-row gap-1 w-full'>
                                                                 <p>Created At : </p>
-                                                                <p className='sm:block hidden'>{`${val?.createdAt?.split("T")[0]} , ${val?.createdAt?.split("T")[1]?.split(".")[0]}`}</p>
-                                                                <p className='sm:hidden block'>{`${val?.createdAt?.split("T")[0]}`}</p>
+                                                                <p className='sm:block hidden'>{`${v?.createdAt?.split("T")[0]} , ${v?.createdAt?.split("T")[1]?.split(".")[0]}`}</p>
+                                                                <p className='sm:hidden block'>{`${v?.createdAt?.split("T")[0]}`}</p>
                                                             </div>
 
-                                                            <p className='sm:hidden block -mt-2'>{`${val?.createdAt?.split("T")[1]?.split(".")[0]}`}</p>
+                                                            <p className='sm:hidden block -mt-2'>{`${v?.createdAt?.split("T")[1]?.split(".")[0]}`}</p>
                                                         </div>
 
                                                         <div className='text-[#acca03] text-[20px] font-bold'>
-                                                            <h1>{val?.title}</h1>
+                                                            <h1>{v?.title}</h1>
                                                         </div>
 
                                                         <div className='text-white'>
                                                             <h1 className='font-bold'>Description : </h1>
-                                                            <h2 className='leading-[20px] text-[#ccccccd4] text-base'>{val?.description}</h2>
+                                                            <h2 className='leading-[20px] text-[#ccccccd4] text-base'>{v?.description}</h2>
                                                         </div>
 
-                                                        <div className='flex justify-between items-center mt-2'>
+                                                        <div className="flex justify-start items-center mt-3">
+                                                            <div className={`gap-4 ${v?.image || v?.video || (Array.isArray(v?.aditional_link) && v?.aditional_link?.length > 0) ? "flex" : "hidden"} bg-[#4e5d7257] text-gray-300 px-3 py-2 rounded-lg border border-gray-500 shadow-md`}>
+                                                                {/* Image icon */}
+                                                                {v?.image && (
+                                                                    <FaImages
+                                                                        onClick={() => handleOpenImage(v?.image)}
+                                                                        size={20}
+                                                                        className="cursor-pointer hover:text-blue-400 transition-colors"
+                                                                        title="Image"
+                                                                    />
+                                                                )}
 
-                                                            <div className='flex gap-3 text-[#1F2937] items-center'>
-                                                                {
-                                                                    val?.image && (
-                                                                        <FaImages onClick={() => {
-                                                                            handleOpenImage(val?.image)
-                                                                        }}
-                                                                            size={20}
-                                                                            className='cursor-pointer' title='image'
-                                                                        />
-                                                                    )
-                                                                }
+                                                                {/* Video icon */}
+                                                                {v?.video && (
+                                                                    <RiFolderVideoFill
+                                                                        onClick={() =>
+                                                                            setVideoOpen({ open: true, video: v?.video })
+                                                                        }
+                                                                        size={20}
+                                                                        className="cursor-pointer hover:text-red-400 transition-colors"
+                                                                        title="Video"
+                                                                    />
+                                                                )}
 
-                                                                {
-                                                                    val?.video && (
-                                                                        <RiFolderVideoFill onClick={() => {
-                                                                            setVideoOpen(() => {
-                                                                                return {
-                                                                                    open: true,
-                                                                                    video: val?.video
-                                                                                }
-                                                                            })
-                                                                        }}
-                                                                            size={20}
-                                                                            className='cursor-pointer' title='video'
-                                                                        />
-                                                                    )
-                                                                }
-
-                                                                {
-                                                                    Array.isArray(val?.aditional_link) && val?.aditional_link?.length !== 0 && (
-                                                                        <LuLink2 onClick={() => {
-                                                                            setLinkWindowOpen(() => {
-                                                                                return {
-                                                                                    open: true,
-                                                                                    data: val?.aditional_link
-                                                                                }
-                                                                            })
-                                                                        }}
-                                                                            size={26}
-                                                                            className='cursor-pointer'
-                                                                            title='Aditional link'
-                                                                        />
-                                                                    )
-                                                                }
-
+                                                                {/* Additional links icon */}
+                                                                {Array.isArray(v?.aditional_link) && v?.aditional_link?.length > 0 && (
+                                                                    <LuLink2
+                                                                        onClick={() =>
+                                                                            setLinkWindowOpen({ open: true, data: v?.aditional_link })
+                                                                        }
+                                                                        size={24}
+                                                                        className="cursor-pointer hover:text-green-400 transition-colors relative -top-0.5"
+                                                                        title="Additional Link"
+                                                                    />
+                                                                )}
                                                             </div>
-
                                                         </div>
+
 
                                                         <div className='flex flex-wrap sm:flex-row flex-col justify-between sm:items-center items-start mt-3'>
                                                             <div className='text-white font-bold leading-[19px]'>
@@ -328,11 +322,11 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
 
                                                                 <div className=''>
 
-                                                                    <p className='ml-2 text-[14px] text-[#ccccccd4]'>{`${val?.dueDate} ${val?.dueTime && ","}`}</p>
+                                                                    <p className='ml-2 text-[14px] text-[#ccccccd4]'>{`${v?.dueDate} ${v?.dueTime && ","}`}</p>
 
                                                                     {
                                                                         val?.dueTime && (
-                                                                            <p className='ml-2 text-[14px] text-[#ccccccd4]'>{val?.dueTime}</p>
+                                                                            <p className='ml-2 text-[14px] text-[#ccccccd4]'>{v?.dueTime}</p>
                                                                         )
                                                                     }
 
@@ -342,24 +336,24 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
 
                                                             <div className='text-white font-bold leading-[19px] pt-2'>
                                                                 <p>Assigned by</p>
-                                                                <p className='ml-3 text-[14px] text-[#ccccccd4]'>{val?.assignby}</p>
+                                                                <p className='ml-3 text-[14px] text-[#ccccccd4]'>{v?.assignby}</p>
                                                             </div>
                                                         </div>
 
                                                     </div>
                                                 ) : (
                                                     <div className='h-[60px] xl:h-[100px] w-full transition-all duration-500 ease-in-out flex items-center relative sm:ml-20 ml-10 sm:mt-3 mt-8 max-w-[400px] xl:max-w-[500px] bg-gradient-to-l from-[#263b5480] to-[#494b4e61] border-2 border-gray-400 rounded-md px-2 py-2 '>
-                                                        <h1 className='text-[#acca03] sm:text-[20px] text-[19px] font-semibold xl:pl-5'>{val?.title}</h1>
+                                                        <h1 className='text-[#acca03] sm:text-[20px] text-[19px] font-semibold xl:pl-5'>{v?.title}</h1>
 
                                                         <div className='flex sm:flex-row flex-col gap-1 font-semibold text-[#d68408b9] absolute sm:-top-[26px] -top-[40px] sm:right-4 sm:left-auto left-0 text-sm'>
 
                                                             <div className='flex flex-row gap-1 w-full'>
                                                                 <p>Created At : </p>
-                                                                <p className='sm:block hidden'>{`${val?.createdAt?.split("T")[0]} , ${val?.createdAt?.split("T")[1]?.split(".")[0]}`}</p>
-                                                                <p className='sm:hidden block'>{`${val?.createdAt?.split("T")[0]}`}</p>
+                                                                <p className='sm:block hidden'>{`${v?.createdAt?.split("T")[0]} , ${v?.createdAt?.split("T")[1]?.split(".")[0]}`}</p>
+                                                                <p className='sm:hidden block'>{`${v?.createdAt?.split("T")[0]}`}</p>
                                                             </div>
 
-                                                            <p className='sm:hidden block -mt-2'>{`${val?.createdAt?.split("T")[1]?.split(".")[0]}`}</p>
+                                                            <p className='sm:hidden block -mt-2'>{`${v?.createdAt?.split("T")[1]?.split(".")[0]}`}</p>
                                                         </div>
                                                     </div>
                                                 )

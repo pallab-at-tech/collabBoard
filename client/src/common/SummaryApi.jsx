@@ -88,6 +88,10 @@ const SummaryApi = {
     get_group_details : {
         url : "/api/chat/get-group-details",
         method : "get"
+    },
+    fetch_task_report : {
+        url : "/api/task/get-report",
+        method : "get"
     }
 }
 

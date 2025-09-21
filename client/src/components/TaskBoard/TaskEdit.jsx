@@ -455,7 +455,7 @@ const TaskEdit = ({ close, columnName, currentTask, columnId }) => {
                             const isSelected = selectedMember.has(val?.userName)
 
                             return (
-                                <div className={`${userId === val?.userName ? "hidden" : "flex"} justify-between items-center p-3 rounded-md border transition my-1 ${isSelected ? "bg-green-100 border-green-400" : "bg-white border-gray-300"}`}>
+                                <div key={`team-m-${idx}`} className={`${userId === val?.userName ? "hidden" : "flex"} justify-between items-center p-3 rounded-md border transition my-1 ${isSelected ? "bg-green-100 border-green-400" : "bg-white border-gray-300"}`}>
 
                                     <div>
                                         <p className="text-gray-800 font-medium pb-1">{val?.userName}</p>

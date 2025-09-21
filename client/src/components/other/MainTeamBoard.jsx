@@ -10,7 +10,8 @@ import ColumnItem from '../common/ColumnItem'
 import { useDispatch } from 'react-redux'
 import {
     updateColumnByTaskUnAssign, updateColumnByTaskAssign, sortColumnByCreatedAt,
-    sortColumnByUpdatedAt, sortColumnByDeadLine, setTaskLogOut , taskBoardNameChange
+    sortColumnByUpdatedAt, sortColumnByDeadLine, setTaskLogOut , taskBoardNameChange,
+    updateColumn
 } from '../../store/taskSlice'
 import RenameCollabDesk from './RenameCollabDesk'
 import DeleteCollabDesk from '../TaskBoard/DeleteCollabDesk'
@@ -187,7 +188,7 @@ const MainTeamBoard = () => {
 
     }, [sortData, task])
 
-    console.log("task details hi", task)
+    // console.log("task details hi", task)
 
     return (
         <section className=''>

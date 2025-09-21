@@ -5,6 +5,11 @@ import { LuFullscreen } from "react-icons/lu";
 import { useLocation } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import UpdateReport from './UpdateReport';
+import { PiEyesBold } from "react-icons/pi";
+import Axios from '../utils/Axios';
+import SummaryApi from '../common/SummaryApi';
 
 // A small, reusable component for displaying metadata in the sidebar
 const MetadataItem = ({ icon, label, value }) => (
@@ -22,7 +27,9 @@ const SeparateTabForTask = () => {
   const data = useLocation().state.val
   const columnId = useLocation().state.columnId
   const teamId = useLocation().state.teamId
-  
+  const report = useLocation().state.report
+  const isLeader = useLocation().state.isLeader
+
   const navigate = useNavigate()
 
   const [fullImage, setFullImage] = useState(false)
@@ -32,8 +39,12 @@ const SeparateTabForTask = () => {
   const videoDropRef = useRef(null)
 
   const [lineClampConfig, setLineClampConfig] = useState(false)
+  const [isReportSubmitted, setIsReportSubmitted] = useState(false)
+  const [openReportWindow, setOpenReportWindow] = useState(false)
 
-  // console.log("location data", useLocation().state)
+  const user = useSelector(state => state.user)
+
+  const [reportData, setReportData] = useState(null)
 
   if (!data) {
     return (
@@ -67,7 +78,6 @@ const SeparateTabForTask = () => {
     };
   }, [])
 
-
   useEffect(() => {
     const clickOutSideOfVideo = (event) => {
       if (videoDropRef.current && !videoDropRef.current.contains(event.target)) {
@@ -81,6 +91,41 @@ const SeparateTabForTask = () => {
     };
   }, [])
 
+  useEffect(() => {
+    const x = report.some((m) => m?.taskId === data?._id)
+    setIsReportSubmitted(x)
+    return () => localStorage.removeItem("success")
+  }, [])
+
+  // fetch report data
+  useEffect(() => {
+
+    const fetchReport = async () => {
+      if (!report) return
+
+      try {
+        const response = await Axios({
+          ...SummaryApi.fetch_task_report,
+          params: {
+            reportId: report[0]?.report_id || ""
+          }
+        })
+        const { data: responseData } = response
+
+        if (responseData.success) {
+          setReportData(responseData?.report)
+        }
+
+      } catch (error) {
+        console.log("report fetch error", error)
+      }
+    }
+
+    fetchReport()
+
+  }, [])
+
+  console.log("report?.report_id", reportData?.submitBy, "   user id", user?._id, "    ===", reportData?.submitBy === user?._id)
 
 
   return (
@@ -245,12 +290,64 @@ const SeparateTabForTask = () => {
 
         {/* Report Button */}
         <div className="mb-auto pt-6 border-t border-gray-700">
-          <Link to={`report`} state={{columnId : columnId , taskId : data?._id , teamId : teamId }}
+          {
+            isLeader ? (
+              isReportSubmitted ? (
 
-            className="w-full cursor-pointer bg-[#3751b8] hover:bg-[#243c9c] text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 text-md transition-transform hover:scale-105"
-          >
-            <FaPaperPlane /> Submit Report
-          </Link>
+                <div className="flex items-center justify-between flex-wrap bg-[#1f2230] border border-gray-700 p-3 rounded-md">
+                  {/* Left section */}
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-400">Report Status</span>
+                    <span className="text-green-400 font-semibold">{`Submitted by ${reportData?.submitByUserId}`}</span>
+                  </div>
+
+                  {/* Right action */}
+                  <button
+                    className="flex items-center gap-1 text-blue-400 hover:text-blue-500 text-sm font-medium cursor-pointer"
+                  >
+                    <PiEyesBold className="text-lg" />
+                    See Report
+                  </button>
+                </div>
+
+              ) : (
+                <div className="flex items-center justify-between bg-[#1f2230] border border-gray-700 p-3 rounded-md">
+                  <span className="text-red-400 font-medium">❌ No submission yet</span>
+                </div>
+              )
+            ) : (
+              <>
+                <Link to={`report`} state={{ columnId: columnId, taskId: data?._id, teamId: teamId }}
+
+                  className={`w-full ${isReportSubmitted || localStorage.getItem("success") === "success" ? "hidden" : "block"} cursor-pointer bg-[#3751b8] hover:bg-[#243c9c] text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 text-md transition-transform hover:scale-105`}
+                >
+                  <FaPaperPlane /> Submit Report
+                </Link>
+
+                <div
+                  className={`${isReportSubmitted || localStorage.getItem("success") === "success"
+                    ? "block"
+                    : "hidden"
+                    } bg-[#1f2230] border border-gray-700 rounded-md p-4 space-y-2`}
+                >
+                  {/* Preview button */}
+                  <div
+                    onClick={() => setOpenReportWindow(true)}
+                    className="w-full cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md flex items-center justify-center gap-2 text-sm transition-transform hover:scale-105"
+                  >
+                    <PiEyesBold className="text-lg" />
+                    Preview
+                  </div>
+
+                  {/* Submitted by info */}
+                  <div className="text-gray-300 text-sm">
+                    Submitted by <span className="font-medium text-white">{`${user?._id === reportData?.submitBy ? "you" : reportData?.submitByUserId}`}</span>
+                  </div>
+                </div>
+
+              </>
+            )
+          }
         </div>
 
       </div>
@@ -276,6 +373,12 @@ const SeparateTabForTask = () => {
             </div>
 
           </section>
+        )
+      }
+
+      {
+        openReportWindow && (
+          <UpdateReport onClose={() => setOpenReportWindow(false)} />
         )
       }
 

@@ -68,7 +68,7 @@ const GlobalProvider = ({ children }) => {
             })
             const { data: responseData } = response
 
-            console.log("response data....",responseData)
+            // console.log("response data....",responseData)
 
             if (responseData?.error) toast.error(responseData?.message)
             if (responseData?.success) dispatch(setTeamDetails(responseData?.data))
@@ -84,6 +84,8 @@ const GlobalProvider = ({ children }) => {
                 params: { teamId }
             })
             const { data: responseData } = response
+
+            // console.log("responseData for task from global",responseData)
 
             if (responseData?.error) toast.error(responseData?.message)
             if (responseData?.success) dispatch(setTask(responseData?.data))
