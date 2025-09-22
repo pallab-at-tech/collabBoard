@@ -132,7 +132,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     }, [])
 
 
-    // console.log("val",isTeamLeader)
+    
 
     return (
         <section>
