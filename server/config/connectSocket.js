@@ -1326,7 +1326,7 @@ io.on("connection", async (socket) => {
     socket.on("report-submit", async (data) => {
 
         try {
-            const { teamId, columnId, taskId, userName, text, image, video, aditional_link } = data || {}
+            const { teamId, columnId, taskId, userName, text, image, video, links } = data || {}
 
             const token = socket.handshake.auth?.token;
             if (!token) {
@@ -1339,6 +1339,8 @@ io.on("connection", async (socket) => {
             } catch (err) {
                 return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
             }
+
+            console.log("aditional_link",links)
 
             const userId = payload1.id;
 
@@ -1440,7 +1442,7 @@ io.on("connection", async (socket) => {
                 submitByUserId: userName,
                 image: image || "",
                 video: video || "",
-                aditional_link: aditional_link || {}
+                aditional_link: links || []
             })
 
             column.reportSubmit.push({

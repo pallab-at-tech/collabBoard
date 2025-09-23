@@ -475,8 +475,6 @@ export const fetchReportController = async (request, response) => {
 
         const { reportId } = request.query || {}
 
-        console.log("request",request.params)
-
         if (!reportId) {
             return response.status(400).json({
                 message: "Report id required",

@@ -10,6 +10,7 @@ import UpdateReport from './UpdateReport';
 import { PiEyesBold } from "react-icons/pi";
 import Axios from '../utils/Axios';
 import SummaryApi from '../common/SummaryApi';
+import { RxCross2 } from "react-icons/rx";
 
 // A small, reusable component for displaying metadata in the sidebar
 const MetadataItem = ({ icon, label, value }) => (
@@ -41,6 +42,9 @@ const SeparateTabForTask = () => {
   const [lineClampConfig, setLineClampConfig] = useState(false)
   const [isReportSubmitted, setIsReportSubmitted] = useState(false)
   const [openReportWindow, setOpenReportWindow] = useState(false)
+
+  const [seeReport, setSeeReport] = useState(false)
+  const reportRef = useRef(null)
 
   const user = useSelector(state => state.user)
 
@@ -91,10 +95,30 @@ const SeparateTabForTask = () => {
     };
   }, [])
 
+  // handle click outside
+  useEffect(() => {
+
+    const handleClickOutside = (event) => {
+      if (reportRef.current && !reportRef.current.contains(event.target)) {
+        setSeeReport(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+
+  }, [])
+
   useEffect(() => {
     const x = report.some((m) => m?.taskId === data?._id)
     setIsReportSubmitted(x)
-    return () => localStorage.removeItem("success")
+    return () => {
+      localStorage.removeItem("success")
+      localStorage.removeItem("report")
+    }
   }, [])
 
   // fetch report data
@@ -125,7 +149,20 @@ const SeparateTabForTask = () => {
 
   }, [])
 
-  console.log("report?.report_id", reportData?.submitBy, "   user id", user?._id, "    ===", reportData?.submitBy === user?._id)
+  useEffect(() => {
+
+    const x = localStorage.getItem("report")
+    const reportObj = x ? JSON.parse(x) : null;
+
+    if(reportObj){
+      setReportData(reportObj)
+    }
+
+  }, [isReportSubmitted])
+
+
+
+  // console.log("reportData", reportData)
 
 
   return (
@@ -302,7 +339,7 @@ const SeparateTabForTask = () => {
                   </div>
 
                   {/* Right action */}
-                  <button
+                  <button onClick={() => setSeeReport(true)}
                     className="flex items-center gap-1 text-blue-400 hover:text-blue-500 text-sm font-medium cursor-pointer"
                   >
                     <PiEyesBold className="text-lg" />
@@ -379,6 +416,101 @@ const SeparateTabForTask = () => {
       {
         openReportWindow && (
           <UpdateReport onClose={() => setOpenReportWindow(false)} />
+        )
+      }
+
+
+      {
+        seeReport && (
+          <section className="fixed right-0 left-0 top-[60px] bottom-0 flex flex-col items-center justify-center z-50 bg-[#1e2e465e]">
+            {console.log("reportData", reportData)}
+
+            <div ref={reportRef} className="bg-[#f5f9ff] max-h-[500px] relative rounded-2xl shadow-lg p-6 w-[90%] sm:w-[450px] max-w-2xl overflow-y-auto hide-scrollbar">
+
+              <RxCross2 size={25} className='absolute top-2 right-2 text-blue-950 hover:text-blue-700 transition-colors duration-300 cursor-pointer' onClick={() => setSeeReport(false)} />
+
+              <h2 className="text-xl font-semibold mb-4">Report</h2>
+
+              {/* Text */}
+              {reportData?.text && (
+                <p className="text-gray-700 mb-3">
+                  <span className="font-medium text-gray-950">Message: </span>
+                  {reportData?.text}
+                </p>
+              )}
+
+              {/* Image */}
+              {reportData?.image && reportData?.image !== "" && (
+                <div className="mb-3">
+                  <span className="font-medium text-gray-950">Image: </span>
+                  <a
+                    href={reportData?.image}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-emerald-600 hover:text-emerald-500 hover:underline transition-colors break-all underline"
+                  >
+                    See image
+                  </a>
+                </div>
+              )}
+
+              {/* Video */}
+              {reportData?.video && reportData?.video !== "" && (
+                <div className="mb-3">
+                  <span className="font-medium text-gray-950">Video: </span>
+                  <a
+                    href={reportData?.video}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-emerald-600 hover:text-emerald-500 hover:underline transition-colors break-all underline"
+                  >
+                    See Video
+                  </a>
+                </div>
+              )}
+
+              {/* Additional Links */}
+              {reportData.aditional_link &&
+                reportData.aditional_link.filter((link) => link.url && link.name).length > 0 && (
+                  <ul className="list-disc list-inside my-2">
+                    <h1>Provided links</h1>
+                    {reportData.aditional_link
+                      .filter((link) => link.url && link.name)
+                      .map((link, i) => (
+                        <li key={i}>
+                          <a
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            {link.name}
+                          </a>
+                        </li>
+                      ))}
+                  </ul>
+                )
+              }
+
+              {/* Meta Info */}
+              <div className="text-sm text-gray-500 border-t border-t-[#2536764e] pt-3">
+                <p>
+                  <span className="font-medium">Submitted By:</span>{" "}
+                  {reportData?.submitByUserId}
+                </p>
+                <p>
+                  <span className="font-medium">Created At:</span>{" "}
+                  {new Date(reportData?.createdAt).toLocaleString()}
+                </p>
+                <p>
+                  <span className="font-medium">Updated At:</span>{" "}
+                  {new Date(reportData?.updatedAt).toLocaleString()}
+                </p>
+              </div>
+
+            </div>
+
+          </section>
         )
       }
 
