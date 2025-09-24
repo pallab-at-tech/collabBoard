@@ -1340,8 +1340,6 @@ io.on("connection", async (socket) => {
                 return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
             }
 
-            console.log("aditional_link",links)
-
             const userId = payload1.id;
 
             if (!teamId) {
@@ -1455,21 +1453,21 @@ io.on("connection", async (socket) => {
             const team = await teamModel.findById(teamId)
 
             team.member.forEach((m) => {
-                io.to(m.userId.toString()).emit("report-submitted",{
-                    message : "Report submitted successfully",
+                io.to(m.userId.toString()).emit("report-submitted", {
+                    message: "Report submitted successfully",
                     deskId: taskBoard._id,
                     reportData: report
                 })
             })
 
             const users = await userModel.find(
-                {userId : {$in : task.assignTo}},
-                {_id : 1}
+                { userId: { $in: task.assignTo } },
+                { _id: 1 }
             )
 
             users.forEach((m) => {
-                io.to(m._id.toString()).emit("report-submitted",{
-                    message : "Report submitted successfully",
+                io.to(m._id.toString()).emit("report-submitted", {
+                    message: "Report submitted successfully",
                     deskId: taskBoard._id,
                     reportData: report
                 })
@@ -1480,6 +1478,128 @@ io.on("connection", async (socket) => {
             socket.emit("error", { message: "Server error while submit report", error: true })
         }
 
+    })
+
+    // update report
+    socket.on("update-report", async (data) => {
+        try {
+            const { teamId, columnId, taskId, reportId, userName, text, image, video, aditional_link = [] } = data || {}
+
+            console.log("report request",data)
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!teamId) {
+                return socket.emit("reportSubmitError", {
+                    message: "Team Id required"
+                })
+            }
+
+            if (!columnId) {
+                return socket.emit("reportSubmitError", {
+                    message: "Column Id required"
+                })
+            }
+
+            if (!taskId) {
+                return socket.emit("reportSubmitError", {
+                    message: "Task Id required"
+                })
+            }
+
+            if (!reportId) {
+                return socket.emit("reportSubmitError", {
+                    message: "Report Id required"
+                })
+            }
+
+            if (!userName) {
+                return socket.emit("reportSubmitError", {
+                    message: "User Name required."
+                })
+            }
+
+            const taskBoard = await taskModel.findOne({ teamId: teamId })
+
+            if (!taskBoard) {
+                return socket.emit("reportSubmitError", {
+                    message: "TaskBoard not found"
+                })
+            }
+
+            const column = taskBoard.column.id(columnId)
+
+            if (!column) {
+                return socket.emit("reportSubmitError", {
+                    message: "Column not found"
+                })
+            }
+
+            const task = column.tasks.id(taskId)
+
+            if (!task) {
+                return socket.emit("reportSubmitError", {
+                    message: "Task not found."
+                })
+            }
+
+            const isAssignedTask = task.assignTo.some((u) => u.toString() === userName.toString())
+
+            if (!isAssignedTask) {
+                return socket.emit("reportSubmitError", {
+                    message: "Illegal Access"
+                })
+            }
+
+            const now = new Date();
+            const today = now.toISOString().split("T")[0]; // "2025-09-18" format
+            const taskDate = new Date(task.dueDate).toISOString().split("T")[0];
+
+            if (taskDate < today) {
+                return socket.emit("reportSubmitError", {
+                    message: "Deadline passed out, can't updated anymore."
+                });
+            }
+            else if (taskDate === today) {
+                // Same day
+                const dueTime = task.dueTime || "23:59";
+                const dueDateTime = new Date(`${task.dueDate}T${dueTime}:00`);
+
+                if (now > dueDateTime) {
+                    return socket.emit("reportSubmitError", {
+                        message: "Deadline time passed out, can't updated anymore."
+                    });
+                }
+            }
+
+            const report = await reportModel.findByIdAndUpdate(reportId, {
+                image: image,
+                video: video,
+                aditional_link: aditional_link,
+                ...(text && { text: text })
+            })
+
+            io.to(userId.toString()).emit("report-updatted",{
+                message : "Report update successfully",
+                updateData : report
+            })
+
+        } catch (error) {
+            console.log("Error while update report.", error)
+            socket.emit("error", { message: "Server error while update report", error: true })
+        }
     })
 
     // disconnect from the room and offline

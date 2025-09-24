@@ -49,6 +49,9 @@ const SeparateTabForTask = () => {
   const user = useSelector(state => state.user)
 
   const [reportData, setReportData] = useState(null)
+  const [updateData, setUpdateData] = useState({
+    update: false
+  })
 
   if (!data) {
     return (
@@ -147,22 +150,19 @@ const SeparateTabForTask = () => {
 
     fetchReport()
 
-  }, [])
+  }, [updateData.update,updateData])
 
   useEffect(() => {
 
     const x = localStorage.getItem("report")
     const reportObj = x ? JSON.parse(x) : null;
 
-    if(reportObj){
+    if (reportObj) {
       setReportData(reportObj)
     }
 
   }, [isReportSubmitted])
 
-
-
-  // console.log("reportData", reportData)
 
 
   return (
@@ -413,17 +413,27 @@ const SeparateTabForTask = () => {
         )
       }
 
+      {/* report window for update report */}
       {
         openReportWindow && (
-          <UpdateReport onClose={() => setOpenReportWindow(false)} />
+          <UpdateReport
+            onClose={() => setOpenReportWindow(false)}
+            data={reportData}
+            setUpdateData={setUpdateData}
+            externalData={{
+              teamId: teamId,
+              columnId: columnId,
+              taskId: data?._id,
+              userName: user?.userId
+            }}
+          />
         )
       }
 
-
+      {/* see report for who assign ( leader ) */}
       {
         seeReport && (
           <section className="fixed right-0 left-0 top-[60px] bottom-0 flex flex-col items-center justify-center z-50 bg-[#1e2e465e]">
-            {console.log("reportData", reportData)}
 
             <div ref={reportRef} className="bg-[#f5f9ff] max-h-[500px] relative rounded-2xl shadow-lg p-6 w-[90%] sm:w-[450px] max-w-2xl overflow-y-auto hide-scrollbar">
 
@@ -513,6 +523,7 @@ const SeparateTabForTask = () => {
           </section>
         )
       }
+
 
     </section>
   )

@@ -89,18 +89,6 @@ const SubmitTaskReport = () => {
         })
     }
 
-    const filterGoodObject = () => {
-        const goodObj = links.filter((m) => m.name && m.url)
-
-        setData((preve) => {
-            return {
-                ...preve,
-                links: goodObj
-            }
-        })
-    }
-
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!socketConnection) return
@@ -143,17 +131,7 @@ const SubmitTaskReport = () => {
         }
     };
 
-    useEffect(() => {
-
-        const report = {
-            gi: "j.m",
-            vhg: "jhkj"
-        }
-        localStorage.setItem("report", JSON.stringify(report))
-    }, [])
-
-    // console.log("report data", data)
-
+    // console.log("submit task report",)
 
 
     return (
@@ -256,7 +234,6 @@ const SubmitTaskReport = () => {
                                 className="hidden"
                             />
                         </label>
-
 
                         {/* Video Upload */}
                         <label className="flex flex-col bg-gray-800 items-center justify-center w-40 h-28 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-[#6f89ef] hover:bg-gray-800/40 transition relative overflow-hidden">
