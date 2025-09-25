@@ -20,6 +20,7 @@ import DeadlineTaskBoard from '../components/common/DeadlineTaskBoard'
 import StatusTaskBoard from '../components/common/StatusTaskBoard'
 import SeparateTabForTask from '../pages/SeparateTabForTask'
 import SubmitTaskReport from '../pages/SubmitTaskReport'
+import ShowColumnForTrack from '../components/TaskBoard/ShowColumnForTrack'
 
 const router = createBrowserRouter([
     {
@@ -53,7 +54,13 @@ const router = createBrowserRouter([
                             },
                             {
                                 path: "track",
-                                element: <TrackTaskBoard />
+                                element: <TrackTaskBoard />,
+                                children : [
+                                    {
+                                        path : "col",
+                                        element : <ShowColumnForTrack/>
+                                    }
+                                ]
                             },
                             {
                                 path: "deadline",

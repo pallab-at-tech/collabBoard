@@ -125,14 +125,11 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     const [isTeamLeader, setIsTeamLeader] = useState(false)
 
     // check user team leader or not
-
     useEffect(() => {
         const x = team?.member?.some((m) => m?.userId === user?._id && m?.role === "LEADER")
         setIsTeamLeader(x)
     }, [])
 
-
-    
 
     return (
         <section>

@@ -226,8 +226,8 @@ const MainTeamBoard = () => {
                                     <div
                                         className="text-center bg-green-600 hover:bg-green-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm"
                                     >
-                                        <Link to={`/board/${params.user}/${params.team}/track`} className="hidden sm:block">Track Task</Link>
-                                        <Link to={`/board/${params.user}/${params.team}/track`} className="block sm:hidden">Track</Link>
+                                        <Link to={`/board/${params.user}/${params.team}/track`} state={{teamId : params.team}} className="hidden sm:block">Track Task</Link>
+                                        <Link to={`/board/${params.user}/${params.team}/track`} state={{teamId : params.team}} className="block sm:hidden">Track</Link>
                                     </div>
 
                                     {/* Deadline */}

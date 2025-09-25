@@ -38,7 +38,7 @@ const StatusTaskBoard = () => {
   const teamStats = groupByAssignee(dummyTasks);
 
   return (
-    <section className="xl:border-2 border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-2 xl:px-6 py-8 xl:bg-[#1F2937] mini_tab:mx-10 rounded-b relative text-white">
+    <section className="xl:border-2  border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-2 xl:px-6 py-8 xl:bg-[#1F2937] mini_tab:mx-10 rounded-b relative text-white">
       <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
         <FaUsers className="text-indigo-400" /> Task Status Overview
       </h2>

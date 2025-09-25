@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { FaSearch, FaCheckCircle, FaClock, FaTasks } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import { useGlobalContext } from "../../provider/GlobalProvider";
+import { useLocation , Link, Outlet } from "react-router-dom";
 
 
 const TrackTaskBoard = () => {
+
+  const { fetchTaskDetails } = useGlobalContext()
+
+  const teamId = useLocation().state?.teamId
+  const x = useLocation().pathname.split("/")
 
   const task = useSelector(state => state.task)
 
@@ -63,17 +70,22 @@ const TrackTaskBoard = () => {
   };
 
   useEffect(() => {
+    if(!teamId) return
+    fetchTaskDetails(teamId)
+  }, [x.length])
+
+  useEffect(() => {
     const newData = manageTask()
     setData(newData)
-  }, [])
+  }, [task])
 
-  console.log("Task hi", data)
+  // console.log("Task hi", x)
 
   return (
-    <section className="xl:border-2 xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#0a0a1880] border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-2 xl:px-6 py-8  mini_tab:mx-10 rounded-b relative text-white">
+    <section className="xl:border-2  xl:border-[#596982] border-white xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#0a0a1880] overflow-y-auto hide-scrollbar min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-2 xl:px-6 py-8  mini_tab:mx-10 rounded-b relative text-white">
 
       {/* Header Controls */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-3 w-full">
+      <div className={`flex ${x[x.length-1] === "col" ? "hidden" : "block"} flex-col md:flex-row justify-between items-center mb-6 gap-3 w-full`}>
 
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <FaTasks className="text-indigo-400" /> Track Tasks
@@ -102,12 +114,12 @@ const TrackTaskBoard = () => {
       </div>
 
       {/* Task List */}
-      <div className="grid gap-4">
+      <div className={`grid gap-4 ${x[x.length-1] === "col" ? "hidden" : "block"}`}>
 
         {
           data?.map((v, i) => {
             return (
-              <div
+              <Link to={"col"} state={{data : v}}
                 key={v?._id}
                 className="bg-gray-800 border border-gray-700 shadow-md rounded-xl p-4 cursor-pointer">
 
@@ -125,7 +137,7 @@ const TrackTaskBoard = () => {
                           <p>
                             Assigned to : {
                               v.assignsTo.map((val, i) => {
-                                return <span className="px-1">{`${val} ${v.assignsTo.length - 1 !== i ? "," : ""}`}</span>
+                                return <span key={i} className="px-1">{`${val} ${v.assignsTo.length - 1 !== i ? "," : ""}`}</span>
                               })
                             }
                           </p>
@@ -134,38 +146,12 @@ const TrackTaskBoard = () => {
 
                     </div>
 
-                    <div className={`text-sm flex flex-row items-center ${v?.tasks.length > 0 ? !v.recentTask ? "text-green-500" : v.recentTask?.deadLine === "SAFE" ? `text-gray-400` : "text-red-500"  : "text-gray-400"}`}>
-                      <FaClock className="mr-1" /> 
-                      <p>{`${v?.tasks.length > 0 ? !v.recentTask ? "Complete All Tasks" : v.recentTask?.deadLine === "SAFE" ? `Recent Deadline : ${v.recentTask.value}` : `Found Expired DeadLine at ${v.recentTask.value}`  : "No Task Assigned"}`}</p>
+                    <div className={`text-sm flex flex-row items-center ${v?.tasks.length > 0 ? !v.recentTask ? "text-green-500" : v.recentTask?.deadLine === "SAFE" ? `text-gray-400` : "text-red-500" : "text-gray-400"}`}>
+                      <FaClock className="mr-1" />
+                      <p>{`${v?.tasks.length > 0 ? !v.recentTask ? "Complete All Tasks" : v.recentTask?.deadLine === "SAFE" ? `Recent Deadline : ${v.recentTask.value}` : `Found Expired DeadLine at ${v.recentTask.value}` : "No Task Assigned"}`}</p>
                     </div>
                   </div>
 
-                  {/* Badges */}
-                  {/* <div className="flex items-center gap-2 mt-2 md:mt-0">
-
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${task.status === "Completed"
-                        ? "bg-green-600"
-                        : task.status === "In Progress"
-                          ? "bg-yellow-500"
-                          : "bg-gray-500"
-                        }`}
-                    >
-                      {task.status}
-                    </span>
-
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${task.priority === "High"
-                        ? "bg-red-600"
-                        : task.priority === "Medium"
-                          ? "bg-orange-500"
-                          : "bg-blue-500"
-                        }`}
-                    >
-                      {task.priority}
-                    </span>
-
-                  </div> */}
                 </div>
 
 
@@ -173,11 +159,11 @@ const TrackTaskBoard = () => {
 
                   <div className={`w-full bg-gray-700 rounded-full h-2 `}>
                     <div
-                      className={`h-2 rounded-full ${(v.reportSubmit.length*100)/v.tasks.length === 100
+                      className={`h-2 rounded-full ${(v.reportSubmit.length * 100) / v.tasks.length === 100
                         ? "bg-green-500"
                         : "bg-indigo-500"
                         }`}
-                      style={{ width: `${(v.reportSubmit.length*100)/v.tasks.length}%` }}
+                      style={{ width: `${(v.reportSubmit.length * 100) / v.tasks.length}%` }}
                     ></div>
                   </div>
 
@@ -185,17 +171,21 @@ const TrackTaskBoard = () => {
                     {task.progress === 100 ? (
                       <FaCheckCircle className="text-green-500" />
                     ) : null}
-                    {(v.reportSubmit.length*100)/v.tasks.length}% completed
+                    {(v.reportSubmit.length * 100) / v.tasks.length}% completed
                   </p>
 
                 </div>
 
-              </div>
+              </Link>
             )
           })
         }
 
       </div>
+
+      {
+        <Outlet/>
+      }
 
     </section>
   );
@@ -203,69 +193,3 @@ const TrackTaskBoard = () => {
 
 export default TrackTaskBoard;
 
-// {dummyTasks.map((task) => (
-//           <div
-//             key={task.id}
-//             className="bg-gray-800 border border-gray-700 shadow-md rounded-xl p-4"
-//           >
-//             <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-//               <div>
-//                 <h3 className="text-lg font-semibold text-indigo-400">
-//                   {task.title}
-//                 </h3>
-//                 <p className="text-sm text-gray-400">
-//                   Assigned to: {task.assignee}
-//                 </p>
-//                 <p className="text-sm text-gray-400">
-//                   <FaClock className="inline mr-1" /> Deadline: {task.deadline}
-//                 </p>
-//               </div>
-
-//               {/* Badges */}
-//               <div className="flex items-center gap-2 mt-2 md:mt-0">
-//                 <span
-//                   className={`px-2 py-1 rounded-full text-xs font-medium ${
-//                     task.status === "Completed"
-//                       ? "bg-green-600"
-//                       : task.status === "In Progress"
-//                       ? "bg-yellow-500"
-//                       : "bg-gray-500"
-//                   }`}
-//                 >
-//                   {task.status}
-//                 </span>
-//                 <span
-//                   className={`px-2 py-1 rounded-full text-xs font-medium ${
-//                     task.priority === "High"
-//                       ? "bg-red-600"
-//                       : task.priority === "Medium"
-//                       ? "bg-orange-500"
-//                       : "bg-blue-500"
-//                   }`}
-//                 >
-//                   {task.priority}
-//                 </span>
-//               </div>
-//             </div>
-
-//             {/* Progress Bar */}
-//             <div className="mt-3">
-//               <div className="w-full bg-gray-700 rounded-full h-2">
-//                 <div
-//                   className={`h-2 rounded-full ${
-//                     task.progress === 100
-//                       ? "bg-green-500"
-//                       : "bg-indigo-500"
-//                   }`}
-//                   style={{ width: `${task.progress}%` }}
-//                 ></div>
-//               </div>
-//               <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-//                 {task.progress === 100 ? (
-//                   <FaCheckCircle className="text-green-500" />
-//                 ) : null}
-//                 {task.progress}% completed
-//               </p>
-//             </div>
-//           </div>
-//         ))}
