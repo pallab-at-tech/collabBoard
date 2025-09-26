@@ -40,7 +40,7 @@ const TrackTaskBoard = () => {
             mostRecent = {
               taskId: t._id,
               dueDate: t.dueDate,
-              dueTime: t.dueTime || "",
+              dueTime: t.dueTime || "Today , 11:59 pm",
               deadLine:
                 new Date(t.dueDate) < new Date(today) ? "UNSAFE" : "SAFE",
             };
@@ -79,7 +79,7 @@ const TrackTaskBoard = () => {
     setData(newData)
   }, [task])
 
-  // console.log("Task hi", x)
+  // console.log("Task hi", teamId)
 
   return (
     <section className="xl:border-2  xl:border-[#596982] border-white xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#0a0a1880] overflow-y-auto hide-scrollbar min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-2 xl:px-6 py-8  mini_tab:mx-10 rounded-b relative text-white">
@@ -163,7 +163,7 @@ const TrackTaskBoard = () => {
                         ? "bg-green-500"
                         : "bg-indigo-500"
                         }`}
-                      style={{ width: `${(v.reportSubmit.length * 100) / v.tasks.length}%` }}
+                      style={{ width: `${((v.reportSubmit.length * 100) / v.tasks.length).toFixed(0)}%` }}
                     ></div>
                   </div>
 
@@ -171,7 +171,7 @@ const TrackTaskBoard = () => {
                     {task.progress === 100 ? (
                       <FaCheckCircle className="text-green-500" />
                     ) : null}
-                    {(v.reportSubmit.length * 100) / v.tasks.length}% completed
+                    {((v.reportSubmit.length * 100) / v.tasks.length).toFixed(0)}% completed
                   </p>
 
                 </div>

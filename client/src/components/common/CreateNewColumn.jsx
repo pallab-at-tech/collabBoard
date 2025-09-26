@@ -65,7 +65,7 @@ const CreateNewColumn = ({ close }) => {
     }
 
     return (
-        <section className='fixed right-0 left-0 top-0 bottom-0 flex flex-col items-center justify-center z-50 bg-gray-800/70 '>
+        <section className='fixed right-0 left-0 top-0 bottom-0 flex flex-col items-center justify-center z-50 bg-[#152231b2] backdrop-blur-[2px]'>
 
             <form onSubmit={handleOnSubmit} className='bg-white flex justify-center items-center sm:py-6 sm:px-6 px-4 py-6 relative rounded-xl'>
 

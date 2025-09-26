@@ -188,11 +188,11 @@ const TaskEdit = ({ close, columnName, currentTask, columnId }) => {
     }
 
     return (
-        <section className='fixed right-0 left-0 top-[60px]  bottom-0 flex flex-col items-center justify-center z-50 sm:bg-gray-800/75 bg-[#dbdbdb] overflow-y-auto'>
+        <section className='fixed right-0 left-0 top-0  bottom-0 flex flex-col items-center justify-center z-50 sm:bg-[#162438b2] backdrop-blur-[3px] bg-[#dbdbdb] overflow-y-auto'>
 
             <div className='sm:flex block items-center sm:gap-4 w-full h-full sm:w-auto sm:h-auto'>
 
-                <div className='bg-[#dbdbdb] rounded  px-1 relative sm:w-auto sm:h-auto w-full h-full transition-all duration-200'>
+                <div className='bg-[#efefef] rounded-md  px-1 relative sm:w-auto sm:h-auto w-full h-full transition-all duration-200'>
 
                     <div className='float-end p-2 sm:block hidden text-gray-500 hover:text-gray-700 transition'>
                         <IoClose size={24} onClick={() => close()} className='cursor-pointer' />

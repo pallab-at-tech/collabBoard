@@ -231,14 +231,14 @@ const MainTeamBoard = () => {
                                     </div>
 
                                     {/* Deadline */}
-                                    <Link to={`/board/${params.user}/${params.team}/deadline`}
+                                    {/* <Link to={`/board/${params.user}/${params.team}/deadline`}
                                         className="text-center bg-blue-600 hover:bg-blue-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm sm:block hidden"
                                     >
                                         Deadline
-                                    </Link>
+                                    </Link> */}
 
                                     {/* Status */}
-                                    <Link to={`/board/${params.user}/${params.team}/status`}
+                                    <Link to={`/board/${params.user}/${params.team}/status`} state={{teamId : params.team}}
                                         className="text-center bg-purple-600 hover:bg-purple-700 transition-colors duration-150 text-white px-3 py-1.5 rounded-lg cursor-pointer shadow-sm"
                                     >
                                         Status

@@ -23,7 +23,6 @@ const ShowColumnForTrack = () => {
 
     if (!column || column.tasks.length === 0) return <div className="text-gray-400 flex items-center gap-2 text-xl"><p>No column data available</p> <FaRegFaceDizzy size={22} className='pt-1'/></div>;
 
-    console.log("column",column)
 
     return (
         <section>
@@ -65,14 +64,14 @@ const ShowColumnForTrack = () => {
                                     </div>
 
                                     {/* Due Date */}
-                                    <div className="text-sm flex items-center py-1">
+                                    <div className="text-sm flex items-start sm:items-center py-1">
                                         
                                         {
                                             deadlineColor === "text-red-500" ? (
-                                                <FaExclamationTriangle className='mr-1 text-[#bcbbbb]'/>
+                                                <FaExclamationTriangle size={18} className='mr-1 pt-0.5 text-[#bcbbbb]'/>
                                             ) : (
                                                 <div>
-                                                    <FaClock className="mr-1 text-[#bcbbbb]" />
+                                                    <FaClock size={18} className="mr-1 pt-0.5 text-[#bcbbbb]" />
                                                 </div>
                                             )
                                         }
@@ -80,7 +79,7 @@ const ShowColumnForTrack = () => {
                                             DueDate :{" "}
                                             <span className={deadlineColor}>
                                                 {isToday
-                                                    ? `Today at ${task.dueTime || "N/A"}`
+                                                    ? `Today at ${task.dueTime || "11:59pm"}`
                                                     : task.dueDate}
                                             </span>{" "}
                                             <span className='text-red-300'>{`${deadlineStatus}`}</span>

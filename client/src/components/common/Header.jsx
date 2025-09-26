@@ -34,7 +34,6 @@ const Header = () => {
   }, [])
 
 
-
   const boardURL = `/board/${user?.name}-${user?._id}/${user?.roles[0]?.teamId}`
   const mobileBoardURL = `/board/${user?.name}-${user?._id}`
   const profileURL = `/profile/${user?.name}`
@@ -63,7 +62,7 @@ const Header = () => {
         >
           Features
         </Link>
-        
+
         <Link
           to=""
           className="hover:text-emerald-400 transition-colors duration-200"

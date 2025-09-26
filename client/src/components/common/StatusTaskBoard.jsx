@@ -1,69 +1,165 @@
-import React from "react";
-import { FaCheckCircle, FaHourglassHalf, FaClipboardList, FaBan, FaUsers } from "react-icons/fa";
-
-const dummyTasks = [
-  { id: 1, title: "Design Banner", assignee: "Pallab", status: "In Progress" },
-  { id: 2, title: "Blog Post", assignee: "Student", status: "To Do" },
-  { id: 3, title: "Backend API", assignee: "Rahul", status: "Completed" },
-  { id: 4, title: "Testing", assignee: "Rahul", status: "Blocked" },
-  { id: 5, title: "UI Fixes", assignee: "Pallab", status: "Completed" },
-  { id: 6, title: "Marketing Copy", assignee: "Student", status: "In Progress" },
-];
-
-// Helper: count tasks by status
-const countByStatus = (tasks, status) =>
-  tasks.filter((t) => t.status === status).length;
-
-// Helper: group by assignee
-const groupByAssignee = (tasks) => {
-  const result = {};
-  tasks.forEach((task) => {
-    if (!result[task.assignee]) {
-      result[task.assignee] = { Completed: 0, "In Progress": 0, "To Do": 0, Blocked: 0 };
-    }
-    result[task.assignee][task.status]++;
-  });
-  return result;
-};
+import React, { useEffect, useState } from "react";
+import { FaCheckCircle ,FaUsers, FaDownload } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { useGlobalContext } from "../../provider/GlobalProvider";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { FaClipboardList, FaChartPie } from "react-icons/fa";
 
 const StatusTaskBoard = () => {
-  const total = dummyTasks.length;
-  const completed = countByStatus(dummyTasks, "Completed");
-  const inProgress = countByStatus(dummyTasks, "In Progress");
-  const todo = countByStatus(dummyTasks, "To Do");
-  const blocked = countByStatus(dummyTasks, "Blocked");
 
-  const completionRate = ((completed / total) * 100).toFixed(0);
+  const task = useSelector(state => state.task)
+  const { fetchTaskDetails } = useGlobalContext()
+  const teamId = useLocation().state?.teamId
 
-  const teamStats = groupByAssignee(dummyTasks);
+  const [data, setData] = useState(null)
+
+  useEffect(() => {
+    if (!teamId) return
+    fetchTaskDetails(teamId)
+  }, [])
+
+  useEffect(() => {
+    const filteredData = {
+      total_submitted: { number: 0, taskIds: [] },
+      total_task: { number: 0, taskIds: [] },
+      total_overDue: { number: 0, taskIds: [] }, // 👈 new global overdue tracker
+    };
+
+    const currDate = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
+
+    task?.column.forEach((c) => {
+      const submit = new Set(c.reportSubmit.map(v => v?.taskId));
+
+      c?.tasks.forEach((t) => {
+        // update global totals
+        filteredData.total_task.number += 1;
+        filteredData.total_task.taskIds = [...filteredData.total_task.taskIds, t._id];
+
+        if (submit.has(t._id)) {
+          filteredData.total_submitted.number += 1;
+          filteredData.total_submitted.taskIds = [...filteredData.total_submitted.taskIds, t._id];
+        }
+
+        // check overdue: if task has dueDate and it's < today and not submitted
+        const isOverdue = t?.dueDate && new Date(t.dueDate) < new Date(currDate) && !submit.has(t._id);
+
+        if (isOverdue) {
+          filteredData.total_overDue.number += 1;
+          filteredData.total_overDue.taskIds = [...filteredData.total_overDue.taskIds, t._id];
+        }
+
+        // per-assignee stats
+        t?.assignTo?.forEach((m) => {
+          if (!filteredData[m]) {
+            filteredData[m] = {
+              complete: {
+                numberOf: submit.has(t._id) ? 1 : 0,
+                taskIds: submit.has(t._id) ? [t._id] : [],
+              },
+              To_Do: {
+                numberOf: submit.has(t._id) ? 0 : 1,
+                taskIds: submit.has(t._id) ? [] : [t._id],
+              },
+              overDue: {
+                numberOf: isOverdue ? 1 : 0,
+                taskIds: isOverdue ? [t._id] : [],
+              },
+              Total_assigned: {
+                numberOf: 1,
+                taskIds: [t._id],
+              },
+            };
+          } else {
+            const userData = filteredData[m];
+
+            if (submit.has(t._id)) {
+              userData.complete.numberOf += 1;
+              userData.complete.taskIds = [...userData.complete.taskIds, t._id];
+            } else {
+              userData.To_Do.numberOf += 1;
+              userData.To_Do.taskIds = [...userData.To_Do.taskIds, t._id];
+            }
+
+            if (isOverdue) {
+              userData.overDue.numberOf += 1;
+              userData.overDue.taskIds = [...userData.overDue.taskIds, t._id];
+            }
+
+            userData.Total_assigned.numberOf += 1;
+            userData.Total_assigned.taskIds = [...userData.Total_assigned.taskIds, t._id];
+
+            filteredData[m] = userData;
+          }
+        });
+      });
+    });
+
+    setData(filteredData);
+  }, [task]);
+
+  console.log("task status", data)
+
+  // dummy funtion
+  const generateReport = () => {
+    const report = {
+      totalTasks: total,
+      completed,
+      inProgress,
+      todo,
+      blocked,
+      completionRate: `${completionRate}%`,
+      teamStats,
+      tasks: dummyTasks,
+    };
+
+    const blob = new Blob([JSON.stringify(report, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "task-report.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const completionRate = ((data?.total_submitted.number / data?.total_task.number) * 100).toFixed(0);
 
   return (
-    <section className="xl:border-2  border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-2 xl:px-6 py-8 xl:bg-[#1F2937] mini_tab:mx-10 rounded-b relative text-white">
+    <section className="xl:border-2  xl:border-[#596982] border-white xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#0a0a1880]  overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] hide-scrollbar px-2 xl:px-6 py-4 sm:py-8 mini_tab:mx-10 rounded-b relative text-white">
+
       <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
         <FaUsers className="text-indigo-400" /> Task Status Overview
       </h2>
 
       {/* Summary Counters */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+
+        <div className="bg-gray-800 p-4 rounded-xl flex flex-col items-center shadow">
+          <FaChartPie className="text-yellow-500 text-2xl mb-2" />
+          <p className="text-lg font-bold">{data?.total_task.number}</p>
+          <p className="text-sm text-gray-400">Total</p>
+        </div>
+
         <div className="bg-gray-800 p-4 rounded-xl flex flex-col items-center shadow">
           <FaCheckCircle className="text-green-500 text-2xl mb-2" />
-          <p className="text-lg font-bold">{completed}</p>
+          <p className="text-lg font-bold">{data?.total_submitted.number || "N/A"}</p>
           <p className="text-sm text-gray-400">Completed</p>
         </div>
-        <div className="bg-gray-800 p-4 rounded-xl flex flex-col items-center shadow">
-          <FaHourglassHalf className="text-yellow-500 text-2xl mb-2" />
-          <p className="text-lg font-bold">{inProgress}</p>
-          <p className="text-sm text-gray-400">In Progress</p>
-        </div>
+
         <div className="bg-gray-800 p-4 rounded-xl flex flex-col items-center shadow">
           <FaClipboardList className="text-blue-400 text-2xl mb-2" />
-          <p className="text-lg font-bold">{todo}</p>
+          <p className="text-lg font-bold">{data?.total_task.number - data?.total_submitted.number}</p>
           <p className="text-sm text-gray-400">To Do</p>
         </div>
+
         <div className="bg-gray-800 p-4 rounded-xl flex flex-col items-center shadow">
-          <FaBan className="text-red-500 text-2xl mb-2" />
-          <p className="text-lg font-bold">{blocked}</p>
-          <p className="text-sm text-gray-400">Blocked</p>
+          <FaExclamationTriangle className="text-red-600 text-2xl mb-2" />
+          <p className="text-lg font-bold">{data?.total_overDue.number || "N/A"}</p>
+          <p className="text-sm text-gray-400">OverDue</p>
         </div>
       </div>
 
@@ -79,29 +175,75 @@ const StatusTaskBoard = () => {
         <p className="text-sm text-gray-400 mt-1">{completionRate}% completed</p>
       </div>
 
+      {/* Generate report buttons */}
+      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        <button
+          onClick={generateReport} // pass a param for "your report"
+          className="bg-indigo-600  hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer"
+        >
+          <FaDownload /> 
+          <p>Generate Your Report</p>
+        </button>
+
+        <button
+          onClick={() => generateReport("overall")} // pass "overall" type
+          className="bg-green-600  hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer"
+        >
+          <FaDownload />
+          <p>Generate Overall Report</p>
+        </button>
+      </div>
+
       {/* Team Breakdown */}
       <h3 className="text-lg font-semibold mb-3">Team Breakdown</h3>
       <div className="grid gap-4">
-        {Object.entries(teamStats).map(([member, stats]) => (
-          <div key={member} className="bg-gray-800 p-4 rounded-xl shadow">
-            <p className="font-semibold text-indigo-400 mb-2">{member}</p>
-            <div className="flex gap-2 text-sm flex-wrap">
-              <span className="bg-green-600 px-2 py-1 rounded-lg">
-                ✅ {stats.Completed} Completed
-              </span>
-              <span className="bg-yellow-500 px-2 py-1 rounded-lg">
-                ⏳ {stats["In Progress"]} In Progress
-              </span>
-              <span className="bg-blue-500 px-2 py-1 rounded-lg">
-                📋 {stats["To Do"]} To Do
-              </span>
-              <span className="bg-red-600 px-2 py-1 rounded-lg">
-                🚫 {stats.Blocked} Blocked
-              </span>
-            </div>
-          </div>
-        ))}
+        {
+          data &&
+          Object.keys(data)
+            .filter(
+              (key) =>
+                key !== "total_submitted" &&
+                key !== "total_task" &&
+                key !== "total_overDue"
+            )
+            .map((key) => (
+              <div key={key} className="bg-gray-800 p-4 rounded-xl shadow">
+                <p className="font-semibold text-indigo-400 mb-2">{key}</p>
+
+                <div className="flex gap-2 text-sm flex-wrap">
+                  
+                  <div className="bg-green-700 px-2 py-1 rounded-lg flex items-center gap-1">
+                    <FaCheckCircle size={15}/>
+                    {data[key].complete.numberOf}
+                    <p>Completed</p>
+                  </div>
+
+                  <div className="bg-blue-700 px-2 py-1 rounded-lg flex items-center gap-1">
+                    <FaClipboardList size={15}/>
+                    {data[key].To_Do.numberOf}
+                    <p>To Do</p>
+                  </div>
+
+                  <div className="bg-red-600 px-2 py-1 rounded-lg flex items-center gap-1">
+                    <FaExclamationTriangle size={15}/>
+                    {data[key].overDue.numberOf}
+                    <p>Overdue</p>
+                  </div>
+
+                  <div className="bg-yellow-700 px-2 py-1 rounded-lg flex items-center gap-1">
+                    <FaChartPie/>
+                    {data[key].Total_assigned.numberOf}
+                    <p>Assigned</p>
+                  </div>
+
+                </div>
+              </div>
+            ))
+        }
+
+
       </div>
+
     </section>
   );
 };

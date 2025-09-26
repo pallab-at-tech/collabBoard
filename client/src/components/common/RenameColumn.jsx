@@ -68,7 +68,7 @@ const RenameColumn = ({ close, columnId, columnName }) => {
 
 
     return (
-        <section className='fixed right-0 left-0 top-0 bottom-0 flex flex-col items-center justify-center z-50 bg-gray-800/70 backdrop-blur-[2px]'>
+        <section className='fixed right-0 left-0 top-0 bottom-0 flex flex-col items-center justify-center z-50 bg-[#152231b2] backdrop-blur-[3px]'>
 
             <form onSubmit={handleOnSubmit} className="bg-white shadow-xl rounded-xl px-6 py-5 w-[320px] animate-scaleIn">
 
