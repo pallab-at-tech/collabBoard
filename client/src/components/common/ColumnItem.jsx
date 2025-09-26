@@ -106,7 +106,6 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
         };
     }, [])
 
-
     const handleOpenImage = (src) => {
         const img = new Image();
         img.src = src;
@@ -389,7 +388,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                 linkWindowOpen.open && (
                     <section className='fixed inset-0 flex items-center justify-center z-50 bg-black/60'>
 
-                        <div ref={linkDropRef} className='bg-white w-full sm:max-w-md max-w-[340px] rounded-2xl px-6 py-6 flex flex-col gap-6 shadow-lg'>
+                        <div ref={linkDropRef} className='bg-white w-full sm:max-w-md max-w-[300px] rounded-2xl px-6 py-6 flex flex-col gap-6 shadow-lg'>
 
                             <h2 className='text-xl font-semibold text-gray-800'>All Links</h2>
 
