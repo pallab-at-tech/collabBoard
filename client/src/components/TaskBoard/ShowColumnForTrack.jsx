@@ -21,6 +21,8 @@ const ShowColumnForTrack = () => {
         setSubmitted(set)
     },[])
 
+    // console.log("column data",column)
+
     if (!column || column.tasks.length === 0) return <div className="text-gray-400 flex items-center gap-2 text-xl"><p>No column data available</p> <FaRegFaceDizzy size={22} className='pt-1'/></div>;
 
 
@@ -38,8 +40,8 @@ const ShowColumnForTrack = () => {
                     const isOverdue = new Date(task.dueDate) < new Date(today);
                     const isToday = task.dueDate === today;
 
-                    const deadlineStatus = isOverdue ? "( Due Time exceed )" : "";
-                    const deadlineColor = isOverdue ? "text-red-500" : "text-green-400";
+                    const deadlineStatus = isOverdue && !submitted.has(task?._id) ? "( Due Time exceed )" : "";
+                    const deadlineColor = isOverdue && !submitted.has(task?._id) ? "text-red-500" : "text-green-400";
 
                     return (
                         <div
@@ -64,7 +66,7 @@ const ShowColumnForTrack = () => {
                                     </div>
 
                                     {/* Due Date */}
-                                    <div className="text-sm flex items-start sm:items-center py-1">
+                                    <div className="text-sm flex items-start py-1">
                                         
                                         {
                                             deadlineColor === "text-red-500" ? (

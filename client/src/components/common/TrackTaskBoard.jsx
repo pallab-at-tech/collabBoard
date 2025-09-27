@@ -79,7 +79,7 @@ const TrackTaskBoard = () => {
     setData(newData)
   }, [task])
 
-  // console.log("Task hi", teamId)
+  console.log("Task hi", data)
 
   return (
     <section className="xl:border-2  xl:border-[#596982] border-white xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#0a0a1880] overflow-y-auto hide-scrollbar min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-2 xl:px-6 py-8  mini_tab:mx-10 rounded-b relative text-white">
