@@ -18,8 +18,6 @@ const StatusTaskBoard = () => {
   const [data, setData] = useState(null)
 
   const [generatingForAll, setGeneratingForAll] = useState(false)
-  const [generatingForAllData, setGeneratingForAllData] = useState("")
-
   const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
@@ -116,7 +114,6 @@ const StatusTaskBoard = () => {
       setGeneratingForAll(false)
 
       if (res) {
-        setGeneratingForAllData(res)
         handleGeneratePdf(res)
       }
       else {
@@ -129,103 +126,45 @@ const StatusTaskBoard = () => {
     }
   }
 
-  // const handleGeneratePdf = async (response) => {
-  //   setDownloading(true)
-  //   try {
-
-  //     if(!response){
-  //       setDownloading(false)
-  //       toast.error("Downloading error occured , try later.")
-  //       return
-  //     }
-
-  //     const doc = new jsPDF();
-
-  //     // Split text into lines to avoid overflow
-  //     const lines = doc.splitTextToSize(response, 180); // 180 = page width minus margin
-
-  //     // Add text to PDF starting at (10, 10)
-  //     doc.text(lines, 10, 10);
-
-  //     // Save PDF
-  //     doc.save("overAll-task-report.pdf");
-  //     toast.success("Report downloaded")
-  //     setDownloading(false)
-
-  //   } catch (error) {
-  //     console.log("Error generating error", error)
-  //     toast.error("Downloading error occured , try later.")
-  //     setDownloading(false)
-  //   }
-  // }
-
- const handleGeneratePdf = async (text) => {
-  setDownloading(true);
-  try {
-    if (!text) {
-      toast.error("No content to download");
-      setDownloading(false);
-      return;
-    }
-
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const marginX = 10; // left/right margin
-    const marginY = 20; // top margin
-    const lineHeight = 7; // space between lines
-
-    const lines = doc.splitTextToSize(text, pageWidth - 2 * marginX);
-    let y = marginY;
-
-    lines.forEach((line) => {
-      if (y > pageHeight - marginY) { // if exceeds page height
-        doc.addPage();
-        y = marginY; // reset y for new page
+  const handleGeneratePdf = async (text) => {
+    setDownloading(true);
+    try {
+      if (!text) {
+        toast.error("No content to download");
+        setDownloading(false);
+        return;
       }
-      doc.text(line, marginX, y);
-      y += lineHeight;
-    });
 
-    doc.save("overall-task-report.pdf");
-    toast.success("Report downloaded successfully!");
-    setDownloading(false);
-  } catch (err) {
-    console.error(err);
-    toast.error("Downloading error, try again!");
-    setDownloading(false);
-  }
-};
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const marginX = 10; // left/right margin
+      const marginY = 20; // top margin
+      const lineHeight = 7; // space between lines
 
+      const lines = doc.splitTextToSize(text, pageWidth - 2 * marginX);
+      let y = marginY;
 
-  // console.log("task status", task?.column)
-  console.log("task overview", generatingForAllData)
+      lines.forEach((line) => {
+        if (y > pageHeight - marginY) { // if exceeds page height
+          doc.addPage();
+          y = marginY; // reset y for new page
+        }
+        doc.text(line, marginX, y);
+        y += lineHeight;
+      });
 
-  // dummy funtion
-  const generateReport = () => {
-    const report = {
-      totalTasks: total,
-      completed,
-      inProgress,
-      todo,
-      blocked,
-      completionRate: `${completionRate}%`,
-      teamStats,
-      tasks: dummyTasks,
-    };
-
-    const blob = new Blob([JSON.stringify(report, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "task-report.json";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      doc.save("overall-task-report.pdf");
+      toast.success("Report downloaded successfully!");
+      setDownloading(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Downloading error, try again!");
+      setDownloading(false);
+    }
   };
+
+  // console.log("task overview", generatingForAllData)
 
   const completionRate = ((data?.total_submitted.number / data?.total_task.number) * 100).toFixed(0);
 
@@ -278,17 +217,10 @@ const StatusTaskBoard = () => {
 
       {/* Generate report buttons */}
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        {/* <button
-          onClick={generateReport} // pass a param for "your report"
-          className=" text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer"
-        >
-          <FaDownload />
-          <p>Generate Your Report</p>
-        </button> */}
 
         <button
           onClick={() => generateText()}
-          className="bg-green-600  hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer"
+          className={`bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition ${downloading || generatingForAll ? "cursor-not-allowed" : "cursor-pointer"}`}
         >
           <FaDownload />
           <p>{generatingForAll ? "generating..." : downloading ? "downloading..." : "Generate Overall Report"}</p>
