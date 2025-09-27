@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { FaCheckCircle ,FaUsers, FaDownload } from "react-icons/fa";
+import { FaCheckCircle, FaUsers, FaDownload } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { useGlobalContext } from "../../provider/GlobalProvider";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { FaClipboardList, FaChartPie } from "react-icons/fa";
+import generateContent from "../../utils/GenerateText";
+import toast from "react-hot-toast";
+import jsPDF from "jspdf"
 
 const StatusTaskBoard = () => {
 
@@ -13,6 +16,11 @@ const StatusTaskBoard = () => {
   const teamId = useLocation().state?.teamId
 
   const [data, setData] = useState(null)
+
+  const [generatingForAll, setGeneratingForAll] = useState(false)
+  const [generatingForAllData, setGeneratingForAllData] = useState("")
+
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     if (!teamId) return
@@ -98,7 +106,83 @@ const StatusTaskBoard = () => {
     setData(filteredData);
   }, [task]);
 
-  console.log("task status", data)
+  const generateText = async () => {
+    setGeneratingForAll(true)
+    try {
+      const stats = data
+      const columnsOfTask = task?.column || []
+
+      const res = await generateContent(stats, columnsOfTask)
+      setGeneratingForAll(false)
+
+      if (res) {
+        setGeneratingForAllData(res)
+        handleGeneratePdf(res)
+      }
+      else {
+        toast.error("Some error occured ! try again.")
+      }
+    } catch (error) {
+      setGeneratingForAll(false)
+      toast.error("Some error occured ! try again.")
+      console.log("Text genating error", error)
+    }
+  }
+
+  // const handleGeneratePdf = async (response) => {
+  //   setDownloading(true)
+  //   try {
+
+  //     if(!response){
+  //       setDownloading(false)
+  //       toast.error("Downloading error occured , try later.")
+  //       return
+  //     }
+
+  //     const doc = new jsPDF();
+
+  //     // Split text into lines to avoid overflow
+  //     const lines = doc.splitTextToSize(response, 180); // 180 = page width minus margin
+
+  //     // Add text to PDF starting at (10, 10)
+  //     doc.text(lines, 10, 10);
+
+  //     // Save PDF
+  //     doc.save("overAll-task-report.pdf");
+  //     toast.success("Report downloaded")
+  //     setDownloading(false)
+
+  //   } catch (error) {
+  //     console.log("Error generating error", error)
+  //     toast.error("Downloading error occured , try later.")
+  //     setDownloading(false)
+  //   }
+  // }
+
+  const handleGeneratePdf = async (text) => {
+    setDownloading(true);
+    try {
+      if (!text) {
+        toast.error("No content to download");
+        setDownloading(false);
+        return;
+      }
+
+      const doc = new jsPDF();
+      const lines = doc.splitTextToSize(text, 180);
+      doc.text(lines, 10, 10);
+      doc.save("overall-task-report.pdf");
+      toast.success("Report downloaded successfully!");
+      setDownloading(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Downloading error, try again!");
+      setDownloading(false);
+    }
+  };
+
+  // console.log("task status", task?.column)
+  console.log("task overview", generatingForAllData)
 
   // dummy funtion
   const generateReport = () => {
@@ -177,20 +261,20 @@ const StatusTaskBoard = () => {
 
       {/* Generate report buttons */}
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <button
+        {/* <button
           onClick={generateReport} // pass a param for "your report"
-          className="bg-indigo-600  hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer"
+          className=" text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer"
         >
-          <FaDownload /> 
+          <FaDownload />
           <p>Generate Your Report</p>
-        </button>
+        </button> */}
 
         <button
-          onClick={() => generateReport("overall")} // pass "overall" type
+          onClick={() => generateText()}
           className="bg-green-600  hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer"
         >
           <FaDownload />
-          <p>Generate Overall Report</p>
+          <p>{generatingForAll ? "generating..." : downloading ? "downloading..." : "Generate Overall Report"}</p>
         </button>
       </div>
 
@@ -211,27 +295,27 @@ const StatusTaskBoard = () => {
                 <p className="font-semibold text-indigo-400 mb-2">{key}</p>
 
                 <div className="flex gap-2 text-sm flex-wrap">
-                  
+
                   <div className="bg-green-700 px-2 py-1 rounded-lg flex items-center gap-1">
-                    <FaCheckCircle size={15}/>
+                    <FaCheckCircle size={15} />
                     {data[key].complete.numberOf}
                     <p>Completed</p>
                   </div>
 
                   <div className="bg-blue-700 px-2 py-1 rounded-lg flex items-center gap-1">
-                    <FaClipboardList size={15}/>
+                    <FaClipboardList size={15} />
                     {data[key].To_Do.numberOf}
                     <p>To Do</p>
                   </div>
 
                   <div className="bg-red-600 px-2 py-1 rounded-lg flex items-center gap-1">
-                    <FaExclamationTriangle size={15}/>
+                    <FaExclamationTriangle size={15} />
                     {data[key].overDue.numberOf}
                     <p>Overdue</p>
                   </div>
 
                   <div className="bg-yellow-700 px-2 py-1 rounded-lg flex items-center gap-1">
-                    <FaChartPie/>
+                    <FaChartPie />
                     {data[key].Total_assigned.numberOf}
                     <p>Assigned</p>
                   </div>
