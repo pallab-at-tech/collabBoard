@@ -159,27 +159,44 @@ const StatusTaskBoard = () => {
   //   }
   // }
 
-  const handleGeneratePdf = async (text) => {
-    setDownloading(true);
-    try {
-      if (!text) {
-        toast.error("No content to download");
-        setDownloading(false);
-        return;
-      }
-
-      const doc = new jsPDF();
-      const lines = doc.splitTextToSize(text, 180);
-      doc.text(lines, 10, 10);
-      doc.save("overall-task-report.pdf");
-      toast.success("Report downloaded successfully!");
+ const handleGeneratePdf = async (text) => {
+  setDownloading(true);
+  try {
+    if (!text) {
+      toast.error("No content to download");
       setDownloading(false);
-    } catch (err) {
-      console.error(err);
-      toast.error("Downloading error, try again!");
-      setDownloading(false);
+      return;
     }
-  };
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginX = 10; // left/right margin
+    const marginY = 20; // top margin
+    const lineHeight = 7; // space between lines
+
+    const lines = doc.splitTextToSize(text, pageWidth - 2 * marginX);
+    let y = marginY;
+
+    lines.forEach((line) => {
+      if (y > pageHeight - marginY) { // if exceeds page height
+        doc.addPage();
+        y = marginY; // reset y for new page
+      }
+      doc.text(line, marginX, y);
+      y += lineHeight;
+    });
+
+    doc.save("overall-task-report.pdf");
+    toast.success("Report downloaded successfully!");
+    setDownloading(false);
+  } catch (err) {
+    console.error(err);
+    toast.error("Downloading error, try again!");
+    setDownloading(false);
+  }
+};
+
 
   // console.log("task status", task?.column)
   console.log("task overview", generatingForAllData)
