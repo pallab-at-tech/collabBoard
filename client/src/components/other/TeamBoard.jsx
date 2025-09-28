@@ -6,18 +6,40 @@ import { useEffect } from 'react'
 import { IoIosPersonAdd } from "react-icons/io";
 import { Outlet } from 'react-router-dom'
 import SearchMember from './SearchMember'
+import { useDispatch } from 'react-redux'
+import { updateTeamDetails } from '../../store/teamSlice'
 
 const TeamBoard = () => {
 
     const params = useParams()
-    const team = useSelector(state => state.team)
+    const team = useSelector(state => state?.team)
     const [openSearchMember, setOpenSearchMember] = useState(false)
 
-    const { fetchTeamDetails } = useGlobalContext()
+    const dispatch = useDispatch()
+
+    const { fetchTeamDetails, socketConnection } = useGlobalContext()
 
     useEffect(() => {
         fetchTeamDetails(params?.team)
     }, [params])
+
+    useEffect(() => {
+        if (!socketConnection) return
+
+        socketConnection.on("teamDetails_updated", (data) => {
+
+            if (params?.team === data?.teamId) {
+                dispatch(updateTeamDetails({ name: data?.name, description: data?.description }))
+            }
+        })
+
+        return () =>{
+            socketConnection.off("teamDetails_updated")
+        }
+
+    }, [socketConnection, dispatch])
+
+    // console.log("header team", team)
 
 
     return (

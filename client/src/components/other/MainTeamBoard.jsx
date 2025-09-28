@@ -15,6 +15,7 @@ import {
 } from '../../store/taskSlice'
 import RenameCollabDesk from './RenameCollabDesk'
 import DeleteCollabDesk from '../TaskBoard/DeleteCollabDesk'
+import { updateTeamDetails } from '../../store/teamSlice'
 
 
 

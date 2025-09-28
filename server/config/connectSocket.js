@@ -1485,8 +1485,6 @@ io.on("connection", async (socket) => {
         try {
             const { teamId, columnId, taskId, reportId, userName, text, image, video, aditional_link = [] } = data || {}
 
-            console.log("report request",data)
-
             const token = socket.handshake.auth?.token;
             if (!token) {
                 return socket.emit("session_expired", { message: "No token found. Please login again." });
@@ -1591,14 +1589,158 @@ io.on("connection", async (socket) => {
                 ...(text && { text: text })
             })
 
-            io.to(userId.toString()).emit("report-updatted",{
-                message : "Report update successfully",
-                updateData : report
+            io.to(userId.toString()).emit("report-updatted", {
+                message: "Report update successfully",
+                updateData: report
             })
 
         } catch (error) {
             console.log("Error while update report.", error)
             socket.emit("error", { message: "Server error while update report", error: true })
+        }
+    })
+
+    // team details edit
+    socket.on("updateTeamDetails", async (data) => {
+        try {
+            const { teamId, teamName, teamAbout } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!teamId) {
+                return socket.emit("teamDetailsError", {
+                    message: "Team id required."
+                })
+            }
+
+            const team = await teamModel.findById(teamId)
+
+            if (!team) {
+                return socket.emit("teamDetailsError", {
+                    message: "Team not found!"
+                })
+            }
+
+            const isLeader = team.member.some((m) => m.userId.toString() === userId.toString() && m.role === "LEADER")
+
+            if (!isLeader) {
+                return socket.emit("teamDetailsError", {
+                    message: "Access denied!"
+                })
+            }
+
+            if (teamName) {
+                team.name = teamName
+            }
+
+            team.description = teamAbout
+            await team.save()
+
+            team.member.forEach((m) => {
+                io.to(m.userId.toString()).emit("teamDetails_updated", {
+                    teamId: team._id,
+                    name: team.name,
+                    description: team.description,
+                    message: "Team details updated"
+                })
+            })
+
+        } catch (error) {
+            console.log("Error while update team details by leader.", error)
+            socket.emit("error", { message: "Server error while update team details by leader", error: true })
+        }
+    })
+
+    // make admin of team
+    socket.on("makeAdminOfTeam", async (data) => {
+        try {
+            const { memberId , teamId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if(!memberId){
+                return socket.emit("adminMakeError",{
+                    message : "Member Id required!"
+                })
+            }
+
+            if(!teamId){
+                return socket.emit("adminMakeError",{
+                    message : "Team Id required!"
+                })
+            }
+
+            const team = await teamModel.findById(teamId)
+
+            if(!team){
+                return socket.emit("adminMakeError",{
+                    message : "Team not found!"
+                })
+            }
+            
+            const isLeader = team.member.some((m) => m.userId.toString() === userId.toString() && m.role === "LEADER")
+
+            if(!isLeader){
+                return socket.emit("adminMakeError",{
+                    message : "Access denied!"
+                })
+            }
+
+            
+
+        } catch (error) {
+            console.log("Error while make admin of team.", error)
+            socket.emit("error", { message: "Server error while make admin of team.", error: true })
+        }
+    })
+
+    // kick out from team
+    socket.on("KickedOUtFromTeam", async (data) => {
+        try {
+
+            const { memberId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+        } catch (error) {
+            console.log("Error while kicked out from team.", error)
+            socket.emit("error", { message: "Server error while kicked out from team", error: true })
         }
     })
 

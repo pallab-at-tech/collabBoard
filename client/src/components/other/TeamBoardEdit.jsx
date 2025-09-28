@@ -1,19 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { HiOutlineDotsVertical } from "react-icons/hi";
+import { useGlobalContext } from '../../provider/GlobalProvider';
+import toast from 'react-hot-toast';
 
 
 const TeamBoardEdit = () => {
 
   const teamDetails = useSelector(state => state?.team)
 
+  const { socketConnection } = useGlobalContext()
+
   const [data, setData] = useState({
+    teamId: teamDetails?._id,
     teamName: teamDetails?.name,
     teamAbout: teamDetails?.description
   })
 
   const [openSettings, setOpenSettings] = useState(new Set())
   const closeSettingWindow = useRef(null)
+
+  const [savingDetails, setSavingDetails] = useState(false)
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -29,10 +36,39 @@ const TeamBoardEdit = () => {
     };
   }, [])
 
-  console.log("team board edit", teamDetails)
+  useEffect(() => {
+    setData({
+      teamId: teamDetails?._id,
+      teamName: teamDetails?.name,
+      teamAbout: teamDetails?.description
+    })
+  }, [teamDetails])
 
-  const handleSave = () => {
+  // console.log("team board edit", teamDetails)
 
+  const handleSave = async (e) => {
+
+    e.preventDefault()
+    if (!socketConnection) return
+
+    try {
+      setSavingDetails(true)
+
+      socketConnection.once("teamDetails_updated", (data) => {
+        toast.success(data?.message)
+        setSavingDetails(false)
+      })
+
+      socketConnection.once("teamDetailsError", (data) => {
+        toast.error(data?.message)
+        setSavingDetails(false)
+      })
+
+      socketConnection.emit("updateTeamDetails", data)
+
+    } catch (error) {
+      console.log("Team details update error", error)
+    }
   };
 
   const handleRemoveMember = (memberId) => {
@@ -47,7 +83,7 @@ const TeamBoardEdit = () => {
     <section className='xl:border-2 xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#0a0a1880] xl:to-transparent mt-2 xl:border-[#596982] xl:ring-1 xl:ring-[#596982] border-white overflow-y-auto hide-scrollbar min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-0.5 xl:px-6 py-8 mini_tab:mx-10 rounded-b relative'>
 
       {/* Team Info */}
-      <div className='mb-6'>
+      <form onSubmit={handleSave} className='mb-6'>
 
         <h2 className='text-xl font-semibold text-white mb-2'>Edit Team Info</h2>
         <input
@@ -67,11 +103,11 @@ const TeamBoardEdit = () => {
 
         <button
           onClick={handleSave}
-          className='mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer'
+          className={`mt-2 px-4 py-2  text-white rounded-md  ${savingDetails ? "cursor-not-allowed bg-blue-500 hover:bg-blue-600" : "cursor-pointer bg-blue-600 hover:bg-blue-700"}`}
         >
-          Save
+          {savingDetails ? "Saving..." : "Save"}
         </button>
-      </div>
+      </form>
 
       {/* generate group add link*/}
       <div>

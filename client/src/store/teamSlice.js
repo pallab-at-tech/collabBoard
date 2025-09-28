@@ -28,9 +28,20 @@ const teamSlice = createSlice({
             state.organization_type = ""
             state.member = []
             state.request_send = []
+        },
+        updateTeamDetails: (state, action) => {
+            const { name, description } = action.payload
+
+            if (name !== undefined) {
+                state.name = name
+            }
+            if (description !== undefined) {
+                state.description = description
+            }
+
         }
     }
 })
 
-export const { setTeamDetails, setTeamLogOut } = teamSlice.actions
+export const { setTeamDetails, setTeamLogOut, updateTeamDetails } = teamSlice.actions
 export default teamSlice.reducer
