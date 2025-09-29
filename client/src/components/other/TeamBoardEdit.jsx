@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 const TeamBoardEdit = () => {
 
   const teamDetails = useSelector(state => state?.team)
+  const user = useSelector(state => state?.user)
 
   const { socketConnection } = useGlobalContext()
 
@@ -18,24 +19,39 @@ const TeamBoardEdit = () => {
   })
 
   const [openSettings, setOpenSettings] = useState(new Set())
-  const closeSettingWindow = useRef(null)
+  const closeSettingWindow = useRef({})
+
+  const [currUserLeader, setCurrUserLeader] = useState(false)
 
   const [savingDetails, setSavingDetails] = useState(false)
+  const [adminLoading, setAdminLoading] = useState(false)
+  const [demoteLoading, setDemoteLoading] = useState(false)
+  const [removeLoading, setRemoveLoading] = useState(false)
 
+  // close setting of admin , remove window.
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (closeSettingWindow.current && !closeSettingWindow.current.contains(event.target)) {
-        const set = new Set()
-        setOpenSettings(set)
-      }
-    };
+      let clickedInside = false
 
-    document.addEventListener("mousedown", handleClickOutside);
+      // loop through all refs
+      Object.values(closeSettingWindow.current).forEach((ref) => {
+        if (ref && ref.contains(event.target)) {
+          clickedInside = true
+        }
+      })
+
+      if (!clickedInside) {
+        setOpenSettings(new Set()) // close all menus
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
   }, [])
 
+  // manage data accoding to changes
   useEffect(() => {
     setData({
       teamId: teamDetails?._id,
@@ -44,8 +60,19 @@ const TeamBoardEdit = () => {
     })
   }, [teamDetails])
 
-  // console.log("team board edit", teamDetails)
+  useEffect(() => {
+    if (!teamDetails) return
+    const isLeader = teamDetails.member.some((m) => m.userId === user._id && m.role === "LEADER")
 
+    if (isLeader) {
+      setCurrUserLeader(true)
+    }
+    else {
+      setCurrUserLeader(false)
+    }
+  }, [teamDetails])
+
+  // edit the team info
   const handleSave = async (e) => {
 
     e.preventDefault()
@@ -68,16 +95,104 @@ const TeamBoardEdit = () => {
 
     } catch (error) {
       console.log("Team details update error", error)
+      setSavingDetails(false)
     }
   };
 
-  const handleRemoveMember = (memberId) => {
-
-  };
-
+  // promote team members
   const handlePromoteMember = (memberId) => {
 
+    if (!socketConnection) return
+
+    try {
+
+      setAdminLoading(true)
+
+      socketConnection.once("adminSuccess", (data) => {
+        toast.success(data?.message)
+        const set = new Set()
+        setOpenSettings(set)
+        setAdminLoading(false)
+      })
+
+      socketConnection.once("adminMakeError", (data) => {
+        toast.error(data?.message)
+        setAdminLoading(false)
+      })
+
+      socketConnection.emit("makeAdminOfTeam", {
+        memberId: memberId,
+        teamId: teamDetails?._id
+      })
+
+    } catch (error) {
+      console.log("Error for promote member", error)
+      setAdminLoading(false)
+    }
   };
+
+  // demote team members
+  const handleDemoteMember = (memberId) => {
+
+    if (!socketConnection) return
+
+    try {
+
+      setDemoteLoading(true)
+
+      socketConnection.once("demoteSuccess", (data) => {
+        toast.success(data?.message)
+        const set = new Set()
+        setOpenSettings(set)
+        setDemoteLoading(false)
+      })
+
+      socketConnection.once("demotedError", (data) => {
+        toast.error(data?.message)
+        setDemoteLoading(false)
+      })
+
+      socketConnection.emit("demoteOfMember", {
+        memberId: memberId,
+        teamId: teamDetails?._id
+      })
+
+    } catch (error) {
+      console.log("Demoted member error", error)
+      setDemoteLoading(false)
+    }
+  };
+
+  // removed from the team
+  const handleRemoveMember = (memberId) => {
+
+    if(!socketConnection) return
+
+    try {
+      setRemoveLoading(true)
+
+      socketConnection.once("kickOutSuccess",(data)=>{
+        toast.success(data?.message)
+        setRemoveLoading(false)
+      })
+
+      socketConnection.once("kickedOutError",(data)=>{
+        toast.error(data?.message)
+        setRemoveLoading(false)
+      })
+
+      socketConnection.emit("KickedOUtFromTeam",{
+        memberId : memberId,
+        teamId : teamDetails?._id
+      })
+      
+    } catch (error) {
+      console.log("Exit from the team Error",error)
+      setRemoveLoading(false)
+    }
+  }
+
+  console.log("team board edit", teamDetails)
 
   return (
     <section className='xl:border-2 xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#0a0a1880] xl:to-transparent mt-2 xl:border-[#596982] xl:ring-1 xl:ring-[#596982] border-white overflow-y-auto hide-scrollbar min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-0.5 xl:px-6 py-8 mini_tab:mx-10 rounded-b relative'>
@@ -85,65 +200,87 @@ const TeamBoardEdit = () => {
       {/* Team Info */}
       <form onSubmit={handleSave} className='mb-6'>
 
-        <h2 className='text-xl font-semibold text-white mb-2'>Edit Team Info</h2>
-        <input
-          type='text'
-          value={data.teamName}
-          onChange={(e) => setData((preve) => { return { ...preve, teamName: e.target.value } })}
-          placeholder='Team Name'
-          className='w-full p-3 mb-3 rounded-lg bg-[#32333a] text-white placeholder-gray-400 border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500  transition'
-        />
+        <h2 className='text-xl font-semibold text-white mb-2'>Team Info</h2>
 
-        <textarea
-          value={data.teamAbout}
-          onChange={(e) => setData((preve) => { return { ...preve, teamAbout: e.target.value } })}
-          placeholder='About Team'
-          className='w-full p-3 mb-3 rounded-lg bg-[#32333a] text-white placeholder-gray-400 border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500  transition max-h-[70px] min-h-[70px]'
-        />
+        {
+          !currUserLeader ? (
+            <>
+              <div className='w-full p-3 mb-3 rounded-lg bg-[#32333a] text-white'>
+                {data.teamName}
+              </div>
 
-        <button
-          onClick={handleSave}
-          className={`mt-2 px-4 py-2  text-white rounded-md  ${savingDetails ? "cursor-not-allowed bg-blue-500 hover:bg-blue-600" : "cursor-pointer bg-blue-600 hover:bg-blue-700"}`}
-        >
-          {savingDetails ? "Saving..." : "Save"}
-        </button>
+              <div className='w-full p-3 mb-3 rounded-lg bg-[#32333a] text-white'>
+                {data.teamAbout}
+              </div>
+            </>
+          ) : (
+            <>
+              <input
+                type='text'
+                value={data.teamName}
+                onChange={(e) => setData((preve) => { return { ...preve, teamName: e.target.value } })}
+                placeholder='Team Name'
+                className='w-full p-3 mb-3 rounded-lg bg-[#32333a] text-white placeholder-gray-400 border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500  transition'
+              />
+
+              <textarea
+                value={data.teamAbout}
+                onChange={(e) => setData((preve) => { return { ...preve, teamAbout: e.target.value } })}
+                placeholder='About Team'
+                className='w-full p-3 mb-3 rounded-lg bg-[#32333a] text-white placeholder-gray-400 border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500  transition max-h-[70px] min-h-[70px]'
+              />
+
+              <button
+                onClick={handleSave}
+                className={`mt-2 px-4 py-2  text-white rounded-md  ${savingDetails ? "cursor-not-allowed bg-blue-500 hover:bg-blue-600" : "cursor-pointer bg-blue-600 hover:bg-blue-700"}`}
+              >
+                {savingDetails ? "Saving..." : "Save"}
+              </button>
+            </>
+          )
+        }
+
       </form>
 
       {/* generate group add link*/}
-      <div>
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-white mb-2">
-            Generate Invite Link
-          </h2>
-          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-            <input
-              type="text"
-              readOnly
-              // value={inviteLink}
-              placeholder="Click Generate to create invite link"
-              className="flex-1 p-3 rounded-lg bg-[#32333a] text-white placeholder-gray-400 border border-[#3a3b45] focus:outline-none"
-            />
+      {
+        currUserLeader && (
+          <div>
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-white mb-2">
+                Generate Invite Link
+              </h2>
+              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                <input
+                  type="text"
+                  readOnly
+                  // value={inviteLink}
+                  placeholder="Click Generate to create invite link"
+                  className="flex-1 p-3 rounded-lg bg-[#32333a] text-white placeholder-gray-400 border border-[#3a3b45] focus:outline-none"
+                />
 
-            <div className='flex gap-2 items-center'>
-              <button
-                // onClick={handleGenerateLink}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
-              >
-                Generate
-              </button>
-              <button
-                // onClick={handleCopyLink}
-                // disabled={!inviteLink}
-                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 cursor-pointer"
-              >
-                Copy
-              </button>
+                <div className='flex gap-2 items-center'>
+                  <button
+                    // onClick={handleGenerateLink}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                  >
+                    Generate
+                  </button>
+                  <button
+                    // onClick={handleCopyLink}
+                    // disabled={!inviteLink}
+                    className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 cursor-pointer"
+                  >
+                    Copy
+                  </button>
+                </div>
+
+              </div>
             </div>
 
           </div>
-        </div>
-
-      </div>
+        )
+      }
 
       {/* Team Members */}
       <div>
@@ -162,14 +299,27 @@ const TeamBoardEdit = () => {
                   <div className='flex gap-2'>
 
                     {
-                      m?.role !== "LEADER" && (
+                      currUserLeader && user?._id !== m?.userId && (
                         <>
-                          <button
-                            // onClick={() => handlePromoteMember(member.id)}
-                            className='px-2 py-1 hidden sm:block bg-green-700 text-white rounded-lg hover:bg-green-800 transition duration-200 cursor-pointer'
-                          >
-                            Make Leader
-                          </button>
+
+                          {
+                            m?.role === "MEMBER" ? (
+                              <button
+                                onClick={() => handlePromoteMember(m?.userId)}
+                                className={`px-2 py-1 hidden sm:block bg-green-700 text-white rounded-lg hover:bg-green-800 transition duration-200 ${adminLoading ? "cursor-not-allowed" : "cursor-pointer"}`}
+                              >
+                                Promote role
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleDemoteMember(m?.userId)}
+                                className={`px-2 py-1 hidden sm:block bg-green-700 text-white rounded-lg hover:bg-green-800 transition duration-200 ${demoteLoading ? "cursor-not-allowed" : "cursor-pointer"}`}
+                              >
+                                Demote role
+                              </button>
+                            )
+                          }
+
 
                           <div className='relative block sm:hidden'>
                             <HiOutlineDotsVertical size={20} className='text-white text-[20px]'
@@ -179,9 +329,16 @@ const TeamBoardEdit = () => {
                                 setOpenSettings(set)
                               }}
                             />
-                            <div ref={closeSettingWindow} className={`absolute bg-white -top-12 -left-[100px] px-3 py-3 rounded-md ${openSettings.has(m?._id) ? "block" : "hidden"}`}>
-                              <p className='border-b-1 border-b-gray-300 pb-1'>Make Admin</p>
-                              <p>Remove</p>
+                            <div ref={(el) => (closeSettingWindow.current[m?._id] = el)} className={`absolute bg-white -top-12 -left-[100px] px-3 py-3 rounded-md h-[77px] w-[125px] ${openSettings.has(m?._id) ? "block" : "hidden"}`}>
+                              {
+                                m?.role === "MEMBER" ? (
+                                  <p onClick={() => handlePromoteMember(m?.userId)} className={`border-b-1 border-b-gray-300 pb-1 block ${adminLoading ? "cursor-not-allowed" : "cursor-pointer"}`}>Promote role</p>
+                                ) : (
+                                  <p onClick={() => handleDemoteMember(m?.userId)} className={`border-b-1 border-b-gray-300 pb-1 block ${demoteLoading ? "cursor-not-allowed" : "cursor-pointer"}`}>Demote role</p>
+                                )
+                              }
+
+                              <p onClick={()=>handleRemoveMember(m?.userId)}>Remove</p>
                             </div>
                           </div>
                         </>
@@ -189,9 +346,9 @@ const TeamBoardEdit = () => {
                     }
 
                     {
-                      m?.role !== "LEADER" && (
+                      currUserLeader && user?._id !== m?.userId && (
                         <button
-                          // onClick={() => handleRemoveMember(member.id)}
+                          onClick={()=>handleRemoveMember(m?.userId)}
                           className='px-2 py-1 hidden sm:block bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 cursor-pointer'
                         >
                           Remove

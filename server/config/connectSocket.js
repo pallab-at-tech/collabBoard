@@ -1666,7 +1666,7 @@ io.on("connection", async (socket) => {
     // make admin of team
     socket.on("makeAdminOfTeam", async (data) => {
         try {
-            const { memberId , teamId } = data || {}
+            const { memberId, teamId } = data || {}
 
             const token = socket.handshake.auth?.token;
             if (!token) {
@@ -1682,39 +1682,182 @@ io.on("connection", async (socket) => {
 
             const userId = payload1.id;
 
-            if(!memberId){
-                return socket.emit("adminMakeError",{
-                    message : "Member Id required!"
+            if (!memberId) {
+                return socket.emit("adminMakeError", {
+                    message: "Member Id required!"
                 })
             }
 
-            if(!teamId){
-                return socket.emit("adminMakeError",{
-                    message : "Team Id required!"
+            if (!teamId) {
+                return socket.emit("adminMakeError", {
+                    message: "Team Id required!"
                 })
             }
 
             const team = await teamModel.findById(teamId)
 
-            if(!team){
-                return socket.emit("adminMakeError",{
-                    message : "Team not found!"
+            if (!team) {
+                return socket.emit("adminMakeError", {
+                    message: "Team not found!"
                 })
             }
-            
+
             const isLeader = team.member.some((m) => m.userId.toString() === userId.toString() && m.role === "LEADER")
 
-            if(!isLeader){
-                return socket.emit("adminMakeError",{
-                    message : "Access denied!"
+            if (!isLeader) {
+                return socket.emit("adminMakeError", {
+                    message: "Access denied!"
                 })
             }
 
-            
+            const findTarget = team.member.find((m) => m.userId.toString() === memberId)
+
+            if (!findTarget) {
+                return socket.emit("adminMakeError", {
+                    message: "Member not found!"
+                })
+            }
+
+            if (findTarget.role === "LEADER") {
+                return socket.emit("adminMakeError", {
+                    message: "This member is already leader!"
+                })
+            }
+
+            findTarget.role = "LEADER"
+
+            const member = await userModel.findById(memberId)
+
+            const targetMember = member.roles.find((m) => m.teamId.toString() === teamId)
+
+            if (!targetMember) {
+                return socket.emit("adminMakeError", {
+                    message: "Member not found!"
+                })
+            }
+
+            if (targetMember.role === "LEADER") {
+                return socket.emit("adminMakeError", {
+                    message: "This member is already leader!"
+                })
+            }
+
+            targetMember.role = "LEADER"
+
+            await member.save()
+            await team.save()
+
+            team.member.forEach((m) => {
+                return io.to(m.userId.toString()).emit("adminSuccess", {
+                    message: "Role promoted successfully",
+                    teamId: teamId,
+                    role: "LEADER",
+                    memberId: memberId
+                })
+            })
 
         } catch (error) {
-            console.log("Error while make admin of team.", error)
-            socket.emit("error", { message: "Server error while make admin of team.", error: true })
+            console.log("Error while make admin of member of team.", error)
+            socket.emit("error", { message: "Server error while make admin of member of team.", error: true })
+        }
+    })
+
+    // make demote of leader
+    socket.on("demoteOfMember", async (data) => {
+        try {
+            const { memberId, teamId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!memberId) {
+                return socket.emit("demotedError", {
+                    message: "Member Id required!"
+                })
+            }
+
+            if (!teamId) {
+                return socket.emit("demotedError", {
+                    message: "Team Id required!"
+                })
+            }
+
+            const team = await teamModel.findById(teamId)
+
+            if (!team) {
+                return socket.emit("demotedError", {
+                    message: "Team not found!"
+                })
+            }
+
+            const isLeader = team.member.some((m) => m.userId.toString() === userId.toString() && m.role === "LEADER")
+
+            if (!isLeader) {
+                return socket.emit("demotedError", {
+                    message: "Access denied!"
+                })
+            }
+
+            const findTarget = team.member.find((m) => m.userId.toString() === memberId)
+
+            if (!findTarget) {
+                return socket.emit("demotedError", {
+                    message: "Member not found!"
+                })
+            }
+
+            if (findTarget.role === "MEMBER") {
+                return socket.emit("demotedError", {
+                    message: "This member is already a normal member!"
+                })
+            }
+
+            findTarget.role = "MEMBER"
+
+            const member = await userModel.findById(memberId)
+
+            const targetMember = member.roles.find((m) => m.teamId.toString() === teamId)
+
+            if (!targetMember) {
+                return socket.emit("demotedError", {
+                    message: "Member not found!"
+                })
+            }
+
+            if (targetMember.role === "MEMBER") {
+                return socket.emit("demotedError", {
+                    message: "This member is already a normal member!"
+                })
+            }
+
+            targetMember.role = "MEMBER"
+
+            await member.save()
+            await team.save()
+
+            team.member.forEach((m) => {
+                return io.to(m.userId.toString()).emit("demoteSuccess", {
+                    message: "Role demoted successfully",
+                    teamId: teamId,
+                    role: "MEMBER",
+                    memberId: memberId
+                })
+            })
+
+        } catch (error) {
+            console.log("Error while make demote of member of team.", error)
+            socket.emit("error", { message: "Server error while make demote of member of team.", error: true })
         }
     })
 
@@ -1722,7 +1865,7 @@ io.on("connection", async (socket) => {
     socket.on("KickedOUtFromTeam", async (data) => {
         try {
 
-            const { memberId } = data || {}
+            const { memberId, teamId } = data || {}
 
             const token = socket.handshake.auth?.token;
             if (!token) {
@@ -1737,6 +1880,58 @@ io.on("connection", async (socket) => {
             }
 
             const userId = payload1.id;
+
+            if (!memberId) {
+                return socket.emit("kickedOutError", {
+                    message: "Member Id required!"
+                })
+            }
+
+            if (!teamId) {
+                return socket.emit("kickedOutError", {
+                    message: "Team Id required!"
+                })
+            }
+
+            const team = await teamModel.findById(teamId)
+
+            if (!team) {
+                return socket.emit("kickedOutError", {
+                    message: "Team not found!"
+                })
+            }
+
+            const isLeader = team.member.some((m) => m.userId.toString() === userId.toString() && m.role === "LEADER")
+
+            if (!isLeader) {
+                return socket.emit("kickedOutError", {
+                    message: "Access denied!"
+                })
+            }
+
+            const filterMemberData = team.member.filter((m) => m.userId.toString() !== memberId)
+
+            const user = await userModel.findById(memberId)
+
+            if(!user){
+                return socket.emit("kickedOutError",{
+                    message : "User not found!"
+                })
+            }
+            const filterUserData = user.roles.filter((u) => u.teamId.toString() !== teamId)
+
+            team.member = filterMemberData
+            user.roles = filterUserData
+
+            await team.save()
+            await user.save()
+
+            team.member.forEach((m) =>{
+                io.to(m.userId.toString()).emit("kickOutSuccess",{
+                    message : `${user.userId} removed from the team by leader`,
+                    teamId : teamId
+                })
+            })
 
         } catch (error) {
             console.log("Error while kicked out from team.", error)

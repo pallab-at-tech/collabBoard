@@ -38,10 +38,28 @@ const teamSlice = createSlice({
             if (description !== undefined) {
                 state.description = description
             }
+        },
+        updateTeamForPromoteDemote: (state, action) => {
+            const { teamId, role, memberId } = action.payload
 
+            if (teamId !== state._id) return
+
+            const targetIdx = state.member.findIndex((m) => m?.userId === memberId)
+            if (targetIdx !== -1) {
+                state.member[targetIdx].role = role
+            }
+        },
+        removeFromTeam: (state, action) => {
+            const { teamId, memberId } = action.payload
+
+            if(teamId !== state._id) return
+
+            const filterData = state.member.filter((m) => m.userId !== memberId)
+            console.log("setRemoveLoading",filterData)
+            state.member = filterData
         }
     }
 })
 
-export const { setTeamDetails, setTeamLogOut, updateTeamDetails } = teamSlice.actions
+export const { setTeamDetails, setTeamLogOut, updateTeamDetails, updateTeamForPromoteDemote, removeFromTeam } = teamSlice.actions
 export default teamSlice.reducer
