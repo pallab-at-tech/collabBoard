@@ -99,7 +99,6 @@ const CollabBoard = () => {
         </div>
       </div>
 
-
     </section>
   )
 }

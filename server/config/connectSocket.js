@@ -1913,9 +1913,9 @@ io.on("connection", async (socket) => {
 
             const user = await userModel.findById(memberId)
 
-            if(!user){
-                return socket.emit("kickedOutError",{
-                    message : "User not found!"
+            if (!user) {
+                return socket.emit("kickedOutError", {
+                    message: "User not found!"
                 })
             }
             const filterUserData = user.roles.filter((u) => u.teamId.toString() !== teamId)
@@ -1926,10 +1926,19 @@ io.on("connection", async (socket) => {
             await team.save()
             await user.save()
 
-            team.member.forEach((m) =>{
-                io.to(m.userId.toString()).emit("kickOutSuccess",{
-                    message : `${user.userId} removed from the team by leader`,
-                    teamId : teamId
+            io.to(memberId).emit("kickOutSuccess", {
+                message: `${user.userId} removed from the team by leader`,
+                teamId: teamId,
+                memberId: memberId,
+                teamName: team.name
+            })
+
+            team.member.forEach((m) => {
+                io.to(m.userId.toString()).emit("kickOutSuccess", {
+                    message: `${user.userId} removed from the team by leader`,
+                    teamId: teamId,
+                    memberId: memberId,
+                    teamName: team.name
                 })
             })
 

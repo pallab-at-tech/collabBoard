@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useGlobalContext } from '../../provider/GlobalProvider'
 import { useEffect } from 'react'
@@ -8,6 +8,9 @@ import { Outlet } from 'react-router-dom'
 import SearchMember from './SearchMember'
 import { useDispatch } from 'react-redux'
 import { removeFromTeam, updateTeamDetails, updateTeamForPromoteDemote } from '../../store/teamSlice'
+import toast from 'react-hot-toast'
+import { currUserteamDetailsUpdate } from '../../store/userSlice'
+
 
 const TeamBoard = () => {
 
@@ -15,7 +18,10 @@ const TeamBoard = () => {
     const team = useSelector(state => state?.team)
     const [openSearchMember, setOpenSearchMember] = useState(false)
 
+    const user = useSelector(state => state?.user)
+
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     const { fetchTeamDetails, socketConnection } = useGlobalContext()
 
@@ -35,6 +41,8 @@ const TeamBoard = () => {
 
         socketConnection.on("adminSuccess", (data) => {
 
+            // console.log("params team123",params?.team === data?.teamId)
+
             if (params?.team === data?.teamId) {
                 dispatch(updateTeamForPromoteDemote({
                     teamId: data?.teamId,
@@ -46,6 +54,8 @@ const TeamBoard = () => {
 
         socketConnection.on("demoteSuccess", (data) => {
 
+            // console.log("params team",params?.team === data?.teamId)
+
             if (params?.team === data?.teamId) {
                 dispatch(updateTeamForPromoteDemote({
                     teamId: data?.teamId,
@@ -55,13 +65,34 @@ const TeamBoard = () => {
             }
         })
 
-        socketConnection.on("kickOutSuccess",(data)=>{
+        socketConnection.on("kickOutSuccess", (data) => {
 
-            // server error here we have to send userId instead of teamId
+            // console.log("params team86177",params)
 
-            if(params?.team === data?.teamId){
-                console.log("setRemoveLoading123",data)
+            if (params?.team === data?.teamId) {
+                console.log("data1",data)
                 dispatch(removeFromTeam({
+                    teamId: data?.teamId,
+                    memberId: data?.memberId
+                }))
+
+                if (data?.memberId === user?._id) {
+                    console.log("data2",data)
+                    dispatch(currUserteamDetailsUpdate({
+                        teamId: data?.teamId,
+                        memberId: data?.memberId
+                    }))
+
+                    toast(`You are removed from team "${data?.teamName}"`, {
+                        icon: "😑"
+                    })
+                    navigate("/")
+                }
+            }
+
+            if (data?.memberId === user?._id) {
+                console.log("data3",data)
+                dispatch(currUserteamDetailsUpdate({
                     teamId: data?.teamId,
                     memberId: data?.memberId
                 }))
@@ -77,7 +108,11 @@ const TeamBoard = () => {
 
     }, [socketConnection, dispatch])
 
-    // console.log("header team", team)
+    // useEffect(() => {
+    //     // navigate("/")
+    // }, [])
+
+    // console.log("hi n", user)
 
 
     return (

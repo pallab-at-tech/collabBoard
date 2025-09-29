@@ -55,7 +55,7 @@ const teamSlice = createSlice({
             if(teamId !== state._id) return
 
             const filterData = state.member.filter((m) => m.userId !== memberId)
-            console.log("setRemoveLoading",filterData)
+            // console.log("setRemoveLoading",filterData)
             state.member = filterData
         }
     }
