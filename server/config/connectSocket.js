@@ -9,6 +9,7 @@ import taskModel, { reportModel } from "../model/task.model.js"
 import teamModel from '../model/team.model.js'
 import crypto from 'crypto'
 import inviteModel from '../model/invite.model.js'
+import { use } from 'react'
 dotenv.config()
 
 
@@ -1999,7 +2000,7 @@ io.on("connection", async (socket) => {
             })
 
             return socket.emit("invited_link", {
-                message: "Invite link created successfully.",
+                message: "Invite code created successfully.",
                 token: invite.token
             })
         } catch (error) {
@@ -2089,25 +2090,48 @@ io.on("connection", async (socket) => {
             invite.usedCount += 1
 
             user.roles.push({
-                teamId : team._id,
-                name : team.name,
-                organization_type : team.organization_type,
-                role : "MEMBER"
+                teamId: team._id,
+                name: team.name,
+                organization_type: team.organization_type,
+                role: "MEMBER"
             })
 
             team.member.push({
-                userId : user._id,
-                role : "MEMBER",
-                userName : user.userId
+                userId: user._id,
+                role: "MEMBER",
+                userName: user.userId
             })
 
             await user.save()
             await team.save()
             await invite.save()
 
-            socket.emit("join_teamSuccess",{
-                message : `You are successfully the member of ${team.name}`,
-                teamId : team._id
+            io.to(userId.toString()).emit("join_teamSuccess", {
+                
+                message: `You are successfully the member of ${team.name}`,
+                teamId: team._id,
+                forUserState: {
+                    teamId: team._id,
+                    name: team.name,
+                    organization_type: team.organization_type,
+                    role: "MEMBER"
+                }
+            })
+
+            team.member.forEach((m) => {
+
+                if (m.userId.toString() !== userId.toString()) {
+
+                    io.to(m.userId.toString()).emit("join_teamSuccess", {
+                        message: `New member ( ${user.userId} ) just joined.`,
+                        teamId: team._id,
+                        newMember: {
+                            userId: userId,
+                            role: "MEMBER",
+                            userName: user.userId,
+                        }
+                    })
+                }
             })
 
         } catch (error) {

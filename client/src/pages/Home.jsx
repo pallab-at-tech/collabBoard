@@ -3,17 +3,18 @@ import collab_banner from "../assets/collab-banner.png"
 import { Link } from 'react-router-dom'
 import { useGlobalContext } from '../provider/GlobalProvider';
 import RealHome from './RealHome';
+import { useEffect } from 'react';
 
 const Home = () => {
-  const { isLogin } = useGlobalContext(); 
+  const { isLogin } = useGlobalContext();
 
-  if (isLogin === null) return null; 
+  if (isLogin === null) return null;
 
   return (
     <section
       className={`${isLogin
-          ? "bg-A-color"
-          : "bg-gradient-to-t to-[var(--primary-color)] from-[#aab8ed]"
+        ? "bg-A-color"
+        : "bg-gradient-to-t to-[var(--primary-color)] from-[#aab8ed]"
         } lg_md:min-h-[calc(100vh-60px)] min-h-[calc(100vh-60px)] relative`}
     >
       {!isLogin ? (

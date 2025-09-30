@@ -27,6 +27,12 @@ const TeamBoardEdit = () => {
   const [adminLoading, setAdminLoading] = useState(false)
   const [demoteLoading, setDemoteLoading] = useState(false)
   const [removeLoading, setRemoveLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const [generatingInvite, setGeneratingInvite] = useState({
+    loading: false,
+    token: ""
+  })
 
   // close setting of admin , remove window.
   useEffect(() => {
@@ -166,33 +172,102 @@ const TeamBoardEdit = () => {
   // removed from the team
   const handleRemoveMember = (memberId) => {
 
-    if(!socketConnection) return
+    if (!socketConnection) return
 
     try {
       setRemoveLoading(true)
 
-      socketConnection.once("kickOutSuccess",(data)=>{
+      socketConnection.once("kickOutSuccess", (data) => {
         toast.success(data?.message)
         setRemoveLoading(false)
       })
 
-      socketConnection.once("kickedOutError",(data)=>{
+      socketConnection.once("kickedOutError", (data) => {
         toast.error(data?.message)
         setRemoveLoading(false)
       })
 
-      socketConnection.emit("KickedOUtFromTeam",{
-        memberId : memberId,
-        teamId : teamDetails?._id
+      socketConnection.emit("KickedOUtFromTeam", {
+        memberId: memberId,
+        teamId: teamDetails?._id
       })
-      
+
     } catch (error) {
-      console.log("Exit from the team Error",error)
+      console.log("Exit from the team Error", error)
       setRemoveLoading(false)
     }
   }
 
-  console.log("team board edit", teamDetails)
+  // generate code
+  const handleGenerateCode = () => {
+
+    if (!socketConnection) return
+
+    try {
+
+      setGeneratingInvite((prev) => {
+        return {
+          ...prev,
+          loading: true
+        }
+      })
+
+      socketConnection.once("invited_link", (data) => {
+        toast.success(data?.message)
+        setGeneratingInvite({
+          loading: false,
+          token: data?.token
+        })
+        localStorage.setItem("inviteToken", data?.token)
+      })
+
+      socketConnection.once("team_inviteError", (data) => {
+        toast.error(data?.message)
+        setGeneratingInvite((prev) => {
+          return {
+            ...prev,
+            loading: false
+          }
+        })
+      })
+
+      socketConnection.emit("generate_team_link", {
+        teamId: data.teamId
+      })
+
+    } catch (error) {
+      console.log("Generate Code Error", error)
+    }
+  }
+
+  // copy in clipBoard
+  const copyInClipBoard = async (text) => {
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+      toast.success("Copied to clipboard!")
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      toast.error("Failed to copy")
+    }
+  }
+
+  useEffect(() => {
+    setGeneratingInvite((prev) => {
+      return {
+        ...prev,
+        token: localStorage.getItem("inviteToken") || ""
+      }
+    })
+
+    return () => localStorage.removeItem("inviteToken")
+  }, [])
+
+
+  // console.log("team board edit", teamDetails)
 
   return (
     <section className='xl:border-2 xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#0a0a1880] xl:to-transparent mt-2 xl:border-[#596982] xl:ring-1 xl:ring-[#596982] border-white overflow-y-auto hide-scrollbar min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-0.5 xl:px-6 py-8 mini_tab:mx-10 rounded-b relative'>
@@ -248,34 +323,48 @@ const TeamBoardEdit = () => {
           <div>
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-white mb-2">
-                Generate Invite Link
+                Generate Invite Code
               </h2>
               <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
                 <input
                   type="text"
                   readOnly
-                  // value={inviteLink}
-                  placeholder="Click Generate to create invite link"
+                  value={generatingInvite.token}
+                  placeholder="Click Generate to create invite code"
                   className="flex-1 p-3 rounded-lg bg-[#32333a] text-white placeholder-gray-400 border border-[#3a3b45] focus:outline-none"
                 />
 
                 <div className='flex gap-2 items-center'>
-                  <button
-                    // onClick={handleGenerateLink}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                  <div
+                    className="px-3 py-3 w-[140px] flex items-center justify-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                   >
-                    Generate
-                  </button>
+                    {
+                      generatingInvite.loading ? (
+                        <div className='loadingCircle cursor-not-allowed'></div>
+                      ) : (
+                        <button className='cursor-pointer' onClick={handleGenerateCode}>
+                          {generatingInvite.token ? "Generate Again" : "Generate"}
+                        </button>
+                      )
+                    }
+
+                  </div>
                   <button
-                    // onClick={handleCopyLink}
-                    // disabled={!inviteLink}
-                    className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 cursor-pointer"
+                    onClick={() => copyInClipBoard(generatingInvite.token)}
+                    className={`px-4 py-3 bg-green-600 text-white rounded-lg transition cursor-pointer duration-300 relative 
+                                ${copied ? "bg-green-700 scale-105" : "hover:bg-green-700"}
+                              `}
                   >
-                    Copy
+                    {copied ? "Copied!" : "Copy"}
                   </button>
+
                 </div>
 
               </div>
+
+              <p className="text-[13px] text-gray-400 mb-2 pt-1">
+                ** This invite code is valid for <span className="font-semibold text-gray-200">7 days</span> and can be used by up to <span className="font-semibold text-gray-200">10 members</span>.
+              </p>
             </div>
 
           </div>
@@ -332,13 +421,13 @@ const TeamBoardEdit = () => {
                             <div ref={(el) => (closeSettingWindow.current[m?._id] = el)} className={`absolute bg-white -top-12 -left-[100px] px-3 py-3 rounded-md h-[77px] w-[125px] ${openSettings.has(m?._id) ? "block" : "hidden"}`}>
                               {
                                 m?.role === "MEMBER" ? (
-                                  <p onClick={() => handlePromoteMember(m?.userId)} className={`border-b-1 border-b-gray-300 pb-1 block ${adminLoading ? "cursor-not-allowed" : "cursor-pointer"}`}>Promote role</p>
+                                  <p onClick={() => handlePromoteMember(m?.userId)} className={`border-b-1 border-b-gray-300 pb-1 block ${(adminLoading || removeLoading || demoteLoading) ? "cursor-not-allowed" : "cursor-pointer"}`}>Promote role</p>
                                 ) : (
-                                  <p onClick={() => handleDemoteMember(m?.userId)} className={`border-b-1 border-b-gray-300 pb-1 block ${demoteLoading ? "cursor-not-allowed" : "cursor-pointer"}`}>Demote role</p>
+                                  <p onClick={() => handleDemoteMember(m?.userId)} className={`border-b-1 border-b-gray-300 pb-1 block ${(adminLoading || removeLoading || demoteLoading) ? "cursor-not-allowed" : "cursor-pointer"}`}>Demote role</p>
                                 )
                               }
 
-                              <p onClick={()=>handleRemoveMember(m?.userId)}>Remove</p>
+                              <p onClick={() => handleRemoveMember(m?.userId)} className={`${(adminLoading || removeLoading || demoteLoading) ? "cursor-not-allowed" : "cursor-pointer"}`}>Remove</p>
                             </div>
                           </div>
                         </>
@@ -348,8 +437,8 @@ const TeamBoardEdit = () => {
                     {
                       currUserLeader && user?._id !== m?.userId && (
                         <button
-                          onClick={()=>handleRemoveMember(m?.userId)}
-                          className='px-2 py-1 hidden sm:block bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 cursor-pointer'
+                          onClick={() => handleRemoveMember(m?.userId)}
+                          className={`px-2 py-1 hidden sm:block bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 ${(adminLoading || removeLoading || demoteLoading) ? "cursor-not-allowed" : "cursor-pointer"}`}
                         >
                           Remove
                         </button>

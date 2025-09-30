@@ -7,7 +7,7 @@ import { IoIosPersonAdd } from "react-icons/io";
 import { Outlet } from 'react-router-dom'
 import SearchMember from './SearchMember'
 import { useDispatch } from 'react-redux'
-import { removeFromTeam, updateTeamDetails, updateTeamForPromoteDemote } from '../../store/teamSlice'
+import { addOfTeamMember, removeFromTeam, updateTeamDetails, updateTeamForPromoteDemote } from '../../store/teamSlice'
 import toast from 'react-hot-toast'
 import { currUserteamDetailsUpdate } from '../../store/userSlice'
 
@@ -54,8 +54,6 @@ const TeamBoard = () => {
 
         socketConnection.on("demoteSuccess", (data) => {
 
-            // console.log("params team",params?.team === data?.teamId)
-
             if (params?.team === data?.teamId) {
                 dispatch(updateTeamForPromoteDemote({
                     teamId: data?.teamId,
@@ -67,17 +65,15 @@ const TeamBoard = () => {
 
         socketConnection.on("kickOutSuccess", (data) => {
 
-            // console.log("params team86177",params)
-
             if (params?.team === data?.teamId) {
-                console.log("data1",data)
+
                 dispatch(removeFromTeam({
                     teamId: data?.teamId,
                     memberId: data?.memberId
                 }))
 
                 if (data?.memberId === user?._id) {
-                    console.log("data2",data)
+
                     dispatch(currUserteamDetailsUpdate({
                         teamId: data?.teamId,
                         memberId: data?.memberId
@@ -91,10 +87,20 @@ const TeamBoard = () => {
             }
 
             if (data?.memberId === user?._id) {
-                console.log("data3",data)
+
                 dispatch(currUserteamDetailsUpdate({
                     teamId: data?.teamId,
                     memberId: data?.memberId
+                }))
+            }
+        })
+
+        socketConnection.on("join_teamSuccess", (data) => {
+
+            if(params?.team === data?.teamId){
+                dispatch(addOfTeamMember({
+                    teamId : data?.teamId,
+                    newMember : data?.newMember
                 }))
             }
         })
@@ -104,13 +110,10 @@ const TeamBoard = () => {
             socketConnection.off("adminSuccess")
             socketConnection.off("demoteSuccess")
             socketConnection.off("kickOutSuccess")
+            socketConnection.off("join_teamSuccess")
         }
 
     }, [socketConnection, dispatch])
-
-    // useEffect(() => {
-    //     // navigate("/")
-    // }, [])
 
     // console.log("hi n", user)
 

@@ -26,7 +26,6 @@ const CollabBoard = () => {
   const boardURL = `/board/${user?.name}-${user?._id}`
 
 
-
   return (
     <section className={`bg-[#202128]  min-h-[calc(100vh-60px)] lg-real:px-[50px] px-6 py-4 grid ${slideOpen ? "lg-real:grid-cols-[1fr_80px]" : "lg-real:grid-cols-[1fr_500px]"} transform-view duration-500`}>
 

@@ -52,14 +52,23 @@ const teamSlice = createSlice({
         removeFromTeam: (state, action) => {
             const { teamId, memberId } = action.payload
 
-            if(teamId !== state._id) return
+            if (teamId !== state._id) return
 
             const filterData = state.member.filter((m) => m.userId !== memberId)
-            // console.log("setRemoveLoading",filterData)
             state.member = filterData
+        },
+        addOfTeamMember: (state, action) => {
+            const { teamId, newMember } = action.payload
+
+            if(teamId !== state._id) return
+
+            const isAlready = state.member.some((m) => m.userId === newMember.userId)
+            if(!isAlready){
+                state.member = [newMember , ...state.member]
+            }
         }
     }
 })
 
-export const { setTeamDetails, setTeamLogOut, updateTeamDetails, updateTeamForPromoteDemote, removeFromTeam } = teamSlice.actions
+export const { setTeamDetails, setTeamLogOut, updateTeamDetails, updateTeamForPromoteDemote, removeFromTeam, addOfTeamMember } = teamSlice.actions
 export default teamSlice.reducer

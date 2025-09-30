@@ -46,14 +46,18 @@ const userSlice = createSlice({
         currUserteamDetailsUpdate: (state, action) => {
             const { teamId, memberId } = action.payload
 
-            console.log("state update user",state._id === memberId)
-            if(state._id === memberId){
+            if (state._id === memberId) {
                 const filterData = state.roles.filter((m) => m.teamId !== teamId)
                 state.roles = filterData
             }
+        },
+        addingTeamDetails: (state, action) => {
+            const { data } = action.payload
+
+            state.roles = [data , ...state.roles]
         }
     }
 })
 
-export const { setUserDetails, setUserLogout, onlineUserDetails, currUserteamDetailsUpdate } = userSlice.actions
+export const { setUserDetails, setUserLogout, onlineUserDetails, currUserteamDetailsUpdate, addingTeamDetails } = userSlice.actions
 export default userSlice.reducer
