@@ -7,7 +7,8 @@ import { conversationModel, messageModel } from '../model/chat.model.js'
 import userModel from '../model/user.model.js'
 import taskModel, { reportModel } from "../model/task.model.js"
 import teamModel from '../model/team.model.js'
-import { promises } from 'dns'
+import crypto from 'crypto'
+import inviteModel from '../model/invite.model.js'
 dotenv.config()
 
 
@@ -1945,6 +1946,173 @@ io.on("connection", async (socket) => {
         } catch (error) {
             console.log("Error while kicked out from team.", error)
             socket.emit("error", { message: "Server error while kicked out from team", error: true })
+        }
+    })
+
+    // generate team joining link by leader.
+    socket.on("generate_team_link", async (data) => {
+        try {
+
+            const { teamId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!teamId) {
+                return socket.emit("team_inviteError", {
+                    message: "Team Id required."
+                })
+            }
+
+            const team = await teamModel.findById(teamId)
+
+            if (!team) {
+                return socket.emit("team_inviteError", {
+                    message: "Team not found!"
+                })
+            }
+
+            const isLeader = team.member.some((m) => m.userId.toString() === userId.toString() && m.role === "LEADER")
+            if (!isLeader) {
+                return socket.emit("team_inviteError", {
+                    message: "Access denied."
+                })
+            }
+
+            // generate random token
+            const inviteToken = crypto.randomBytes(12).toString('hex')
+
+            const invite = await inviteModel.create({
+                teamId: teamId,
+                token: inviteToken
+            })
+
+            return socket.emit("invited_link", {
+                message: "Invite link created successfully.",
+                token: invite.token
+            })
+        } catch (error) {
+            console.log("Error while creating team joining code.", error)
+            socket.emit("error", { message: "Server error while creating team joining code.", error: true })
+        }
+    })
+
+    // join team through invite code
+    socket.on("join_team", async (data) => {
+        try {
+
+            const { invite_code } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!invite_code) {
+                return socket.emit("join_teamError", {
+                    message: "Invite code required!"
+                })
+            }
+
+            const invite = await inviteModel.findOne({ token: invite_code })
+
+            if (!invite) {
+                return socket.emit("join_teamError", {
+                    message: "Invite Code doesn't exist."
+                })
+            }
+
+            if (invite.expireAt < new Date()) {
+                return socket.emit("join_teamError", {
+                    message: "Team code expired!"
+                })
+            }
+
+            if (invite.usedCount >= invite.maxCount) {
+                return socket.emit("join_teamError", {
+                    message: "Invite link has reached maximum usage"
+                })
+            }
+
+            const team = await teamModel.findById(invite.teamId)
+
+            if (!team) {
+                return socket.emit("join_teamError", {
+                    message: "Team not found!"
+                })
+            }
+
+            const alreadyMember = team.member.some((m) => m.userId.toString() === userId.toString())
+
+            if (alreadyMember) {
+                return socket.emit("join_teamError", {
+                    message: `You are already a member of the team "${team.name}"`
+                })
+            }
+
+            const user = await userModel.findById(userId)
+
+            if (!user) {
+                return socket.emit("join_teamError", {
+                    message: "User doesn't exist!"
+                })
+            }
+
+            const alreadyMemberFromUser = user.roles.some((m) => m.teamId.toString() === team._id.toString())
+
+            if (alreadyMemberFromUser) {
+                return socket.emit("join_teamError", {
+                    message: `You are already a member of the team "${team.name}"`
+                })
+            }
+
+            invite.usedCount += 1
+
+            user.roles.push({
+                teamId : team._id,
+                name : team.name,
+                organization_type : team.organization_type,
+                role : "MEMBER"
+            })
+
+            team.member.push({
+                userId : user._id,
+                role : "MEMBER",
+                userName : user.userId
+            })
+
+            await user.save()
+            await team.save()
+            await invite.save()
+
+            socket.emit("join_teamSuccess",{
+                message : `You are successfully the member of ${team.name}`,
+                teamId : team._id
+            })
+
+        } catch (error) {
+            console.log("Error while joining team through team code.", error)
+            socket.emit("error", { message: "Server error while joining team through team code.", error: true })
         }
     })
 
