@@ -7,7 +7,7 @@ import { IoIosPersonAdd } from "react-icons/io";
 import { Outlet } from 'react-router-dom'
 import SearchMember from './SearchMember'
 import { useDispatch } from 'react-redux'
-import { addOfTeamMember, removeFromTeam, updateTeamDetails, updateTeamForPromoteDemote } from '../../store/teamSlice'
+import { addOfTeamMember, removeFromTeam, requestWithDraw, teamRequestSendInfo, updateTeamDetails, updateTeamForPromoteDemote } from '../../store/teamSlice'
 import toast from 'react-hot-toast'
 import { currUserteamDetailsUpdate } from '../../store/userSlice'
 
@@ -97,10 +97,30 @@ const TeamBoard = () => {
 
         socketConnection.on("join_teamSuccess", (data) => {
 
-            if(params?.team === data?.teamId){
+            if (params?.team === data?.teamId) {
                 dispatch(addOfTeamMember({
-                    teamId : data?.teamId,
-                    newMember : data?.newMember
+                    teamId: data?.teamId,
+                    newMember: data?.newMember
+                }))
+            }
+        })
+
+        socketConnection.on("team_requsetSend", (data) => {
+
+            if (params?.team === data?.teamId) {
+                dispatch(teamRequestSendInfo({
+                    teamId: data?.teamId,
+                    data: data?.requestData
+                }))
+            }
+        })
+
+        socketConnection.on("request_pulled", (data) => {
+
+            if (params?.team === data?.teamId) {
+                dispatch(requestWithDraw({
+                    teamId: data?.teamId,
+                    memberId: data?.memberId
                 }))
             }
         })
@@ -111,6 +131,8 @@ const TeamBoard = () => {
             socketConnection.off("demoteSuccess")
             socketConnection.off("kickOutSuccess")
             socketConnection.off("join_teamSuccess")
+            socketConnection.off("team_requsetSend")
+            socketConnection.off("request_pulled")
         }
 
     }, [socketConnection, dispatch])

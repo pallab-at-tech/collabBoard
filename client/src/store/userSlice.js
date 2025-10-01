@@ -54,10 +54,35 @@ const userSlice = createSlice({
         addingTeamDetails: (state, action) => {
             const { data } = action.payload
 
-            state.roles = [data , ...state.roles]
+            state.roles = [data, ...state.roles]
+        },
+        requestAccept: (state, action) => {
+            const { teamId } = action.payload
+            state.request = state.request.filter((m) => m.teamId !== teamId)
+        },
+        teamRequestSend: (state, action) => {
+            const { data, teamId } = action.payload
+
+            const isAlready = state.request.some((m) => m.teamId === teamId)
+
+            if (!isAlready) {
+                state.request.push(data)
+            }
+
+        },
+        teamRequestWithDraw: (state, action) => {
+
+            const { teamId } = action.payload
+
+            if(teamId){
+                state.request = state.request.filter((r) => r.teamId !== teamId)
+            }
         }
     }
 })
 
-export const { setUserDetails, setUserLogout, onlineUserDetails, currUserteamDetailsUpdate, addingTeamDetails } = userSlice.actions
+export const { setUserDetails, setUserLogout, onlineUserDetails, currUserteamDetailsUpdate,
+    addingTeamDetails, requestAccept, teamRequestSend , teamRequestWithDraw
+} = userSlice.actions
+
 export default userSlice.reducer

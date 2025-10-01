@@ -7,46 +7,50 @@ import SummaryApi from '../common/SummaryApi';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useGlobalContext } from '../provider/GlobalProvider';
+import { useDispatch } from 'react-redux';
+import { addingTeamDetails, requestAccept } from '../store/userSlice';
 
 const ProfileTeamRequest = () => {
 
     const user = useSelector(state => state.user)
 
     const [loading, setLoading] = useState(false)
+    const dispatch = useDispatch()
 
-    const { fetchUserAllDetails } = useGlobalContext()
+    const { fetchUserAllDetails, socketConnection } = useGlobalContext()
 
-    const handleRequestAccept = async (requestedBy_id, requestedBy_userId, teamId, teamName) => {
+
+    const handleRequestAccept = async (teamId) => {
+
+        if (!socketConnection) return
+
         try {
 
             setLoading(true)
 
-            const response = await Axios({
-                ...SummaryApi.request_acceptBY_user,
-                data: {
-                    requestedBy_id: requestedBy_id,
-                    requestedBy_userId: requestedBy_userId,
-                    teamId: teamId,
-                    teamName: teamName
-                }
+            socketConnection.once("team_join_success", (data) => {
+
+                toast.success(data?.message)
+                dispatch(addingTeamDetails({
+                    data: data?.roleData
+                }))
+                dispatch(requestAccept({
+                    teamId : data?.teamId
+                }))
+                setLoading(false)
             })
 
-            const { data: responseData } = response
+            socketConnection.once("team_joinError", (data) => {
+                toast.error(data?.message)
+                setLoading(false)
+            })
 
-            if (responseData?.error) {
-                toast.error(responseData?.message)
-            }
-
-            if (responseData?.success) {
-
-                toast.success(responseData?.message)
-                fetchUserAllDetails()
-            }
-
+            socketConnection.emit("team_join", {
+                teamId: teamId
+            })
 
         } catch (error) {
-            console.log("error from handleRequestAccept", error)
-        } finally {
+            console.log("handleRequestAccept error", error)
             setLoading(false)
         }
     }
@@ -114,9 +118,9 @@ const ProfileTeamRequest = () => {
                                         <div className='flex sm:flex-col gap-2 text-sm items-center'>
 
                                             <div onClick={() => {
-                                                handleRequestAccept(v?.requestedBy_id, v?.requestedBy_userId, v?.teamId, v?.teamName)
+                                                handleRequestAccept(v?.teamId)
                                             }}
-                                                className={`flex items-center justify-center gap-2 bg-[#ebbeec] hover:bg-[#eab1eb] transition-colors duration-150 text-black px-2 py-1 rounded-md sm:rounded-lg ${loading ? "pointer-events-none" : "cursor-pointer"} w-full`}
+                                                className={`flex items-center justify-center gap-2 bg-[#ebbeec] hover:bg-[#eab1eb] transition-colors duration-150 text-black px-2 py-1 rounded-md sm:rounded-lg ${loading ? "cursor-not-allowed" : "cursor-pointer"} w-full`}
                                             >
                                                 <p>accept</p>
                                                 <SiTicktick size={16} />

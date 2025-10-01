@@ -60,15 +60,37 @@ const teamSlice = createSlice({
         addOfTeamMember: (state, action) => {
             const { teamId, newMember } = action.payload
 
-            if(teamId !== state._id) return
+            if (teamId !== state._id) return
 
             const isAlready = state.member.some((m) => m.userId === newMember.userId)
-            if(!isAlready){
-                state.member = [newMember , ...state.member]
+            if (!isAlready) {
+                state.member = [newMember, ...state.member]
             }
+        },
+        teamRequestSendInfo: (state, action) => {
+            const { teamId, data } = action.payload
+
+            if (teamId !== state._id) return
+
+            const isAlready = state.request_send.some((m) => m.sendTo_userId === data.sendTo_userId)
+
+            if (!isAlready) {
+                state.request_send.push(data)
+            }
+        },
+        requestWithDraw: (state, action) => {
+            const { memberId, teamId } = action.payload
+
+            if(state._id !== teamId) return
+
+            state.request_send = state.request_send.filter((r) => r.sendTo_userId !== memberId)
         }
     }
 })
 
-export const { setTeamDetails, setTeamLogOut, updateTeamDetails, updateTeamForPromoteDemote, removeFromTeam, addOfTeamMember } = teamSlice.actions
+export const { setTeamDetails, setTeamLogOut, updateTeamDetails,
+    updateTeamForPromoteDemote, removeFromTeam,
+    addOfTeamMember, teamRequestSendInfo, requestWithDraw
+} = teamSlice.actions
+
 export default teamSlice.reducer

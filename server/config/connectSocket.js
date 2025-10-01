@@ -2107,7 +2107,7 @@ io.on("connection", async (socket) => {
             await invite.save()
 
             io.to(userId.toString()).emit("join_teamSuccess", {
-                
+
                 message: `You are successfully the member of ${team.name}`,
                 teamId: team._id,
                 forUserState: {
@@ -2137,6 +2137,309 @@ io.on("connection", async (socket) => {
         } catch (error) {
             console.log("Error while joining team through team code.", error)
             socket.emit("error", { message: "Server error while joining team through team code.", error: true })
+        }
+    })
+
+    // join team by direct invite
+    socket.on("team_join", async (data) => {
+        try {
+            const { teamId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!teamId) {
+                return socket.emit("team_joinError", {
+                    message: "Team id required!"
+                })
+            }
+
+            const user = await userModel.findById(userId)
+
+            if (!user) {
+                return socket.emit("team_joinError", {
+                    message: "User not found!"
+                })
+            }
+
+            const team = await teamModel.findById(teamId)
+
+            if (!team) {
+                return socket.emit("team_joinError", {
+                    message: "Team not found!"
+                })
+            }
+
+            const isRequestExist = user.request.some((is) => is.teamId.toString() === teamId.toString())
+
+            if(!isRequestExist){
+                return socket.emit("team_joinError", {
+                    message: "Request not found!"
+                })
+            }
+
+            user.request = user.request.filter((m) => m.teamId.toString() !== teamId.toString())
+            user.roles.push({
+                teamId: teamId,
+                name: team.name,
+                organization_type: team.organization_type,
+                role: "MEMBER"
+            })
+
+            await user.save()
+
+            team.request_send = team.request_send.filter((m) => m.sendTo_userId.toString() !== userId.toString())
+
+            team.member.push({
+                userId: userId,
+                userName: user.userId,
+                role: "MEMBER"
+            })
+
+            await team.save()
+
+            socket.emit("team_join_success", {
+                message: `You are successfully the member of team "${team.name}"`,
+                teamId: team._id,
+                roleData: {
+                    name: team.name,
+                    organization_type: team.organization_type,
+                    role: "MEMBER",
+                    teamId: team._id,
+                    _id: "N/A"
+                }
+            })
+
+            team.member.forEach((m) => {
+
+                if (m.userId.toString() !== userId.toString()) {
+
+                    io.to(m.userId.toString()).emit("join_teamSuccess", {
+                        message: `New member ( ${user.userId} ) just joined.`,
+                        teamId: team._id,
+                        newMember: {
+                            userId: userId,
+                            role: "MEMBER",
+                            userName: user.userId,
+                        }
+                    })
+                }
+            })
+
+        } catch (error) {
+            console.log("Error while joining team through direct team leader request.", error)
+            socket.emit("error", { message: "Server error while joining team through direct team leader request.", error: true })
+        }
+    })
+
+    // send direct team request by leader
+    socket.on("team_request", async (data) => {
+        try {
+            const { memberId, teamId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!teamId) {
+                return socket.emit("team_requestError", {
+                    message: "Team Id required!"
+                })
+            }
+
+            if (!memberId) {
+                return socket.emit("team_requestError", {
+                    message: "User Id required!"
+                })
+            }
+
+            const team = await teamModel.findById(teamId)
+
+            if (!team) {
+                return socket.emit("team_requestError", {
+                    message: "Team not found!"
+                })
+            }
+
+            const isTeamLeader = team.member.some((m) => m.userId.toString() === userId.toString() && m.role !== "MEMBER")
+
+            if (!isTeamLeader) {
+                return socket.emit("team_requestError", {
+                    message: "Access denied!"
+                })
+            }
+
+            const isUserAlreadyAvailable = team.member.some((m) => m.userId.toString() === memberId.toString())
+
+            if (isUserAlreadyAvailable) {
+                return socket.emit("team_requestError", {
+                    message: "User already present in team"
+                })
+            }
+
+            const isAlreadyRequestSend = team.request_send.some((m) => m.sendTo_userId.toString() === memberId.toString())
+
+            if(isAlreadyRequestSend){
+                return socket.emit("team_requestError", {
+                    message: "Request already sent!"
+                })
+            }
+
+            const userLeader = await userModel.findById(userId)
+            const userUpdate = await userModel.findById(memberId)
+
+            userUpdate.request.push({
+                teamId: teamId,
+                teamName: team.name,
+                requestedBy_id: userId,
+                requestedBy_userId: userLeader.userId
+            })
+
+            await userUpdate.save()
+
+            team.request_send.push({
+                sendTo_userId: memberId,
+                sendBy_userId: userId,
+
+                sendTo_userName: userUpdate.userId,
+                sendBy_userName: userLeader.userId
+            })
+
+            await team.save()
+
+            io.to(memberId).emit("team_requestReceived", {
+                message: `"${userLeader.userId}" send a team request.`,
+                teamId: teamId,
+                teamRequestData: {
+                    teamId: teamId,
+                    teamName: team.name,
+                    requestedBy_id: userLeader._id,
+                    requestedBy_userId: userUpdate.userId,
+                    _id: "N/A"
+                }
+            })
+
+            team.member.forEach((m) => {
+
+                io.to(m.userId.toString()).emit("team_requsetSend", {
+
+                    message: `Team request send to "${userUpdate.userId}"`,
+                    teamId: teamId,
+                    requestData: {
+                        createdAt: new Date(),
+                        sendBy_userId: userId,
+                        sendBy_userName: userLeader.userId,
+                        sendTo_userId: memberId,
+                        sendTo_userName: userUpdate.userId,
+                        updatedAt: new Date(),
+                        _id: "N/A"
+                    }
+                })
+            })
+
+        } catch (error) {
+            console.log("Error while sending team request.", error)
+            socket.emit("error", { message: "Server error while sending team request.", error: true })
+        }
+    })
+
+    // team request withdraw by leader
+    socket.on("request_withdraw", async (data) => {
+        try {
+            const { memberId, teamId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!teamId) {
+                return socket.emit("team_withDrawError", {
+                    message: "Team Id required!"
+                })
+            }
+
+            if (!memberId) {
+                return socket.emit("team_withDrawError", {
+                    message: "User Id required!"
+                })
+            }
+
+            const team = await teamModel.findById(teamId)
+
+            const isTeamLeader = team.member.some((m) => m.userId.toString() === userId.toString() && m.role !== "MEMBER")
+
+            if (!isTeamLeader) {
+                return socket.emit("team_withDrawError", {
+                    message: "Access denied!"
+                })
+            }
+
+            const isUserAlreadyAvailable = team.member.some((m) => m.userId.toString() === memberId.toString())
+
+            if (isUserAlreadyAvailable) {
+                return socket.emit("team_withDrawError", {
+                    message: "User already present in team!"
+                })
+            }
+
+            const user = await userModel.findById(memberId)
+
+            team.request_send = team.request_send.filter((u) => u.sendTo_userId.toString() !== memberId.toString())
+
+            await team.save()
+
+            user.request = user.request.filter((u) => u.teamId.toString() !== teamId.toString())
+
+            await user.save()
+
+            io.to(memberId.toString()).emit("request_targetPulled", {
+                message: `Pull out your team request from team "${team.name}"`,
+                teamId: teamId
+            })
+
+            team.member.forEach((m) => {
+
+                io.to(m.userId.toString()).emit("request_pulled", {
+                    message: `Team requset withDraw from user "${user.userId}"`,
+                    memberId: memberId,
+                    teamId: teamId
+                })
+            })
+
+        } catch (error) {
+            console.log("Error while withdrawing team request.", error)
+            socket.emit("error", { message: "Server error while withdrawing team request.", error: true })
         }
     })
 

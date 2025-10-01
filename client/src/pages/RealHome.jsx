@@ -5,7 +5,7 @@ import CreateTeam from "../components/other/CreateTeam";
 import { useGlobalContext } from "../provider/GlobalProvider";
 import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
-import { addingTeamDetails, currUserteamDetailsUpdate } from "../store/userSlice";
+import { addingTeamDetails, currUserteamDetailsUpdate, teamRequestSend, teamRequestWithDraw } from "../store/userSlice";
 import { useEffect } from "react";
 
 const RealHome = () => {
@@ -22,6 +22,7 @@ const RealHome = () => {
 
     console.log("home page", user)
 
+    // join team through team code
     const handleJoinTeam = (e) => {
 
         e.preventDefault()
@@ -74,8 +75,24 @@ const RealHome = () => {
             }
         })
 
+        socketConnection.on("team_requestReceived",(data) =>{
+            dispatch(teamRequestSend({
+                teamId : data?.teamId,
+                data : data?.teamRequestData
+            }))
+        })
+
+        socketConnection.on("request_targetPulled",(data)=>{
+            
+            dispatch(teamRequestWithDraw({
+                teamId : data?.teamId
+            }))
+        })
+
         return () =>{
             socketConnection.off("kickOutSuccess")
+            socketConnection.off("team_requestReceived")
+            socketConnection.off("request_targetPulled")
         }
 
     }, [socketConnection, dispatch])
@@ -125,7 +142,7 @@ const RealHome = () => {
             {/* Create Team Modal */}
             {openCreateTeam && <CreateTeam close={() => setOpenCreateTeam(false)} />}
 
-            {/* Join Team Modal (placeholder for now) */}
+            {/* Join Team */}
             {openJoinTeam && (
                 <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
                     <form onSubmit={handleJoinTeam} className="bg-[#1f2029] text-white rounded-2xl shadow-lg p-6 w-[90%] max-w-md relative">

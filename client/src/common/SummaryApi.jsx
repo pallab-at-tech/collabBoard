@@ -41,14 +41,6 @@ const SummaryApi = {
         url : "/api/user/user-search",
         method : "get"
     },
-    add_member : {
-        url : "/api/teaming/add-member",
-        method : "post"
-    },
-    request_withdraw_byLeader : {
-        url : "/api/teaming/request-withdraw-by-leader",
-        method : "post"
-    },
     logout : {
         url : "/api/user/logout",
         method : "get"

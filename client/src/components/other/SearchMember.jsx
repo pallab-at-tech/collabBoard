@@ -19,14 +19,13 @@ const SearchMember = ({ close }) => {
     const [allSearchData, setallSearchData] = useState([])
     const params = useParams()
 
-    const { fetchTeamDetails } = useGlobalContext()
+    const { socketConnection } = useGlobalContext()
 
     const user = useSelector(state => state.user)
     const team = useSelector(state => state.team)
     const [storeRequestTemp, setStoreRequestTemp] = useState(new Set())
 
     const [activeButton, setActiveButton] = useState(new Set())
-
 
 
     const searchUserFromServer = async (inputData) => {
@@ -55,36 +54,33 @@ const SearchMember = ({ close }) => {
     }
 
     const addMember = async (userId) => {
+        if (!socketConnection) return
+
         try {
 
             const newSet = new Set(activeButton)
             newSet.add(userId)
             setActiveButton(newSet)
 
-            const response = await Axios({
-                ...SummaryApi.add_member,
-                data: {
-                    userId: userId,
-                    teamId: params?.team
-                }
-            })
-
-            if (response?.data?.success) {
-                fetchTeamDetails(params?.team)
-                toast.success(response?.data?.message)
+            socketConnection.once("team_requsetSend", (data) => {
+                toast.success(data?.message)
                 const newSet = new Set(storeRequestTemp)
                 newSet.add(userId)
                 setStoreRequestTemp(newSet)
-            }
+            })
 
-            if (response?.data?.error) {
-                toast.error(response?.data?.message)
-            }
+            socketConnection.once("team_requestError", (data) => {
+                toast.error(data?.message)
+            })
+
+            socketConnection.emit("team_request", {
+                memberId: userId,
+                teamId: team?._id
+            })
+
         } catch (error) {
-            console.log("error from addMember", error)
-            toast.error(error?.response?.data?.message)
-        }
-        finally {
+            console.log("sending request error", error)
+        } finally {
             const newSet = new Set(activeButton)
             newSet.delete(userId)
             setActiveButton(newSet)
@@ -92,34 +88,33 @@ const SearchMember = ({ close }) => {
     }
 
     const requestWithdrawByLeader = async (userId) => {
-        try {
 
+        if (!socketConnection) return
+
+        try {
             const newSet = new Set(activeButton)
             newSet.add(userId)
             setActiveButton(newSet)
 
-            const response = await Axios({
-                ...SummaryApi.request_withdraw_byLeader,
-                data: {
-                    userId: userId,
-                    teamId: params?.team
-                }
-            })
+            socketConnection.once("request_pulled", (data) => {
+                toast.success(data?.message)
 
-            if (response?.data?.error) {
-                toast.error(response?.data?.message)
-            }
-
-            if (response?.data?.success) {
-                fetchTeamDetails(params?.team)
-                toast.success(response?.data?.message)
                 const newSet = new Set(storeRequestTemp)
                 newSet.delete(userId)
                 setStoreRequestTemp(newSet)
-            }
+            })
+
+            socketConnection.once("team_withDrawError", (data) => {
+                toast.error(data.message)
+            })
+
+            socketConnection.emit("request_withdraw", {
+                memberId : userId,
+                teamId : team?._id
+            })
+
         } catch (error) {
             console.log("error from requestWithdrawByLeader", error)
-            toast.error(error?.response?.data?.message)
         } finally {
             const newSet = new Set(activeButton)
             newSet.delete(userId)
