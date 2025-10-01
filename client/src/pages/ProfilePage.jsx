@@ -1,22 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import profile from "../assets/profile.png"
-import { FiMessageSquare } from "react-icons/fi";
 import { FaEdit, FaEye } from "react-icons/fa";
 import { NavLink, Outlet, useParams, useLocation, useNavigate } from 'react-router-dom'
-import UnderLine from '../utils/UnderLine';
 import Axios from "../utils/Axios"
 import SummaryApi from '../common/SummaryApi';
 import { useDispatch } from 'react-redux';
-import { setUserLogout } from '../store/userSlice';
+import { imageAndNameUpdate, setUserLogout } from '../store/userSlice';
 import { setChatLogOut } from '../store/chatSlice';
 import { setTaskLogOut } from '../store/taskSlice';
 import { setTeamLogOut } from '../store/teamSlice';
 import toast from 'react-hot-toast'
 import ProfileEdit from '../components/other/ProfileEdit';
 import { FaEnvelopeOpenText } from "react-icons/fa";
-import { IoChatbubbleEllipsesSharp } from "react-icons/io5";
 import { useGlobalContext } from '../provider/GlobalProvider';
+
+import { FaCamera } from "react-icons/fa";
+import { IoClose } from "react-icons/io5";
+
+import defaultProfile from "../assets/profile.png"
+import uploadFile from '../utils/uploadFile';
 
 const ProfilePage = () => {
 
@@ -25,7 +28,7 @@ const ProfilePage = () => {
   const location = useLocation()
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { logoutUser } = useGlobalContext()
+  const { logoutUser, socketConnection } = useGlobalContext()
 
 
   const [path, setPath] = useState("")
@@ -37,7 +40,22 @@ const ProfilePage = () => {
   }, [location.pathname])
 
   const [editAbout, setEditAbout] = useState(false)
+  const [editProfile, setEditProfile] = useState(false)
 
+  const [loaderForImg, setloaderForImg] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  const [data, setData] = useState({
+    image: user?.avatar || "",
+    name: user?.name || ""
+  })
+
+  useEffect(() => {
+    setData({
+      image: user?.avatar || "",
+      name: user?.name || ""
+    })
+  }, [user])
 
   const handleLogout = async () => {
     try {
@@ -63,6 +81,70 @@ const ProfilePage = () => {
     }
   }
 
+  const handleProfilePicUpload = async (e) => {
+
+    setloaderForImg(true)
+
+    const file = e.target.files?.[0]
+
+    if (!file) return
+
+    const response = await uploadFile(file)
+
+    setData((preve) => {
+      return {
+        ...preve,
+        image: response?.secure_url
+      }
+    })
+
+    setloaderForImg(false)
+  }
+
+  const handleSave = () => {
+
+    if (!data.name) {
+      toast.error("User name required!")
+      return
+    }
+
+    if (!socketConnection) return
+
+    try {
+      setSaving(true)
+
+      socketConnection.once("user_updateSuccess", (data) => {
+
+        toast.success(data?.message)
+
+        dispatch(imageAndNameUpdate({
+          name: data?.name,
+          avatar: data?.avatar
+        }))
+
+        console.log("update data",data)
+
+        setSaving(false)
+      })
+
+      socketConnection.once("userDeatails_error", (data) => {
+        toast.error(data?.message)
+        setSaving(false)
+      })
+
+      socketConnection.emit("change_userDetails", data)
+
+    } catch (error) {
+      console.log("profile update error", error)
+      setSaving(false)
+    }
+  }
+
+
+
+  console.log("profile data", user)
+
+
 
   return (
     <section className='bg-[#282932] text-white min-h-[calc(100vh-60px)] '>
@@ -75,7 +157,7 @@ const ProfilePage = () => {
 
             <div className='mt-4 mini_tab:ml-16 ml-[12%] relative w-fit'>
               <img src={profile} alt="" className='h-[200px] w-[188px] rounded-2xl border-2 border-[#179709]' />
-              <button className='absolute bottom-0 right-0 cursor-pointer text-white bg-[#137008] px-3 py-1.5 rounded-l-md rounded-r'>Edit</button>
+              <button onClick={() => setEditProfile(true)} className='absolute bottom-0 right-0 cursor-pointer text-white bg-[#137008] px-3 py-1.5 rounded-l-md rounded-r'>Edit</button>
             </div>
 
             <div className='mini_tab:ml-16 ml-[12%] mt-4 flex gap-2 items-center max-w-[220px]'>
@@ -219,6 +301,118 @@ const ProfilePage = () => {
       {
         editAbout && (
           <ProfileEdit close={() => setEditAbout(false)} />
+        )
+      }
+
+      {
+        editProfile && (
+          <section className='fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4'>
+
+            <div className="relative bg-[#f5f5f5] p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-[300px] sm:max-w-[400px] flex flex-col items-center gap-5 animate-in fade-in-0 zoom-in-95">
+
+              {/* Close Button */}
+              <button
+                onClick={() => {
+                  setEditProfile(false)
+                  setData(() => {
+                    return {
+                      name: user?.name || "",
+                      image: user?.avatar || ""
+                    }
+                  })
+                }}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
+                aria-label="Close"
+              >
+                <IoClose size={24} />
+              </button>
+
+              <h2 className="text-2xl font-bold text-gray-800">Edit Profile</h2>
+
+              {/* --- Profile Image Uploader --- */}
+              <div className="relative group">
+
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-400 shadow-md select-none">
+                  {
+                    loaderForImg ? (
+                      <div className='relative'>
+                        <div className='imgLoader absolute top-[36px] right-0 left-[38px] bottom-0'></div>
+                      </div>
+                    ) :
+                      data.image ? (
+                        <img src={data.image} alt="Profile Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full bg-[#d8d8d8] text-gray-400 font-medium">
+                          <img src={defaultProfile} alt="" className='mt-auto' />
+                        </div>
+                      )}
+                </div>
+
+                {/* Uploader Overlay */}
+                <label
+                  htmlFor="profile-picture-upload"
+                  className={`${loaderForImg ? "hidden" : "block"} absolute inset-0 flex items-center justify-center bg-black/50 rounded-full cursor-pointer opacity-80 sm:opacity-0 group-hover:opacity-100 transition-opacity`}
+                >
+                  <div className='text-white flex flex-col items-center gap-1'>
+                    <FaCamera size={32} />
+                    <p className=''>Change image</p>
+                  </div>
+
+                  <input
+                    id="profile-picture-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfilePicUpload}
+                    className="hidden"
+                  />
+                </label>
+
+              </div>
+
+              {/* --- Name Input Field --- */}
+              <div className="w-full">
+
+                <label htmlFor="user-name" className="block text-sm font-medium text-gray-600 mb-1">
+                  Name
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Enter your name"
+                  value={data.name}
+                  onChange={(e) => setData((prev) => { return { ...prev, name: e.target.value } })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                />
+              </div>
+
+              {/* --- Action Buttons --- */}
+              <div className="flex justify-end gap-3 w-full mt-4">
+
+                <button
+                  onClick={() => {
+                    setEditProfile(false)
+                    setData(() => {
+                      return {
+                        name: user?.name || "",
+                        image: user?.avatar || ""
+                      }
+                    })
+                  }}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-6 py-2.5 rounded-lg transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleSave}
+                  className={`bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all ${saving ? "cursor-not-allowed" : "cursor-pointer"}`}
+                >
+                  {saving ? "Saving" : "Save"}
+                </button>
+              </div>
+
+            </div>
+          </section>
         )
       }
 

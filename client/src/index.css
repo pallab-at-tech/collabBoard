@@ -334,3 +334,26 @@
     transform: scaleY(-1) rotate(-135deg)
   }
 }
+
+/* loader for image load */
+.imgLoader {
+  width: 45px;
+  padding: 6px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #25b09b;
+  --_m:
+    conic-gradient(#0000 10%, #000),
+    linear-gradient(#000 0 0) content-box;
+  -webkit-mask: var(--_m);
+  mask: var(--_m);
+  -webkit-mask-composite: source-out;
+  mask-composite: subtract;
+  animation: l334 1s infinite linear;
+}
+
+@keyframes l334 {
+  to {
+    transform: rotate(1turn)
+  }
+}

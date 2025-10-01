@@ -64,6 +64,54 @@ io.on("connection", async (socket) => {
         console.log("User connected:", `${socket.id} -- ${userId}`);
     })
 
+
+    // Message related controller start from here ...
+
+    // change user details like name and profile picture
+    socket.on("change_userDetails", async (data) => {
+        try {
+            const { name, image } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!name) {
+                return socket.emit("userDeatails_error", {
+                    message: "Name required!"
+                })
+            }
+
+            const user = await userModel.findByIdAndUpdate(userId,
+                {
+                    name: name,
+                    avatar: image
+                },
+                { new: true }
+            )
+
+            socket.emit("user_updateSuccess", {
+                message: "Details successfully updated.",
+                name: user.name,
+                avatar: user.avatar
+            })
+
+        } catch (error) {
+            console.log("Error while change user details.", error)
+            socket.emit("error", { message: "Server error while change user details.", error: true })
+        }
+    })
+
     // send message privatly
     socket.on("send_message", async (data) => {
         try {
@@ -2183,7 +2231,7 @@ io.on("connection", async (socket) => {
 
             const isRequestExist = user.request.some((is) => is.teamId.toString() === teamId.toString())
 
-            if(!isRequestExist){
+            if (!isRequestExist) {
                 return socket.emit("team_joinError", {
                     message: "Request not found!"
                 })
@@ -2300,7 +2348,7 @@ io.on("connection", async (socket) => {
 
             const isAlreadyRequestSend = team.request_send.some((m) => m.sendTo_userId.toString() === memberId.toString())
 
-            if(isAlreadyRequestSend){
+            if (isAlreadyRequestSend) {
                 return socket.emit("team_requestError", {
                     message: "Request already sent!"
                 })
