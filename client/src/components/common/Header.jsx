@@ -77,11 +77,13 @@ const Header = () => {
           <>
             {/* Profile / Avatar */}
             {user.avatar ? (
-              <img
-                src={user.avatar}
-                alt="profile"
-                className="w-8 h-8 rounded-full object-cover border-2 border-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
-              />
+              <Link to={profileURL}>
+                <img
+                  src={user.avatar}
+                  alt="profile"
+                  className="w-8 h-8 rounded-full object-cover border-2 border-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
+                />
+              </Link>
             ) : (
               <Link to={profileURL} className="text-gray-200 hover:text-emerald-400 transition-colors">
                 <CgProfile size={24} />

@@ -6,7 +6,7 @@ import { HiOutlineUserAdd } from "react-icons/hi";
 import SearchNewMember from './SearchNewMember';
 import Axios from '../utils/Axios';
 import SummaryApi from '../common/SummaryApi';
-import {updateparticipantsForRemove, removeConversation ,  setMessageDetails, updateGroupImage, updateGroupName, updateparticipantsForAdd,  } from '../store/chatSlice';
+import { updateparticipantsForRemove, removeConversation, setMessageDetails, updateGroupImage, updateGroupName, updateparticipantsForAdd, } from '../store/chatSlice';
 import { useDispatch } from 'react-redux';
 import { FiArrowUpLeft } from 'react-icons/fi'
 import { RxAvatar } from 'react-icons/rx';
@@ -18,7 +18,7 @@ import CreateGroup from '../components/common/CreateGroup';
 import { FaUserGroup } from "react-icons/fa6";
 import { useGlobalContext } from '../provider/GlobalProvider';
 import { updateConversationWithNewMessage } from '../store/chatSlice';
-import toast from 'react-hot-toast';
+
 const ChatPage = () => {
 
     const user = useSelector(state => state.user)
@@ -67,7 +67,6 @@ const ChatPage = () => {
 
     }, [socketConnection, dispatch])
 
-
     useEffect(() => {
         (async () => {
             try {
@@ -77,8 +76,6 @@ const ChatPage = () => {
                 })
 
                 const { data: responseData } = response
-
-                console.log("response testing", responseData)
 
                 if (responseData.success) {
                     dispatch(setMessageDetails({ all_message: responseData?.data }))
@@ -93,7 +90,7 @@ const ChatPage = () => {
     // update for remove member for all members of group
     useEffect(() => {
 
-        if(!socketConnection) return
+        if (!socketConnection) return
 
         socketConnection.on("member_removed", ({ group_id, removedMemberId }) => {
             dispatch(updateparticipantsForRemove({
@@ -104,7 +101,7 @@ const ChatPage = () => {
 
         socketConnection.on("removed_from_group", ({ group_id }) => {
             // If current user was removed
-            dispatch(removeConversation(group_id)) 
+            dispatch(removeConversation(group_id))
         })
 
         return () => {
@@ -112,26 +109,26 @@ const ChatPage = () => {
             socketConnection.off("removed_from_group")
         }
 
-    }, [dispatch , socketConnection])
+    }, [dispatch, socketConnection])
 
     // update for add member for all members of group 
-    useEffect(()=>{
+    useEffect(() => {
 
-        if(!socketConnection) return
+        if (!socketConnection) return
 
-        socketConnection.on("member_added" , ({group_id , obj , removedMemberId})=>[
+        socketConnection.on("member_added", ({ group_id, obj, removedMemberId }) => [
             dispatch(updateparticipantsForAdd({
-                group_Id :group_id,
-                memberId : removedMemberId,
-                obj :  obj
+                group_Id: group_id,
+                memberId: removedMemberId,
+                obj: obj
             }))
         ])
 
-        return () =>{
+        return () => {
             socketConnection.off("member_added")
         }
 
-    },[socketConnection , dispatch])
+    }, [socketConnection, dispatch])
 
     return (
         <section className='min-h-[calc(100vh-60px)] '>
@@ -144,7 +141,13 @@ const ChatPage = () => {
 
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#2e2f38]">
-                                <CgProfile size={24} className="text-gray-300" />
+                                {
+                                    user?.avatar ? (
+                                        <img src={user?.avatar} alt="" className='h-[32px] w-[32px] object-cover rounded-full'/>
+                                    ) : (
+                                        <CgProfile size={24} className="text-gray-300" />
+                                    )
+                                }
                             </div>
                             <p className="text-sm font-medium truncate sm:max-w-[15ch] max-w-[9ch] ipad_pro:hidden block lg-real:block">{`${user?.name}` || "Guest User"}</p>
                         </div>
@@ -158,7 +161,7 @@ const ChatPage = () => {
                         </div>
 
                         <div>
-                            <HiUserGroup size={28} onClick={() => setOpenGroupCreateWindow(true)} title='create group' />
+                            <HiUserGroup size={28} onClick={() => setOpenGroupCreateWindow(true)} title='create group' className='cursor-pointer'/>
                         </div>
 
                         <div>

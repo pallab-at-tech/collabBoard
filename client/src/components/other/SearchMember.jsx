@@ -180,7 +180,13 @@ const SearchMember = ({ close }) => {
                                     return (
                                         <div key={`allSearchData-${idx}`} className='bg-[#bbbbbc] px-2 py-1 rounded grid sm:grid-cols-[30px_83px_1fr] grid-cols-[28px_70px_1fr] items-center sm:max-w-[226px] sm:min-w-[226px] max-w-[180px] min-w-[180px] gap-3 my-1.5'>
 
-                                            <RxAvatar size={32} />
+                                            {
+                                                val?.avatar ? (
+                                                    <img src={val?.avatar} alt="" className='w-[32px] h-[32px] object-cover object-center rounded-full'/>
+                                                ) : (
+                                                    <RxAvatar size={32} />
+                                                )
+                                            }
 
                                             <div className='flex flex-col leading-[16px] text-sm justify-start'>
                                                 <p className='max-w-[11ch] truncate'>{val?.name}</p>

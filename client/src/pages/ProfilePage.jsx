@@ -140,11 +140,7 @@ const ProfilePage = () => {
     }
   }
 
-
-
   console.log("profile data", user)
-
-
 
   return (
     <section className='bg-[#282932] text-white min-h-[calc(100vh-60px)] '>
@@ -156,7 +152,13 @@ const ProfilePage = () => {
           <div className=''>
 
             <div className='mt-4 mini_tab:ml-16 ml-[12%] relative w-fit'>
-              <img src={profile} alt="" className='h-[200px] w-[188px] rounded-2xl border-2 border-[#179709]' />
+            {
+              user?.avatar ? (
+                <img src={user?.avatar} alt="" className='h-[200px] w-[188px] rounded-2xl border-2 border-[#179709] object-cover object-center'/>
+              ) : (
+                <img src={profile} alt="" className='h-[200px] w-[188px] rounded-2xl border-2 border-[#179709]' />
+              )
+            }
               <button onClick={() => setEditProfile(true)} className='absolute bottom-0 right-0 cursor-pointer text-white bg-[#137008] px-3 py-1.5 rounded-l-md rounded-r'>Edit</button>
             </div>
 
