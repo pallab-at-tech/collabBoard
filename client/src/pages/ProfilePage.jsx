@@ -88,7 +88,6 @@ const ProfilePage = () => {
               <p className='font-semibold'>{user?.email}</p>
             </div>
 
-
           </div>
 
           <div className='mini_tab:ml-16 ml-[12%] mt-6 max-w-[350px]'>

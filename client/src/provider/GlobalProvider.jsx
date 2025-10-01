@@ -20,6 +20,8 @@ const GlobalProvider = ({ children }) => {
     const [socketConnection, setSocketConnection] = useState(null)
     const [isLogin, setIsLogin] = useState(localStorage.getItem("login") === "true")
 
+    const [slideExpand, setSlideExpand] = useState(true)
+
     useEffect(() => {
         setLoginGlobal = setIsLogin
     }, [setIsLogin])
@@ -68,8 +70,6 @@ const GlobalProvider = ({ children }) => {
             })
             const { data: responseData } = response
 
-            // console.log("response data....",responseData)
-
             if (responseData?.error) toast.error(responseData?.message)
             if (responseData?.success) dispatch(setTeamDetails(responseData?.data))
         } catch (error) {
@@ -84,8 +84,6 @@ const GlobalProvider = ({ children }) => {
                 params: { teamId }
             })
             const { data: responseData } = response
-
-            // console.log("responseData for task from global",responseData)
 
             if (responseData?.error) toast.error(responseData?.message)
             if (responseData?.success) dispatch(setTask(responseData?.data))
@@ -149,7 +147,9 @@ const GlobalProvider = ({ children }) => {
             isLogin,
             setIsLogin,
             loginUser,
-            logoutUser
+            logoutUser,
+            slideExpand,
+            setSlideExpand
         }}>
             {children}
         </GlobalContext.Provider>

@@ -105,7 +105,7 @@ const ProfileTeamRequest = () => {
                         {
                             user?.request?.map((v, i) => {
                                 return (
-                                    <div className='px-6 py-3 bg-[#a31083] hover:bg-[#9c0b7d] border border-[#ded5dc] transition-colors duration-150 rounded-xl flex sm:flex-row flex-col sm:items-center sm:justify-between max-w-[72%] my-2.5'>
+                                    <div className='px-6 py-3  border bg-[#21305e] hover:bg-[#21305eb6] border-[#ded5dc] transition-colors duration-150 rounded-xl flex sm:flex-row flex-col sm:items-center sm:justify-between max-w-[72%] my-2.5'>
 
                                         <div className='flex flex-col justify-between'>
                                             <h1 className='font-semibold text-[22px] pb-[1px]'>{v?.teamName}</h1>
@@ -120,7 +120,7 @@ const ProfileTeamRequest = () => {
                                             <div onClick={() => {
                                                 handleRequestAccept(v?.teamId)
                                             }}
-                                                className={`flex items-center justify-center gap-2 bg-[#ebbeec] hover:bg-[#eab1eb] transition-colors duration-150 text-black px-2 py-1 rounded-md sm:rounded-lg ${loading ? "cursor-not-allowed" : "cursor-pointer"} w-full`}
+                                                className={`flex items-center justify-center gap-2 bg-blue-200 hover:bg-blue-300   transition-colors duration-150 text-black px-2 py-1 rounded-md sm:rounded-lg ${loading ? "cursor-not-allowed" : "cursor-pointer"} w-full`}
                                             >
                                                 <p>accept</p>
                                                 <SiTicktick size={16} />
@@ -129,7 +129,7 @@ const ProfileTeamRequest = () => {
                                             <div onClick={() => {
                                                 handleRequestCancel(v?.requestedBy_id, v?.requestedBy_userId, v?.teamId, v?.teamName)
                                             }}
-                                                className={`flex items-center gap-1 justify-center bg-[#ebbeec] hover:bg-[#eab1eb] transition-colors duration-150 text-black px-2 py-1 rounded-md sm:rounded-lg ${loading ? "pointer-events-none" : "cursor-pointer"} w-full`}
+                                                className={`flex items-center gap-1 justify-center bg-blue-200 hover:bg-blue-300  transition-colors duration-150 text-black px-2 py-1 rounded-md sm:rounded-lg ${loading ? "pointer-events-none" : "cursor-pointer"} w-full`}
                                             >
                                                 <p>reject</p>
                                                 <RxCross2 size={18} />

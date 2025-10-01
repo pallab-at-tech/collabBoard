@@ -4,6 +4,7 @@ import { BsColumnsGap } from "react-icons/bs";
 import { FaClock } from 'react-icons/fa';
 import { FaRegFaceDizzy } from "react-icons/fa6";
 import { FaExclamationTriangle } from 'react-icons/fa';
+import { useGlobalContext } from '../../provider/GlobalProvider';
 
 const ShowColumnForTrack = () => {
     const location = useLocation().state;
@@ -13,17 +14,18 @@ const ShowColumnForTrack = () => {
 
     const [submitted, setSubmitted] = useState(new Set())
 
-    useEffect(()=>{
+    const { slideExpand } = useGlobalContext()
+
+    useEffect(() => {
         const set = new Set()
-        column.reportSubmit.map((m)=>{
+        column.reportSubmit.map((m) => {
             set.add(m.taskId)
         })
         setSubmitted(set)
-    },[])
+    }, [])
 
-    // console.log("column data",column)
 
-    if (!column || column.tasks.length === 0) return <div className="text-gray-400 flex items-center gap-2 text-xl"><p>No column data available</p> <FaRegFaceDizzy size={22} className='pt-1'/></div>;
+    if (!column || column.tasks.length === 0) return <div className="text-gray-400 flex items-center gap-2 text-xl"><p>No column data available</p> <FaRegFaceDizzy size={22} className='pt-1' /></div>;
 
 
     return (
@@ -34,7 +36,7 @@ const ShowColumnForTrack = () => {
                 <h2 className="text-[25px] font-bold mb-2 text-white">{column.name}</h2>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className={`grid ${slideExpand ? "sm:grid-cols-2" : "sm:grid-cols-3"} gap-4`}>
                 {column.tasks.map((task, i) => {
                     // deadline check
                     const isOverdue = new Date(task.dueDate) < new Date(today);
@@ -67,10 +69,10 @@ const ShowColumnForTrack = () => {
 
                                     {/* Due Date */}
                                     <div className="text-sm flex items-start py-1">
-                                        
+
                                         {
                                             deadlineColor === "text-red-500" ? (
-                                                <FaExclamationTriangle size={18} className='mr-1 pt-0.5 text-[#bcbbbb]'/>
+                                                <FaExclamationTriangle size={18} className='mr-1 pt-0.5 text-[#bcbbbb]' />
                                             ) : (
                                                 <div>
                                                     <FaClock size={18} className="mr-1 pt-0.5 text-[#bcbbbb]" />
@@ -85,7 +87,7 @@ const ShowColumnForTrack = () => {
                                                     : task.dueDate}
                                             </span>{" "}
                                             <span className='text-red-300'>{`${deadlineStatus}`}</span>
-                                            <span className='text-green-600'>{`${submitted.has(task._id) ? "(Report submitted)": ""}`}</span>
+                                            <span className='text-green-600'>{`${submitted.has(task._id) ? "(Report submitted)" : ""}`}</span>
                                         </p>
                                     </div>
                                 </div>

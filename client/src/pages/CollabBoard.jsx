@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { useSelector } from 'react-redux'
 import student from "../assets/test-student-banner1.png"
 import engineering from "../assets/engineering-banner.png"
@@ -9,11 +9,11 @@ import other from "../assets/other-banner.png"
 import { Outlet } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { VscTriangleRight } from "react-icons/vsc";
+import { useGlobalContext } from '../provider/GlobalProvider'
 
 const CollabBoard = () => {
 
   const user = useSelector(state => state.user)
-  const [slideOpen, setSlideOpen] = useState(false)
 
   const bannerCombo = {
     "Engineering-IT": engineering,
@@ -25,9 +25,11 @@ const CollabBoard = () => {
   }
   const boardURL = `/board/${user?.name}-${user?._id}`
 
+  const { slideExpand, setSlideExpand } = useGlobalContext()
+
 
   return (
-    <section className={`bg-[#202128]  min-h-[calc(100vh-60px)] lg-real:px-[50px] px-6 py-4 grid ${slideOpen ? "lg-real:grid-cols-[1fr_80px]" : "lg-real:grid-cols-[1fr_500px]"} transform-view duration-500`}>
+    <section className={`bg-[#202128]  min-h-[calc(100vh-60px)] lg-real:px-[50px] px-6 py-4 grid ${slideExpand ? "lg-real:grid-cols-[1fr_500px]" : "lg-real:grid-cols-[1fr_60px]"} transform-view duration-500`}>
 
       <div className=''>
         {
@@ -40,12 +42,13 @@ const CollabBoard = () => {
         <div
           onClick={(e) => {
             e.stopPropagation();
-            setSlideOpen(!slideOpen);
+            // setSlideOpen(!slideOpen);
+            setSlideExpand(!slideExpand)
           }}
           className={`absolute top-4 -left-0.5 cursor-pointer 
-                text-[#a78bfa] ${slideOpen ? "rotate-180" : "rotate-0"} 
+                text-[#a78bfa] ${slideExpand ? "rotate-0" : "rotate-180"} 
                 transition-transform duration-300`}
-          title={slideOpen ? "Show team list" : "Hide team list"}
+          title={slideExpand ? "Hide team list" : "Show team list"}
         >
           <VscTriangleRight size={28} />
         </div>
@@ -55,7 +58,7 @@ const CollabBoard = () => {
           className={`ml-4 text-center font-extrabold py-3 text-xl tracking-wide 
                 text-[#f5f3ff] border-b-2 border-[#000107]
                 shadow-[0_2px_0_#6d28d9] 
-                ${slideOpen ? "opacity-0" : "opacity-100"} 
+                ${slideExpand ? "opacity-100" : "opacity-0"} 
                 transition-opacity duration-300`}
         >
           ▓ ALL TEAMS ▓
@@ -64,7 +67,7 @@ const CollabBoard = () => {
         {/* Teams List */}
         <div
           className={`h-[calc(100vh-170px)] transition-transform duration-300 
-                ${slideOpen ? "hidden" : "block"} 
+                ${slideExpand ? "block" : "hidden"} 
                 overflow-y-auto px-3 py-4 space-y-3 
                 scrollbar-thin scrollbar-thumb-[#6d28d9]/60 scrollbar-track-transparent`}
           style={{ willChange: "transform" }}
