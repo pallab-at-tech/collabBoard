@@ -42,37 +42,43 @@ const Header = () => {
 
   return (
     <header
-      className={`${isLogin ? "bg-[#1b1c29]/90 backdrop-blur-md" : "bg-[var(--primary-color)]/90 backdrop-blur-md"} 
-  min-h-[60px] grid mini_tab:grid-cols-[1fr_2fr_2fr] grid-cols-[140px_1fr] 
+      className={`${isLogin ? "bg-[#1b1c29]/90 backdrop-blur-md" : "bg-white backdrop-blur-md shadow-md"} 
+  min-h-[60px] grid sm:grid-cols-[1fr_4fr_2fr] grid-cols-[140px_1fr] 
   items-center z-50 sticky top-0 border-b border-white/10`}
     >
       {/* Logo */}
-      <Link to={"/"} className={`${isLogin ? "text-white" : ""} sm:pl-6 flex items-center gap-2`}>
+      <Link to={"/"} className={`sm:pl-6 flex items-center gap-2 w-fit`}>
         <img src={logo1} alt="logo" className="h-[50px] drop-shadow-[0_0_10px_rgba(16,185,110,0.1)]" />
+        <div className='text-[24px] pb-1 font-bold -ml-1.5 relative'>
+          <span className={`${isLogin ? "text-yellow-400" : "text-yellow-500"}`}>Col</span>
+          <span className={`${isLogin ? "text-green-500" : "text-green-600"}`}>lab</span>
+          <span className={`${isLogin ? "text-cyan-500" : "text-cyan-600"}`}>Desk</span>
+          <span className='w-[70px] h-[3px] bg-green-600 absolute left-[2px] bottom-[7px]' style={{textShadow: "rgb(0 114 42 / 80%) 0px 0px 12px"}}></span>
+        </div>
       </Link>
 
       {/* Center Navigation */}
       <div
-        className={`items-center justify-center md:gap-[20%] gap-8 ${isLogin ? "text-gray-200" : "text-white"
+        className={`items-center justify-center xl:gap-[20%] gap-8 ${isLogin ? "text-gray-200" : "text-white"
           } font-medium tracking-wide mini_tab:flex hidden`}
       >
         <Link
           to=""
-          className="hover:text-emerald-400 transition-colors duration-200"
+          className={`${isLogin ? "hover:text-emerald-400" : "text-gray-600 hover:text-indigo-600"} transition-colors duration-200`}
         >
           Features
         </Link>
 
         <Link
           to=""
-          className="hover:text-emerald-400 transition-colors duration-200"
+          className={`${isLogin ? "hover:text-emerald-400" : "text-gray-600 hover:text-indigo-600"} transition-colors duration-200`}
         >
           About
         </Link>
       </div>
 
       {/* Right Side */}
-      <div className="flex items-center justify-center mini_tab:gap-10 gap-6">
+      <div className="flex items-center justify-center  gap-6">
         {isLogin ? (
           <>
             {/* Profile / Avatar */}
@@ -126,15 +132,17 @@ const Header = () => {
             </div>
           </>
         ) : (
-          <Link
-            to={"/login"}
-            className="bg-[#005eff] py-[7px] px-4 rounded-xl text-white font-medium 
-        transition-all duration-200 hover:bg-[#3a82ff] hover:scale-105 text-center"
-          >
-            Sign in
-          </Link>
+          <div className="flex items-center space-x-4">
+            <Link
+              to="/login"
+              className="bg-indigo-600 text-white font-semibold px-5 py-2 rounded-full hover:bg-indigo-700 transition-colors duration-300"
+            >
+              Sign In
+            </Link>
+          </div>
         )}
       </div>
+
     </header>
 
   )
