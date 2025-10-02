@@ -20,9 +20,9 @@ const Home = () => {
 
           <div className='min-h-[calc(100vh-60px)] xl:grid xl:grid-cols-[1fr_550px]'>
 
-            <div className="w-full py-8 sm:py-[80px] xl:py-[14%] px-6 custom-sm:px-10 ipad_pro:px-[100px] xl:pl-[150px] xl:pr-10">
+            <div className="w-full py-8 sm:py-[80px] xl:py-[14%] px-6 custom-sm:px-10  ipad_pro:px-[180px] xl:pl-[150px] xl:pr-10">
 
-              <h1 className="text-2xl md:text-[55px] font-bold mb-3 leading-[1.2] text-[#000727]">
+              <h1 className="text-2xl sm:text-[60px] font-bold mb-3 leading-[1.2] text-[#000727]">
                 Streamline Your Workflow - Collaborate in Real Time with CollabDesk
               </h1>
               <p className="text-[14px] sm:text-lg text-base font-semibold text-[#000312]">
