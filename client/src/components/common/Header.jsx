@@ -60,7 +60,7 @@ const Header = () => {
       {/* Center Navigation */}
       <div
         className={`items-center justify-center xl:gap-[20%] gap-8 ${isLogin ? "text-gray-200" : "text-white"
-          } font-medium tracking-wide mini_tab:flex hidden`}
+          } font-medium tracking-wide mini_tab:flex hidden pl-14`}
       >
         <Link
           to=""
@@ -132,7 +132,7 @@ const Header = () => {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-end pr-10 space-x-4 w-full">
+          <div className="flex items-center justify-end sm:justify-center pr-10 space-x-4 w-full">
             <Link
               to="/login"
               className="bg-indigo-600 text-white font-semibold px-5 py-2 rounded-full hover:bg-indigo-700 transition-colors duration-300"
