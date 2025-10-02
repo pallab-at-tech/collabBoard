@@ -7,9 +7,10 @@ import { IoIosPersonAdd } from "react-icons/io";
 import { Outlet } from 'react-router-dom'
 import SearchMember from './SearchMember'
 import { useDispatch } from 'react-redux'
-import { addOfTeamMember, removeFromTeam, requestWithDraw, teamRequestSendInfo, updateTeamDetails, updateTeamForPromoteDemote } from '../../store/teamSlice'
+import { addOfTeamMember, leftTeamMember, removeFromTeam, requestWithDraw, teamRequestSendInfo, updateTeamDetails, updateTeamForPromoteDemote } from '../../store/teamSlice'
 import toast from 'react-hot-toast'
-import { currUserteamDetailsUpdate } from '../../store/userSlice'
+import { currUserteamDetailsUpdate, leftFromTeamUpdate } from '../../store/userSlice'
+import { MdExitToApp } from "react-icons/md";
 
 
 const TeamBoard = () => {
@@ -17,13 +18,47 @@ const TeamBoard = () => {
     const params = useParams()
     const team = useSelector(state => state?.team)
     const [openSearchMember, setOpenSearchMember] = useState(false)
+    const [exitWindow, setExitWindow] = useState(false)
+
+    const [teamLeftLoading, setTeamLeftLoading] = useState(false)
 
     const user = useSelector(state => state?.user)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    const { fetchTeamDetails, socketConnection } = useGlobalContext()
+    const { fetchTeamDetails, socketConnection, isTeamLeader } = useGlobalContext()
+
+    const handleLeftTeam = async () => {
+
+        if (!socketConnection) return
+        if (!team?._id) return
+
+        try {
+
+            setTeamLeftLoading(true)
+
+            socketConnection.once("team_exited", (data) => {
+                toast.success(data?.message)
+                setTeamLeftLoading(false)
+                setExitWindow(false)
+                navigate("/")
+            })
+
+            socketConnection.once("exitError", (data) => {
+                toast.error(data?.message)
+                setTeamLeftLoading(false)
+            })
+
+            socketConnection.emit("team_exit", {
+                teamId: team?._id
+            })
+
+        } catch (error) {
+            console.log("Left team error", error)
+            setTeamLeftLoading(false)
+        }
+    }
 
     useEffect(() => {
         fetchTeamDetails(params?.team)
@@ -125,6 +160,23 @@ const TeamBoard = () => {
             }
         })
 
+        socketConnection.on("team_exited", (data) => {
+
+            if (params?.team === data?.teamId) {
+                dispatch(leftTeamMember({
+                    teamId: data?.teamId,
+                    left_userId: data?.left_userId
+                }))
+            }
+
+            if (user?._id === data?.left_userId) {
+                dispatch(leftFromTeamUpdate({
+                    teamId: data?.teamId,
+                    left_userId: data?.left_userId
+                }))
+            }
+        })
+
         return () => {
             socketConnection.off("teamDetails_updated")
             socketConnection.off("adminSuccess")
@@ -133,20 +185,20 @@ const TeamBoard = () => {
             socketConnection.off("join_teamSuccess")
             socketConnection.off("team_requsetSend")
             socketConnection.off("request_pulled")
+            socketConnection.off("team_exited")
         }
 
     }, [socketConnection, dispatch])
 
-    // console.log("hi n", user)
-
+    // console.log("team details", team)
 
     return (
         <section className='h-full w-full grid-rows-2'>
 
             {/* header of task desk   */}
-            <div className='flex items-center justify-between 
-                mini_tab:mx-10 mini_tab:px-6 px-3 py-2 mt-2 mb-1 rounded-t text-white 
-                border border-white xl:border-[#596982] xl:ring-1 xl:ring-[#596982]'
+            <div className={`flex items-center justify-between 
+                mini_tab:mx-10 mini_tab:px-6 px-3 ${team?.description ? "py-2" : "py-[19px]"}  mt-2 mb-1 rounded-t text-white 
+                border border-white xl:border-[#596982] xl:ring-1 xl:ring-[#596982]`}
             >
 
                 <div className='flex flex-col'>
@@ -160,14 +212,17 @@ const TeamBoard = () => {
                     </div>
                 </div>
 
-                <div className='flex gap-x-6'>
+                <div className={`flex gap-x-6 sm:gap-x-8`}>
+
+                    <Link to={`/board/${params.user}/${params.team}/edit`} className={`bg-blue-700  transition-colors duration-200 px-3 text-white py-1 rounded-md cursor-pointer border border-white ${isTeamLeader ? "block" : "hidden"}`}>Edit</Link>
 
                     <div className='cursor-pointer text-[#E2E8F0] hover:text-blue-400' title='add member' onClick={() => setOpenSearchMember(true)}>
                         <IoIosPersonAdd size={32} />
                     </div>
 
-                    <Link to={`/board/${params.user}/${params.team}/edit`} className='bg-blue-700  transition-colors duration-200 px-3 text-white py-1 rounded-md cursor-pointer border border-white'>Edit</Link>
-
+                    <div className={`cursor-pointer text-[#E2E8F0] hover:text-blue-400`} onClick={() => setExitWindow(true)} title='Exit from the team'>
+                        <MdExitToApp size={32} />
+                    </div>
                 </div>
 
             </div>
@@ -183,6 +238,37 @@ const TeamBoard = () => {
             {
                 openSearchMember && (
                     <SearchMember close={() => setOpenSearchMember(false)} />
+                )
+            }
+
+            {
+                exitWindow && (
+                    <section className="fixed inset-0 flex items-center justify-center z-50 bg-[#152231b2] backdrop-blur-[3px]">
+
+                        <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-6 text-center">
+                            {/* Header */}
+                            <h2 className="text-xl font-bold text-gray-900 mb-3">
+                                Are you sure you want to leave the team?
+                            </h2>
+                            <p className="text-gray-600 mb-6">
+                                This action cannot be undone.
+                            </p>
+
+                            {/* Action Buttons */}
+                            <div className="flex justify-center gap-4">
+                                <button onClick={() => setExitWindow(false)}
+                                    className={`px-5 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold ${teamLeftLoading ? "cursor-not-allowed" : "cursor-pointer"}`}
+                                >
+                                    Cancel
+                                </button>
+                                <button onClick={()=>handleLeftTeam()}
+                                    className={`px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold ${teamLeftLoading ? "cursor-not-allowed" : "cursor-pointer"}`}
+                                >
+                                    Confirm
+                                </button>
+                            </div>
+                        </div>
+                    </section>
                 )
             }
 

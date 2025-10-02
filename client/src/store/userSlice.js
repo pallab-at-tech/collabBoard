@@ -82,14 +82,21 @@ const userSlice = createSlice({
 
             const { name, avatar } = action.payload
 
-            if(name) state.name = name
+            if (name) state.name = name
             state.avatar = avatar
+        },
+        leftFromTeamUpdate: (state, action) => {
+            const { teamId, left_userId } = action.payload
+
+            if(left_userId !== state._id) return
+            state.roles = state.roles.filter((t) => t?.teamId !== teamId)
         },
     }
 })
 
 export const { setUserDetails, setUserLogout, onlineUserDetails, currUserteamDetailsUpdate,
-    addingTeamDetails, requestAccept, teamRequestSend, teamRequestWithDraw, imageAndNameUpdate
+    addingTeamDetails, requestAccept, teamRequestSend, teamRequestWithDraw, imageAndNameUpdate,
+    leftFromTeamUpdate
 } = userSlice.actions
 
 export default userSlice.reducer

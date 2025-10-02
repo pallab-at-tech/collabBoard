@@ -49,7 +49,7 @@ const Header = () => {
       {/* Logo */}
       <Link to={"/"} className={`sm:pl-6 flex items-center gap-2 w-fit`}>
         <img src={logo1} alt="logo" className="h-[50px] drop-shadow-[0_0_10px_rgba(16,185,110,0.1)]" />
-        <div className='text-[24px] pb-1 font-bold -ml-1.5 relative'>
+        <div className={`text-[24px] pb-1 font-bold -ml-1.5 relative ${isLogin ? "hidden sm:block" : "block"}`}>
           <span className={`${isLogin ? "text-yellow-400" : "text-yellow-500"}`}>Col</span>
           <span className={`${isLogin ? "text-green-500" : "text-green-600"}`}>lab</span>
           <span className={`${isLogin ? "text-cyan-500" : "text-cyan-600"}`}>Desk</span>

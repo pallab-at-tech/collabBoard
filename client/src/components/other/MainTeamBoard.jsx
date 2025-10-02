@@ -18,7 +18,6 @@ import DeleteCollabDesk from '../TaskBoard/DeleteCollabDesk'
 import { updateTeamDetails } from '../../store/teamSlice'
 
 
-
 const MainTeamBoard = () => {
 
     const [data, setData] = useState({
@@ -189,7 +188,6 @@ const MainTeamBoard = () => {
 
     }, [sortData, task])
 
-    // console.log("task details hi", task)
 
     return (
         <section className=''>

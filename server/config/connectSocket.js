@@ -2491,6 +2491,143 @@ io.on("connection", async (socket) => {
         }
     })
 
+    // team member exit
+    socket.on("team_exit", async (data) => {
+        try {
+
+            const { teamId } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            if (!teamId) {
+                return socket.emit("exitError", {
+                    message: "Team Id required!"
+                })
+            }
+
+            // check is team member or not
+            const user = await userModel.findById(userId)
+            if (!user) {
+                return socket.emit("exitError", {
+                    message: "User not found!"
+                })
+            }
+
+            const team = await teamModel.findById(teamId)
+            if (!team) {
+                return socket.emit("exitError", {
+                    message: "Team not found!"
+                })
+            }
+
+            const searchInUser = user.roles.some((u) => u.teamId.toString() === teamId.toString())
+            const searchInTeam = team.member.some((u) => u.userId.toString() === userId.toString())
+
+            if (!searchInTeam || !searchInUser) {
+                return socket.emit("exitError", {
+                    message: "Illegal access!"
+                })
+            }
+
+            // check leader if then only leader in the team
+            let leader_count = 0
+            let isLeader = false
+            team.member.forEach((m) => {
+
+                if (m.role.toString() !== "MEMBER") {
+                    leader_count += 1
+
+                    if (m.userId.toString() === userId.toString()) {
+                        isLeader = true
+                    }
+                }
+
+            })
+
+            let isTeamDelete = false
+
+            if (isLeader) {
+
+                if (leader_count === 1) {
+
+                    if (team.member.length === 1) {
+                        // exit group and delete team model
+                        isTeamDelete = true
+                        user.roles = user.roles.filter((u) => u.teamId.toString() !== teamId.toString())
+                        await taskModel.deleteMany({ teamId: teamId })
+                        await team.deleteOne()
+                    }
+                    else {
+                        // exit group and make another member leader
+                        user.roles = user.roles.filter((u) => u.teamId.toString() !== teamId.toString())
+                        for (let m of team.member) {
+                            if (m.userId.toString() !== userId.toString()) {
+                                m.role = "LEADER"
+                                break
+                            }
+                        }
+                        team.member = team.member.filter((m) => m.userId.toString() !== userId.toString())
+                    }
+                }
+                else {
+                    // just exit the team
+                    user.roles = user.roles.filter((u) => u.teamId.toString() !== teamId.toString())
+                    team.member = team.member.filter((m) => m.userId.toString() !== userId.toString())
+                }
+            }
+            else {
+                // just exit the team
+                user.roles = user.roles.filter((u) => u.teamId.toString() !== teamId.toString())
+                team.member = team.member.filter((m) => m.userId.toString() !== userId.toString())
+            }
+
+            if (!isTeamDelete) {
+                await team.save()
+            }
+            await user.save()
+
+            if (isTeamDelete) {
+                io.to(userId.toString()).emit("team_exited", {
+                    message: "You have left the team successfully.",
+                    teamId: teamId,
+                    left_userId : userId
+                })
+            }
+            else {
+                io.to(userId.toString()).emit("team_exited", {
+                    message: "You have left the team successfully.",
+                    teamId: teamId,
+                    left_userId : userId
+                })
+
+                team.member.forEach((m)=>{
+                    io.to(m.userId.toString()).emit("team_exited",{
+                        message : `${user.userId} has left the team.`,
+                        teamId : teamId,
+                        left_userId : userId
+                    })
+                })
+            }
+
+
+        } catch (error) {
+            console.log("Error while exit from team.", error)
+            socket.emit("error", { message: "Server error while exit from team.", error: true })
+        }
+    })
+
     // disconnect from the room and offline
     socket.on("disconnect", () => {
         const userId = onlineUser.get(socket.id)

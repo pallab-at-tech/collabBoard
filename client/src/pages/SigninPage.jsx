@@ -24,11 +24,6 @@ const SigninPage = () => {
     const dispatch = useDispatch()
     const { loginUser } = useGlobalContext();
 
-    const user = useSelector(state => state.user)
-
-    console.log("user redux", user)
-
-
     const handleChange = (e) => {
         const { name, value } = e.target
 

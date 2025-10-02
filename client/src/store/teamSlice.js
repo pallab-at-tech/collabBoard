@@ -81,16 +81,22 @@ const teamSlice = createSlice({
         requestWithDraw: (state, action) => {
             const { memberId, teamId } = action.payload
 
-            if(state._id !== teamId) return
-
+            if (state._id !== teamId) return
             state.request_send = state.request_send.filter((r) => r.sendTo_userId !== memberId)
-        }
+        },
+        leftTeamMember: (state, action) => {
+            const { teamId, left_userId } = action.payload
+
+            if(teamId !== state._id) return
+            state.member = state.member.filter((m) => m.userId !== left_userId)
+        },
     }
 })
 
 export const { setTeamDetails, setTeamLogOut, updateTeamDetails,
     updateTeamForPromoteDemote, removeFromTeam,
-    addOfTeamMember, teamRequestSendInfo, requestWithDraw
+    addOfTeamMember, teamRequestSendInfo, requestWithDraw,
+    leftTeamMember
 } = teamSlice.actions
 
 export default teamSlice.reducer

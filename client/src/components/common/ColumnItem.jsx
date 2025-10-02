@@ -12,12 +12,15 @@ import TaskEdit from '../TaskBoard/TaskEdit';
 import TaskDelete from '../TaskBoard/TaskDelete';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useGlobalContext } from '../../provider/GlobalProvider';
 
 const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     const dropdownRef = useRef(null);
     const imageDropRef = useRef(null)
     const linkDropRef = useRef(null)
     const videoDropRef = useRef(null)
+
+    const { isTeamLeader } = useGlobalContext()
 
     const [imageOpen, setImageOpen] = useState({
         open: false,
@@ -121,15 +124,6 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
     const [taskDeleteOpen, setTaskDeleteOpen] = useState(false)
     const [taskLabel, setTaskLabel] = useState(new Set())
 
-    const [isTeamLeader, setIsTeamLeader] = useState(false)
-
-    // check user team leader or not
-    useEffect(() => {
-        const x = team?.member?.some((m) => m?.userId === user?._id && m?.role === "LEADER")
-        setIsTeamLeader(x)
-    }, [])
-
-
 
     return (
         <section>
@@ -223,7 +217,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                             {/* edit options */}
                                             <div className='text-white absolute sm:top-2 sm:-right-2.5 top-0 -right-6 flex sm:flex-col flex-row items-center'>
 
-                                                <Link to={`/task/task-assign-${v?._id}`} state={{ val: v, columnId: val?._id, teamId: team?._id, report: val?.reportSubmit || [], isLeader: isTeamLeader || false }} className='h-fit w-fit'>
+                                                <Link to={`/task/task-assign-${v?._id}`} state={{ val: v, columnId: val?._id, teamId: team?._id, report: val?.reportSubmit || [], isLeader: isTeamLeader || false }} className={`h-fit w-fit`}>
                                                     <FaExternalLinkAlt
                                                         size={17}
                                                         className='my-1.5 mx-1.5 cursor-pointer text-[#cccdcc] hover:text-[#f0f1f0] transition-colors'
@@ -237,7 +231,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                                         setCurrentTaskToEdit(v)
                                                     }}
                                                     size={20}
-                                                    className='my-1.5 mx-1.5 cursor-pointer text-[#50c900] hover:text-[#409f00] transition-colors' title='Edit task'
+                                                    className={`my-1.5 mx-1.5 cursor-pointer text-[#50c900] hover:text-[#409f00] transition-colors ${isTeamLeader ? "block" : "hidden"}`} title='Edit task'
                                                 />
 
                                                 <MdAutoDelete
@@ -245,7 +239,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                                         setTaskDeleteOpen(true)
                                                         setCurrentTaskToEdit(v)
                                                     }}
-                                                    className='my-1.5 mx-1.5 cursor-pointer text-[#f36900] hover:text-red-500 transition-colors' title='Delete task'
+                                                    className={`my-1.5 mx-1.5 cursor-pointer text-[#f36900] hover:text-red-500 transition-colors ${isTeamLeader ? "block" : "hidden"}`} title='Delete task'
                                                     size={20}
                                                 />
                                             </div>

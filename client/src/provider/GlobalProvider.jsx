@@ -21,6 +21,7 @@ const GlobalProvider = ({ children }) => {
     const [isLogin, setIsLogin] = useState(localStorage.getItem("login") === "true")
 
     const [slideExpand, setSlideExpand] = useState(true)
+    const [isTeamLeader, setIsTeamLeader] = useState(false)
 
     useEffect(() => {
         setLoginGlobal = setIsLogin
@@ -70,6 +71,9 @@ const GlobalProvider = ({ children }) => {
             })
             const { data: responseData } = response
 
+            const x = await responseData?.data.member?.some((m) => m?.userId === user?._id && m?.role === "LEADER")
+            setIsTeamLeader(x)
+
             if (responseData?.error) toast.error(responseData?.message)
             if (responseData?.success) dispatch(setTeamDetails(responseData?.data))
         } catch (error) {
@@ -107,7 +111,7 @@ const GlobalProvider = ({ children }) => {
                 { auth: { token: token } }
             )
 
-            socket.once("session_expired",(data)=>{
+            socket.once("session_expired", (data) => {
                 toast.error("Your session has expired. Please log in again!")
                 localStorage.clear()
                 window.location.href = "/"
@@ -119,7 +123,7 @@ const GlobalProvider = ({ children }) => {
                 if (err.message.includes("Not authenticated")) {
                     toast.error("Your session has expired. Please log in again!")
                     localStorage.clear()
-                    window.location.href = "/"; 
+                    window.location.href = "/";
                 }
             });
 
@@ -149,7 +153,9 @@ const GlobalProvider = ({ children }) => {
             loginUser,
             logoutUser,
             slideExpand,
-            setSlideExpand
+            setSlideExpand,
+            setIsTeamLeader,
+            isTeamLeader
         }}>
             {children}
         </GlobalContext.Provider>
