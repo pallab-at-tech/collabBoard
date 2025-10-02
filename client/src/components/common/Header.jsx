@@ -43,7 +43,7 @@ const Header = () => {
   return (
     <header
       className={`${isLogin ? "bg-[#1b1c29]/90 backdrop-blur-md" : "bg-white backdrop-blur-md shadow-md"} 
-  min-h-[60px] grid sm:grid-cols-[1fr_4fr_2fr] grid-cols-[140px_1fr] 
+  min-h-[60px] grid sm:grid-cols-[1fr_2fr_2fr] grid-cols-[120px_1fr] 
   items-center z-50 sticky top-0 border-b border-white/10`}
     >
       {/* Logo */}
@@ -53,7 +53,7 @@ const Header = () => {
           <span className={`${isLogin ? "text-yellow-400" : "text-yellow-500"}`}>Col</span>
           <span className={`${isLogin ? "text-green-500" : "text-green-600"}`}>lab</span>
           <span className={`${isLogin ? "text-cyan-500" : "text-cyan-600"}`}>Desk</span>
-          <span className='w-[70px] h-[3px] bg-green-600 absolute left-[2px] bottom-[7px]' style={{textShadow: "rgb(0 114 42 / 80%) 0px 0px 12px"}}></span>
+          <span className='w-[70px] h-[3px] bg-green-600 absolute left-[2px] bottom-[7px]' style={{ textShadow: "rgb(0 114 42 / 80%) 0px 0px 12px" }}></span>
         </div>
       </Link>
 
@@ -78,9 +78,9 @@ const Header = () => {
       </div>
 
       {/* Right Side */}
-      <div className="flex items-center justify-center  gap-6">
+      <div className="flex items-center justify-center gap-0  xl:gap-6">
         {isLogin ? (
-          <>
+          <div className='flex gap-8 xl:gap-14 items-center xl:pr-[60px]'>
             {/* Profile / Avatar */}
             {user.avatar ? (
               <Link to={profileURL}>
@@ -130,9 +130,9 @@ const Header = () => {
                 <NotificationPopbar close={() => setNotificationbarOpen(false)} />
               )}
             </div>
-          </>
+          </div>
         ) : (
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-end pr-10 space-x-4 w-full">
             <Link
               to="/login"
               className="bg-indigo-600 text-white font-semibold px-5 py-2 rounded-full hover:bg-indigo-700 transition-colors duration-300"

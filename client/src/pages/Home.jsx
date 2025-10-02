@@ -72,9 +72,9 @@ const Home = () => {
               {/* Phone Mockup */}
               <div className='sm:grid xl:block grid-cols-[1fr_300px] gap-6 px-10'>
 
-                <div className="relative w-[280px] sm:w-[360px] h-[480px] bg-black rounded-[2rem] shadow-2xl overflow-hidden border-[6px] border-gray-900">
+                <div className="relative w-[280px] sm:w-[360px] h-[480px] rounded-[2rem] shadow-2xl overflow-hidden border-[6px] border-gray-900 xl:border-blue-800">
                   {/* Screen */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-blue-200 p-4 flex flex-col gap-4">
+                  <div className="absolute inset-0  bg-gradient-to-b xl:from-transparent xl:to-transparent from-blue-200 to-blue-300 p-4 flex flex-col gap-4">
 
                     <h3 className="text-lg font-bold text-[#00194d]">CollabDesk</h3>
 
