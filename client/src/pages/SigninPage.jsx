@@ -99,7 +99,7 @@ const SigninPage = () => {
 
                     {/* Logo */}
                     <div className="flex items-center gap-x-2 mb-6">
-                        <img src={yourLogo} alt="CollabDesk Logo" className="h-10 w-12" />
+                        <img src={yourLogo} alt="CollabDesk Logo" className="h-12 w-12" />
                         <h1 className="text-3xl font-bold text-[#000727] mb-1.5">CollabDesk</h1>
                     </div>
 

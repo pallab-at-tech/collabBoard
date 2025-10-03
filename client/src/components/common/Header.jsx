@@ -47,8 +47,8 @@ const Header = () => {
   items-center z-50 sticky top-0 border-b border-white/10`}
     >
       {/* Logo */}
-      <Link to={"/"} className={`sm:pl-6 flex items-center gap-2 w-fit`}>
-        <img src={logo1} alt="logo" className="h-[50px] drop-shadow-[0_0_10px_rgba(16,185,110,0.1)]" />
+      <Link to={"/"} className={`pl-4 sm:pl-6 flex items-center gap-2 w-fit`}>
+        <img src={logo1} alt="logo" className="h-[46px] drop-shadow-[0_0_10px_rgba(16,185,110,0.1)] pt-1" />
         <div className={`text-[24px] pb-1 font-bold -ml-1.5 relative ${isLogin ? "hidden sm:block" : "block"}`}>
           <span className={`${isLogin ? "text-yellow-400" : "text-yellow-500"}`}>Col</span>
           <span className={`${isLogin ? "text-green-500" : "text-green-600"}`}>lab</span>
