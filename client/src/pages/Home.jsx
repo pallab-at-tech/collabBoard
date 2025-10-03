@@ -1,15 +1,14 @@
-import React from 'react'
-import collab_banner from "../assets/collab-banner.png"
 import { Link } from 'react-router-dom'
 import { useGlobalContext } from '../provider/GlobalProvider';
 import RealHome from './RealHome';
-import { useEffect } from 'react';
 import { FaAngleLeft } from "react-icons/fa";
 import { FaChevronRight } from "react-icons/fa";
 import { FaSquare } from "react-icons/fa6";
+import { useState } from 'react';
 
 const Home = () => {
   const { isLogin } = useGlobalContext();
+  const [emailValue, setEmailValue] = useState("")
 
   if (isLogin === null) return null;
 
@@ -33,10 +32,12 @@ const Home = () => {
                 <input
                   type="email"
                   placeholder="Enter email..."
+                  value={emailValue}
+                  onChange={(e)=>setEmailValue(e.target.value)}
                   className="w-[310px] bg-white md:py-[9px] py-[5px] rounded px-1.5 outline-none border text-[#07014e] border-blue-500"
                 />
                 <Link
-                  to={"/signup"}
+                  to={"/signup"} state={{email : emailValue}}
                   className="block bg-[#005eff] md:py-[9px] py-[5px] px-2 rounded text-white transition-all duration-150 hover:bg-[#0055e8] hover:scale-105 cursor-pointer text-center"
                 >
                   get started
