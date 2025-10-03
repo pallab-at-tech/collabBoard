@@ -140,18 +140,17 @@ const ProfilePage = () => {
     }
   }
 
-  console.log("profile data", user)
 
   return (
     <section className='bg-[#282932] text-white min-h-[calc(100vh-60px)] '>
 
       <div className='grid lg-real:grid-cols-[500px_1fr]'>
 
-        <div className='lg-real:bg-[#21222b] bg-[#282932] lg-real:block mini_tab:flex  justify-start  px-6 py-4 lg-real:min-h-[calc(100vh-70px)] lg-real:max-h-[calc(100vh-60px)] sticky top-[60px] overflow-y-auto hide-scrollbar lg-real:shadow-md shadow-[#282828]'>
+        <div className='lg-real:bg-[#21222b] bg-[#282932] lg-real:block mini_tab:flex  justify-start px-4 sm:px-6 py-4 lg-real:min-h-[calc(100vh-70px)] lg-real:max-h-[calc(100vh-60px)] sticky top-[60px] overflow-y-auto hide-scrollbar lg-real:shadow-md shadow-[#282828]'>
 
           <div className=''>
 
-            <div className='mt-4 mini_tab:ml-16 ml-[12%] relative w-fit'>
+            <div className='mt-4 mini_tab:ml-16 custom-sm:ml-[12%] ml-[8%] relative w-fit'>
             {
               user?.avatar ? (
                 <img src={user?.avatar} alt="" className='h-[200px] w-[188px] rounded-2xl border-2 border-[#179709] object-cover object-center'/>
@@ -162,19 +161,19 @@ const ProfilePage = () => {
               <button onClick={() => setEditProfile(true)} className='absolute bottom-0 right-0 cursor-pointer text-white bg-[#137008] px-3 py-1.5 rounded-l-md rounded-r'>Edit</button>
             </div>
 
-            <div className='mini_tab:ml-16 ml-[12%] mt-4 flex gap-2 items-center max-w-[220px]'>
+            <div className='mini_tab:ml-16 custom-sm:ml-[12%] ml-[8%] mt-4 flex gap-2 items-center max-w-[220px]'>
               <p className='block'>{user?.userId}</p>
               <div className='block h-[0.5px] w-full bg-[#b4b3b3]'></div>
             </div>
 
-            <div className='flex items-center gap-x-1 mini_tab:ml-16 ml-[12%] mt-4'>
+            <div className='flex items-center gap-x-1 mini_tab:ml-16 custom-sm:ml-[12%] ml-[8%] mt-4'>
               <p className='font-bold'>Email :</p>
               <p className='font-semibold'>{user?.email}</p>
             </div>
 
           </div>
 
-          <div className='mini_tab:ml-16 ml-[12%] mt-6 max-w-[350px]'>
+          <div className='mini_tab:ml-16 custom-sm:ml-[12%] ml-[8%] mt-6 max-w-[350px]'>
 
             <div className=''>
 
@@ -246,7 +245,7 @@ const ProfilePage = () => {
 
         </div>
 
-        <div className='overflow-y-auto  sticky top-[70px] px-8 sm:block hidden ml-16 lg-real:ml-0'>
+        <div className='overflow-y-auto sticky top-[70px] px-8 sm:block hidden ml-16 lg-real:ml-0'>
 
           <div className=''>
 
