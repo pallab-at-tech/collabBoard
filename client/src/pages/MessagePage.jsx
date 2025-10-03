@@ -190,7 +190,6 @@ const MessagePage = () => {
         })()
     }, [params?.conversation, chat_details])
 
-
     // recieved message and update globally [ all chat member ]
     useEffect(() => {
         if (!socketConnection) return;
@@ -266,6 +265,9 @@ const MessagePage = () => {
         setConversation(conversation)
     }, [])
 
+    console.log("location?.allMessageDetails",location?.allMessageDetails)
+    console.log("group details",conversation)
+
 
     return (
         <>
@@ -280,8 +282,8 @@ const MessagePage = () => {
 
                                 {
                                     isGroup ? (
-                                        conversation?.group_image || location?.allMessageDetails?.group_image ? (
-                                            <img src={conversation?.group_image || location?.allMessageDetails?.group_image} alt="" className='h-[36px] w-[36px] rounded-full' />
+                                        location?.allMessageDetails?.group_image || conversation?.group_image  ? (
+                                            <img src={location?.allMessageDetails?.group_image || conversation?.group_image} alt="" className='h-[36px] w-[36px] rounded-full' />
                                         ) : (
                                             <FaUserGroup size={30} />
                                         )
@@ -291,7 +293,7 @@ const MessagePage = () => {
                                 }
 
                                 {location?.allMessageDetails?.group_type === "GROUP" ? (
-                                    <p className="text-lg">{conversation?.group_name || location?.allMessageDetails?.group_name}</p>
+                                    <p className="text-lg">{location?.allMessageDetails?.group_name || conversation?.group_name}</p>
                                 ) : (
                                     <div className="flex flex-col text-base">
                                         <p>{location?.allMessageDetails?.otherUser?.name}</p>
@@ -305,16 +307,21 @@ const MessagePage = () => {
                                     isGroup ? (
                                         <FaUserGroup size={30} />
                                     ) : (
-                                        <RxAvatar size={38} />
+                                         
+                                        location?.allMessageDetails?.otherUser?.avatar ? (
+                                            <img src={location?.allMessageDetails?.otherUser?.avatar} alt="" className='h-[40px] w-[40px] border-2 border-[#205b67] p-1 rounded-full object-cover'/>
+                                        ) : (
+                                            <RxAvatar size={38} />
+                                        )
                                     )
                                 }
 
                                 {location?.allMessageDetails?.group_type === "GROUP" ? (
-                                    <p className="text-lg">{conversation?.group_name || location?.allMessageDetails?.group_name}</p>
+                                    <p className="text-lg">{location?.allMessageDetails?.group_name || conversation?.group_name}</p>
                                 ) : (
                                     <div className="flex flex-col text-base">
-                                        <p>{conversation?.otherUser?.name || location?.allMessageDetails?.otherUser?.name}</p>
-                                        <p className="text-sm opacity-75">{conversation?.otherUser?.userId || location?.allMessageDetails?.otherUser?.userId}</p>
+                                        <p>{location?.allMessageDetails?.otherUser?.name || conversation?.otherUser?.name}</p>
+                                        <p className="text-sm opacity-75">{location?.allMessageDetails?.otherUser?.userId || conversation?.otherUser?.userId}</p>
                                     </div>
                                 )}
                             </div>

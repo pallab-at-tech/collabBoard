@@ -20,8 +20,6 @@ const RealHome = () => {
 
     const dispatch = useDispatch()
 
-    console.log("home page", user)
-
     // join team through team code
     const handleJoinTeam = (e) => {
 

@@ -115,7 +115,7 @@ const MessageEdit = () => {
     }
 
 
-    console.log("all_details", all_details)
+    // console.log("all_details", all_details)
 
     return (
         <section className='bg-[#21222b] text-white h-[calc(100vh-60px)] overflow-y-auto px-4 py-3 sm:px-6 sm:py-5'>
