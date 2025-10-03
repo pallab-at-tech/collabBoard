@@ -9,7 +9,7 @@ import taskModel, { reportModel } from "../model/task.model.js"
 import teamModel from '../model/team.model.js'
 import crypto from 'crypto'
 import inviteModel from '../model/invite.model.js'
-import { use } from 'react'
+import notificationModel from '../model/notification.model.js'
 dotenv.config()
 
 
@@ -1698,13 +1698,31 @@ io.on("connection", async (socket) => {
             team.description = teamAbout
             await team.save()
 
-            team.member.forEach((m) => {
+            team.member.forEach(async(m) => {
                 io.to(m.userId.toString()).emit("teamDetails_updated", {
                     teamId: team._id,
                     name: team.name,
                     description: team.description,
                     message: "Team details updated"
                 })
+                if(userId.toString() !== m.userId.toString()){
+
+                    const notification = await notificationModel.create({
+                        recipient : m.userId.toString(),
+                        type : "TEAM UPDATE",
+                        content : "Team details just updated",
+                        navigation_link : `/board/${m.userName}-${m.userId}/${teamId}`
+                    })
+
+                    io.to(m.userId.toString()).emit("notify",{
+                        _id : notification._id,
+                        recipient : m.userId.toString(),
+                        type : "TEAM UPDATE",
+                        content : "Team details just updated",
+                        navigation_link : `/board/${m.userName}-${m.userId}/${teamId}`,
+                        isRead : false
+                    })
+                }
             })
 
         } catch (error) {
@@ -2602,21 +2620,21 @@ io.on("connection", async (socket) => {
                 io.to(userId.toString()).emit("team_exited", {
                     message: "You have left the team successfully.",
                     teamId: teamId,
-                    left_userId : userId
+                    left_userId: userId
                 })
             }
             else {
                 io.to(userId.toString()).emit("team_exited", {
                     message: "You have left the team successfully.",
                     teamId: teamId,
-                    left_userId : userId
+                    left_userId: userId
                 })
 
-                team.member.forEach((m)=>{
-                    io.to(m.userId.toString()).emit("team_exited",{
-                        message : `${user.userId} has left the team.`,
-                        teamId : teamId,
-                        left_userId : userId
+                team.member.forEach((m) => {
+                    io.to(m.userId.toString()).emit("team_exited", {
+                        message: `${user.userId} has left the team.`,
+                        teamId: teamId,
+                        left_userId: userId
                     })
                 })
             }
@@ -2627,6 +2645,129 @@ io.on("connection", async (socket) => {
             socket.emit("error", { message: "Server error while exit from team.", error: true })
         }
     })
+
+    // Notification configuration start from here...
+
+    // get all unread notification
+    socket.on("get_unread_notify", async () => {
+        try {
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            const notifications = await notificationModel.find({ recipient: userId, isRead: false }).sort({ createdAt: -1 }).limit(10)
+            const count = await notificationModel.countDocuments({ recipient: userId, isRead: false });
+
+            socket.emit("got_unread_notification", {
+                message: "Got all unread notification",
+                notifications: notifications,
+                count: count
+            })
+
+        } catch (error) {
+            console.log("Error while get unread notification.", error)
+            socket.emit("error", { message: "Server error while get unread notification.", error: true })
+        }
+    })
+
+    // get all notifications
+    socket.on("all_notification", async (data) => {
+        try {
+            const { page = 1, limit = 10 } = data || {}
+
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+            const skip = (page - 1) * limit
+
+            const all_notifications = await notificationModel.find({ recipient: userId }).sort({ createdAt: -1 }).skip(skip).limit(limit)
+            const total = await notificationModel.countDocuments({ recipient: userId })
+
+            socket.emit("got_all_notification", {
+                notifications: all_notifications,
+                total: total,
+                total_page: Math.ceil(total / limit)
+            })
+        } catch (error) {
+            console.log("Error while get all notifications.", error)
+            socket.emit("error", { message: "Server error while get all notifications.", error: true })
+        }
+    })
+
+    // mark one notification
+    socket.on("mark_notification_read", async ({ id }, callback) => {
+        try {
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            const updated = await notificationModel.findOneAndUpdate(
+                { _id: id, recipient: userId },
+                { isRead: true }
+            )
+            callback({ success: true, message: "Marked" });
+        } catch (error) {
+            console.log("Error while marked one notification.", error)
+            socket.emit("error", { message: "Server error while marked one notification.", error: true })
+            callback({ success: false, message: "Error updating notification" });
+        }
+    });
+
+    // marked all read
+    socket.on("mark_all_notifications_read", async (callback) => {
+        try {
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+            await notificationModel.updateMany({ recipient: userId, isRead: false }, { isRead: true })
+
+            callback({ success: true, message: "All message marked as read"})
+        } catch (error) {
+            console.log("Error while marked all notification.", error)
+            socket.emit("error", { message: "Server error while marked all notification.", error: true })
+            callback({ success: false, message: "Error updating notifications" });
+        }
+    });
 
     // disconnect from the room and offline
     socket.on("disconnect", () => {

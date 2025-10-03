@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
 import { addingTeamDetails, currUserteamDetailsUpdate, teamRequestSend, teamRequestWithDraw } from "../store/userSlice";
 import { useEffect } from "react";
+import { fillWithNotification } from "../store/notificationSlice";
 
 const RealHome = () => {
     const [openCreateTeam, setOpenCreateTeam] = useState(false);
@@ -73,24 +74,39 @@ const RealHome = () => {
             }
         })
 
-        socketConnection.on("team_requestReceived",(data) =>{
+        socketConnection.on("team_requestReceived", (data) => {
             dispatch(teamRequestSend({
-                teamId : data?.teamId,
-                data : data?.teamRequestData
+                teamId: data?.teamId,
+                data: data?.teamRequestData
             }))
         })
 
-        socketConnection.on("request_targetPulled",(data)=>{
-            
+        socketConnection.on("request_targetPulled", (data) => {
+
             dispatch(teamRequestWithDraw({
-                teamId : data?.teamId
+                teamId: data?.teamId
             }))
         })
 
-        return () =>{
+        socketConnection.on("notify", (data) => {
+
+            dispatch(fillWithNotification({
+                value: {
+                    _id: data?._id,
+                    recipient: data?.recipient,
+                    type: data?.type,
+                    content: data?.content,
+                    navigation_link: data?.navigation_link,
+                    isRead: data?.isRead
+                }
+            }))
+        })
+
+        return () => {
             socketConnection.off("kickOutSuccess")
             socketConnection.off("team_requestReceived")
             socketConnection.off("request_targetPulled")
+            socketConnection.off("notify")
         }
 
     }, [socketConnection, dispatch])

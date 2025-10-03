@@ -12,6 +12,7 @@ import userRoute from './routes/user.route.js'
 import teamRouter from './routes/team.route.js'
 import taskRoute from './routes/task.route.js'
 import chatRoute from './routes/chat.route.js'
+import notificationRoute from './routes/notification.route.js'
 
 
 app.use(cors({
@@ -40,6 +41,7 @@ app.use("/api/user", userRoute)
 app.use("/api/teaming", teamRouter)
 app.use("/api/task", taskRoute)
 app.use("/api/chat", chatRoute)
+app.use("/app/notify",notificationRoute)
 
 const PORT = 8080 || process.env.PORT
 

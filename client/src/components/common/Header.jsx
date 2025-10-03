@@ -123,11 +123,11 @@ const Header = () => {
             <div
               ref={dropdownRef}
               onClick={() => setNotificationbarOpen(true)}
-              className="text-gray-200 hover:text-emerald-400 relative cursor-pointer"
+              className="relative text-gray-200"
             >
-              <IoIosNotifications size={24} />
+              <IoIosNotifications size={24} className=' hover:text-emerald-400  cursor-pointer'/>
               {NotificationbarOpen && (
-                <NotificationPopbar close={() => setNotificationbarOpen(false)} />
+                <NotificationPopbar close={() => setNotificationbarOpen(false)}/>
               )}
             </div>
           </div>

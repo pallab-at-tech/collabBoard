@@ -21,6 +21,7 @@ import StatusTaskBoard from '../components/common/StatusTaskBoard'
 import SeparateTabForTask from '../pages/SeparateTabForTask'
 import SubmitTaskReport from '../pages/SubmitTaskReport'
 import ShowColumnForTrack from '../components/TaskBoard/ShowColumnForTrack'
+import NotificationPage from '../pages/NotificationPage'
 
 const router = createBrowserRouter([
     {
@@ -131,6 +132,10 @@ const router = createBrowserRouter([
     {
         path: "/signup",
         element: <SignupPage />
+    },
+    {
+        path : "/notifications",
+        element : <NotificationPage/>
     }
 ])
 

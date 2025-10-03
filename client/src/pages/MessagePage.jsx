@@ -265,8 +265,8 @@ const MessagePage = () => {
         setConversation(conversation)
     }, [])
 
-    console.log("location?.allMessageDetails",location?.allMessageDetails)
-    console.log("group details",conversation)
+    // console.log("location?.allMessageDetails",location?.allMessageDetails)
+    // console.log("group details",conversation)
 
 
     return (
