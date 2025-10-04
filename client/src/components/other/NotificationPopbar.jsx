@@ -1,27 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { BsDot } from "react-icons/bs";
 
 
 const NotificationPopbar = ({ close }) => {
-    const [notifications, setNotifications] = useState([]);
-    const navigate = useNavigate()
 
-    const notify = useSelector(state => state?.notification)
+    const navigate = useNavigate()
+    const notifyData = useSelector(state => state?.notification)
 
     useEffect(() => {
 
     }, []);
 
     const markAsRead = (id) => {
-        socket.emit("mark_notification_read", { id }, (res) => {
-            if (res.success) {
-                setNotifications((prev) =>
-                    prev.filter((n) => n._id !== id)
-                );
-                setUnreadCount((c) => c - 1);
-            }
-        });
+        
     };
 
     const handleSeeMore = () => {
@@ -29,32 +22,35 @@ const NotificationPopbar = ({ close }) => {
         navigate("/notifications");
     };
 
-    // console.log("nnnnnnnnnn",notify)
+    console.log("nnnnnnnnnn", notifyData)
 
     return (
-        <div className=" max-h-[260px] w-[200px] max-w-[200px] sm:h-[150px] sm:w-[320px] sm:max-w-[320px] bg-white text-gray-900 absolute -left-[180px] sm:-left-[280px] top-9 rounded-md px-5 py-2 shadow-lg overflow-y-auto">
-            {/* <div className="absolute -top-2 right-1.5 w-6 h-6 bg-white rotate-45"></div> */}
+        <div className={`${notifyData.data.length === 0 ? "h-[180px]" : "h-[250px] sm:h-[250px]"}  w-[250px] sm:w-[350px] grid grid-rows-[40px_1fr_30px] bg-white text-gray-900 absolute -left-[230px] sm:-left-[300px] top-9 rounded-md sm:px-5 px-3 py-2 shadow-lg overflow-y-auto`}>
 
-            <h1 className="text-2xl font-bold text-gray-700 mb-2">Notifications</h1>
+            <div className="sm:flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-gray-700">Notifications</h1>
+                <h2 className={`text-[15px] text-blue-600 hover:text-blue-500 cursor-pointer ${notifyData.data.length === 0 ? "hidden" : "hidden sm:block"}`}>Marked all read</h2>
+            </div>
 
-            {notifications.length === 0 && (
+            {notifyData.data.length === 0 && (
                 <div className="relative">
                     <div className="text-gray-500 flex flex-col justify-center items-center h-[60px] sm:h-[80px] pb-4">
                         <p className="select-none">No new notifications!</p>
                     </div>
-                    <p onClick={handleSeeMore} className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200 underline absolute text-[11px] sm:text-sm -bottom-0 sm:-bottom-2 right-0 cursor-pointer">See old notification</p>
+                    <p onClick={handleSeeMore} className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200 underline absolute text-[11px] sm:text-sm -bottom-4 sm:-bottom-2 right-2 cursor-pointer">See old notification</p>
                 </div>
             )}
 
-            <ul>
-                {notifications.map((n) => (
+            <ul className="overflow-y-auto">
+                {notifyData.data?.map((n) => (
                     <li
                         key={n._id}
-                        className="p-2 rounded-md hover:bg-gray-100 cursor-pointer flex justify-between items-center"
+                        className="px-2 py-2.5 rounded-md bg-blue-50 hover:bg-cyan-100 transition-colors duration-200 cursor-pointer flex justify-between gap-y-2 items-center mb-1.5"
                     >
-                        <span>{n.content}</span>
+                        <BsDot size={20} className="text-blue-600" />
+                        <Link className="sm:max-w-[150px] truncate">{n.content}</Link>
                         <button
-                            className="text-sm text-blue-500 ml-2"
+                            className="text-sm text-blue-600 ml-2 cursor-pointer sm:block hidden"
                         // onClick={() => markAsRead(n._id)}
                         >
                             Mark read
@@ -63,14 +59,18 @@ const NotificationPopbar = ({ close }) => {
                 ))}
             </ul>
 
-            {/* {notifications.length > 0 && (
-                <button
-                    className="text-blue-600 font-semibold mt-2 block mx-auto"
+            {notifyData?.data?.length > 0 && (
+                <div className="flex justify-between sm:justify-center items-center px-2 text-sm">
+                    <button
+                        className="text-blue-600 hover:text-blue-500 font-semibold block underline cursor-pointer"
                     // onClick={handleSeeMore}
-                >
-                    See more
-                </button>
-            )} */}
+                    >
+                        See more
+                    </button>
+
+                    <button className="sm:hidden block text-blue-600 hover:text-blue-500 font-semibold underline cursor-pointer">Marked all read</button>
+                </div>
+            )}
         </div>
     );
 };
