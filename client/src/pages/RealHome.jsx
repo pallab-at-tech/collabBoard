@@ -7,9 +7,7 @@ import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
 import { addingTeamDetails, currUserteamDetailsUpdate, teamRequestSend, teamRequestWithDraw } from "../store/userSlice";
 import { useEffect } from "react";
-import { fillWithNotification, setNotification } from "../store/notificationSlice";
-import Axios from "../utils/Axios";
-import SummaryApi from "../common/SummaryApi";
+import { fillWithNotification } from "../store/notificationSlice";
 
 const RealHome = () => {
     const [openCreateTeam, setOpenCreateTeam] = useState(false);
@@ -113,32 +111,6 @@ const RealHome = () => {
 
     }, [socketConnection, dispatch])
 
-    // fetch unread notification
-    const fetchedUnread_notification = async () => {
-        try {
-            const response = await Axios({
-                ...SummaryApi.fetch_unread_notification
-            })
-
-            const { data: responseData } = response
-
-            console.log("response notification",responseData)
-
-            if (responseData?.success) {
-                dispatch(setNotification({
-                    data: responseData?.notifications,
-                    count: responseData?.count
-                }))
-            }
-
-        } catch (error) {
-            console.log("fetchedUnread_notification error", error)
-        }
-    }
-
-    useEffect(() => {
-        fetchedUnread_notification()
-    }, [])
 
     return (
         <section className="bg-gradient-to-b from-[#1b1c29] to-[#21222b] min-h-[calc(100vh-60px)] grid place-items-center px-6">

@@ -433,7 +433,7 @@ io.on("connection", async (socket) => {
                         const notification = await notificationModel.create({
                             recipient: pid.toString(),
                             type: "CHAT RELATED",
-                            content: `"${group.group_name}" group details just updated"`,
+                            content: `"${group.group_name}" group details just updated`,
                             navigation_link: `/chat/${group._id}`
                         })
 
@@ -441,7 +441,7 @@ io.on("connection", async (socket) => {
                             _id: notification._id,
                             recipient: pid.toString(),
                             type: "CHAT RELATED",
-                            content: `"${group.group_name}" group details just updated"`,
+                            content: `"${group.group_name}" group details just updated`,
                             navigation_link: `/chat/${group._id}`,
                             isRead: false
                         })

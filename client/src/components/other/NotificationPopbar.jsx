@@ -22,7 +22,7 @@ const NotificationPopbar = ({ close }) => {
         close();
     };
 
-    console.log("nnnnnnnnnn", notifyData)
+    // console.log("nnnnnnnnnn", notifyData)
 
     return (
         <div onClick={(e)=>e.stopPropagation()} className={`${notifyData.data.length === 0 ? "h-[180px]" : "h-[250px] sm:h-[250px]"}  w-[250px] sm:w-[350px] grid grid-rows-[40px_1fr_30px] bg-white text-gray-900 absolute -left-[230px] sm:-left-[300px] top-9 rounded-md sm:px-5 px-3 py-2 shadow-lg overflow-y-auto`}>
@@ -72,6 +72,7 @@ const NotificationPopbar = ({ close }) => {
                     <button className="sm:hidden block text-blue-600 hover:text-blue-500 font-semibold underline cursor-pointer">Marked all read</button>
                 </div>
             )}
+            
         </div>
     );
 };

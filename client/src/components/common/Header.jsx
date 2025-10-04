@@ -8,14 +8,19 @@ import { IoChatbubbleEllipsesSharp } from "react-icons/io5"
 import { FaChartBar } from "react-icons/fa6"
 import logo1 from "../../assets/logo1.png"
 import NotificationPopbar from '../other/NotificationPopbar'
+import { useDispatch } from 'react-redux'
+import Axios from '../../utils/Axios'
+import SummaryApi from '../../common/SummaryApi'
+import { setNotification } from '../../store/notificationSlice'
 
 const Header = () => {
-  const { isLogin } = useGlobalContext()
+  const { isLogin, socketConnection } = useGlobalContext()
   const user = useSelector(state => state.user)
 
   const [NotificationbarOpen, setNotificationbarOpen] = useState(false)
 
   const dropdownRef = useRef(null)
+  const dispatch = useDispatch()
 
   useEffect(() => {
 
@@ -33,9 +38,32 @@ const Header = () => {
 
   }, [])
 
-  useEffect(()=>{
-    console.log("hiii",NotificationbarOpen)
-  },[NotificationbarOpen])
+  // fetch unread notification
+  const fetchedUnread_notification = async () => {
+    try {
+      const response = await Axios({
+        ...SummaryApi.fetch_unread_notification
+      })
+
+      const { data: responseData } = response
+
+      if (responseData?.success) {
+        dispatch(setNotification({
+          data: responseData?.notifications,
+          count: responseData?.count
+        }))
+      }
+
+    } catch (error) {
+      console.log("fetchedUnread_notification error", error)
+    }
+  }
+
+  useEffect(() => {
+    fetchedUnread_notification()
+  }, [])
+
+
 
 
   const boardURL = `/board/${user?.name}-${user?._id}/${user?.roles[0]?.teamId}`
@@ -129,11 +157,11 @@ const Header = () => {
               onClick={() => setNotificationbarOpen(prev => !prev)}
               className="relative text-gray-200"
             >
-              <IoIosNotifications size={24} className=' hover:text-emerald-400  cursor-pointer'/>
+              <IoIosNotifications size={24} className=' hover:text-emerald-400  cursor-pointer' />
               {NotificationbarOpen && (
                 <NotificationPopbar close={() => {
                   setNotificationbarOpen(prev => !prev)
-                }}/>
+                }} />
               )}
             </div>
           </div>

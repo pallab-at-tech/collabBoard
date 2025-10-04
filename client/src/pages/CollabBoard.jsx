@@ -42,7 +42,6 @@ const CollabBoard = () => {
         <div
           onClick={(e) => {
             e.stopPropagation();
-            // setSlideOpen(!slideOpen);
             setSlideExpand(!slideExpand)
           }}
           className={`absolute top-4 -left-0.5 cursor-pointer 

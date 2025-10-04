@@ -88,6 +88,10 @@ const SummaryApi = {
     fetch_unread_notification: {
         url: "/app/notify/get-unread-notify",
         method: "post"
+    },
+    fetch_all_notification : {
+        url : "/app/notify/get-all-notify",
+        method : "post"
     }
 }
 
