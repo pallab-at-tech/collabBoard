@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Axios from "../utils/Axios";
 import SummaryApi from "../common/SummaryApi";
+import { FaAngleLeft } from "react-icons/fa";
+import { FaAngleRight } from "react-icons/fa";
+
 
 const NotificationPage = () => {
 
@@ -28,22 +31,49 @@ const NotificationPage = () => {
     }
   }
 
+  // function for fetch all unread notification
+  const fetch_unread_notify = async () => {
+    try {
+      const response = await Axios({
+        ...SummaryApi.fetch_unread_notification
+      })
+
+      const { data: responseData } = response
+
+      if (responseData?.success) {
+        setData({
+          notifications: responseData?.notifications,
+          total: responseData?.count,
+          total_page: responseData?.total_page
+        })
+      }
+
+    } catch (error) {
+      console.log("fetchedUnread_notification error", error)
+    }
+  }
+
+  // fetch notification
   useEffect(() => {
 
     // fetch all notification
     if (activeTab === "all") {
       fetch_all_notify()
     }
+    // fetch all unread notification
+    else if (activeTab === "unread") {
+      fetch_unread_notify()
+    }
 
   }, [activeTab])
 
-  console.log("all n data", data)
+  // console.log("all n data", data)
 
   return (
     <section className="bg-[#202128] min-h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] px-4 sm:px-10 py-4 sm:grid sm:grid-cols-[200px_1fr]  gap-4">
 
       {/* Sidebar */}
-      <div className="bg-[#2a2b33] sticky top-[70px] rounded-lg p-4 flex sm:flex-col flex-row justify-around sm:justify-start w-full sm:gap-2 gap-4 text-gray-300 font-medium h-fit">
+      <div className="bg-[#2a2b33] sticky top-[70px] rounded-lg p-0 sm:p-4 flex sm:flex-col flex-row justify-around sm:justify-start w-full sm:gap-2 gap-4 text-gray-300 font-medium h-fit">
 
         {/* for tablet and desktop version */}
         <button
@@ -64,16 +94,6 @@ const NotificationPage = () => {
             }`}
         >
           Unread Notifications
-        </button>
-
-        <button
-          onClick={() => setActiveTab("old")}
-          className={`px-3 py-2 hidden sm:block rounded-md capitalize transition text-sm w-full cursor-pointer ${activeTab === "old"
-            ? "bg-emerald-600 text-white"
-            : "hover:bg-[#35363f]"
-            }`}
-        >
-          Old Notifications
         </button>
 
         {/* for mobile version */}
@@ -97,28 +117,18 @@ const NotificationPage = () => {
           Unread
         </button>
 
-        <button
-          onClick={() => setActiveTab("old")}
-          className={`px-3 py-2 block sm:hidden rounded-md capitalize transition text-sm w-full cursor-pointer ${activeTab === "old"
-            ? "bg-emerald-600 text-white"
-            : "hover:bg-[#35363f]"
-            }`}
-        >
-          Old
-        </button>
-
       </div>
 
       {/* Notification list (only this scrolls) */}
-      <div className="bg-[#2a2b33] rounded-lg p-5 mt-4 sm:mt-0 overflow-y-auto decrease-Width-slidebar max-h-[calc(100vh-140px-32px)] sm:max-h-[calc(100vh-70px-32px)]">
+      <div className="bg-[#2a2b33]  rounded-lg p-5 mt-4 sm:mt-0 overflow-y-auto decrease-Width-slidebar max-h-[calc(100vh-160px-32px)] sm:max-h-[calc(100vh-110px-32px)]">
 
         {
-          !data ? (
+          !data || data?.notifications.length === 0 ? (
             <div className="w-full h-full flex justify-center items-center text-gray-200 text-[16px] sm:text-lg select-none">
               No Notification have ?!
             </div>
           ) : (
-            <>
+            <div className="">
               {
                 data?.notifications?.map((v, i) => {
                   return (
@@ -139,7 +149,7 @@ const NotificationPage = () => {
                       <div className="flex flex-col-reverse sm:flex-row gap-3 items-center justify-end text-sm">
 
                         <span className="text-xs text-gray-400 whitespace-nowrap">2h ago</span>
-                        
+
                         {v?.isRead ? (
                           <span className="text-gray-400 italic">Read</span>
                         ) : (
@@ -157,9 +167,19 @@ const NotificationPage = () => {
                 })
               }
 
-            </>
+            </div>
           )
         }
+      </div>
+
+      <div className="text-gray-400 flex pl-0 sm:pl-[270px] items-center sm:justify-end w-full absolute right-5 sm:right-10 bottom-5">
+        <div className="flex justify-center w-full sm:w-auto pt-4 sm:pt-0">
+          <FaAngleLeft size={28} />
+          <div>
+            /
+          </div>
+          <FaAngleRight size={28} />
+        </div>
       </div>
 
     </section>
