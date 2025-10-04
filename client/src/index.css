@@ -52,6 +52,23 @@
 
 
 /* score bar width resize */
+.decrease-Width-slidebar::-webkit-scrollbar {
+  width: 7px;
+}
+
+.decrease-Width-slidebar::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+
+.decrease-Width-slidebar::-webkit-scrollbar-thumb {
+  background: #888; 
+  border-radius: 10px;
+}
+
+.decrease-Width-slidebar::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
 .narrow-scrollbar::-webkit-scrollbar {
   width: 8px;
 }

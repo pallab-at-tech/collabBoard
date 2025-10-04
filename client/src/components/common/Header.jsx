@@ -33,6 +33,10 @@ const Header = () => {
 
   }, [])
 
+  useEffect(()=>{
+    console.log("hiii",NotificationbarOpen)
+  },[NotificationbarOpen])
+
 
   const boardURL = `/board/${user?.name}-${user?._id}/${user?.roles[0]?.teamId}`
   const mobileBoardURL = `/board/${user?.name}-${user?._id}`
@@ -122,12 +126,14 @@ const Header = () => {
             {/* Notifications */}
             <div
               ref={dropdownRef}
-              onClick={() => setNotificationbarOpen(true)}
+              onClick={() => setNotificationbarOpen(prev => !prev)}
               className="relative text-gray-200"
             >
               <IoIosNotifications size={24} className=' hover:text-emerald-400  cursor-pointer'/>
               {NotificationbarOpen && (
-                <NotificationPopbar close={() => setNotificationbarOpen(false)}/>
+                <NotificationPopbar close={() => {
+                  setNotificationbarOpen(prev => !prev)
+                }}/>
               )}
             </div>
           </div>

@@ -56,10 +56,10 @@ const router = createBrowserRouter([
                             {
                                 path: "track",
                                 element: <TrackTaskBoard />,
-                                children : [
+                                children: [
                                     {
-                                        path : "col",
-                                        element : <ShowColumnForTrack/>
+                                        path: "col",
+                                        element: <ShowColumnForTrack />
                                     }
                                 ]
                             },
@@ -122,6 +122,10 @@ const router = createBrowserRouter([
                         ]
                     },
                 ]
+            },
+            {
+                path: "/notifications",
+                element: <NotificationPage />
             }
         ]
     },
@@ -132,10 +136,6 @@ const router = createBrowserRouter([
     {
         path: "/signup",
         element: <SignupPage />
-    },
-    {
-        path : "/notifications",
-        element : <NotificationPage/>
     }
 ])
 

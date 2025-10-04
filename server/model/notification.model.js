@@ -11,7 +11,7 @@ const notificationSchema = new mongoose.Schema({
         enum: [
             "TASK ASSIGNED",
             "TASK COMPLETED",
-            "NEW MESSAGE",
+            "CHAT RELATED",
             "TEAM INVITE",
             "SYSTEM ALERT",
             "OTHER",

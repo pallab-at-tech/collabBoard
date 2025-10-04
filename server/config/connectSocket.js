@@ -212,7 +212,7 @@ io.on("connection", async (socket) => {
                 return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
             }
 
-            const userId1 = payload1.id;
+            const userId = payload1.id;
 
             if (!createrId || !group_name) {
                 return socket.emit("error", { message: "Missing required fields" });
@@ -240,8 +240,6 @@ io.on("connection", async (socket) => {
 
             const populateMessage = await messageModel.findById(systemMessage._id).populate("senderId", "_id name avatar userId").lean()
 
-            console.log("populateMessage", populateMessage)
-
             const conversationToEmit = {
                 _id: createGroup._id,
                 group_type: createGroup.group_type,
@@ -252,14 +250,32 @@ io.on("connection", async (socket) => {
                 messages: createGroup.messages
             }
 
-            uniqueParticipants.forEach(pid => {
+            uniqueParticipants.forEach(async (pid) => {
+
                 io.to(pid.toString()).emit("receive_message", {
                     conversation: conversationToEmit,
                     message: populateMessage
                 })
-                io.to(pid.toString()).emit("notification", {
-                    message: `you have been joined ${createGroup.group_name} by ${createrUserName}`
-                })
+
+                if (userId.toString() !== pid?.toString()) {
+
+                    const notification = await notificationModel.create({
+                        recipient: pid.toString(),
+                        type: "CHAT RELATED",
+                        content: `You have been joined "${createGroup.group_name}" by "${createrUserName}"`,
+                        navigation_link: `/chat/${createGroup._id}`
+                    })
+
+                    io.to(pid.toString()).emit("notify", {
+                        _id: notification._id,
+                        recipient: pid.toString(),
+                        type: "CHAT RELATED",
+                        content: `You have been joined "${createGroup.group_name}" by "${createrUserName}"`,
+                        navigation_link: `/chat/${createGroup._id}`,
+                        isRead: false
+                    })
+                }
+
             })
 
         } catch (error) {
@@ -406,11 +422,30 @@ io.on("connection", async (socket) => {
                     .populate("senderId", "_id name avatar userId")
                     .lean();
 
-                group.participants.forEach(pid => {
+                group.participants.forEach(async (pid) => {
                     io.to(pid.toString()).emit("receive_message", {
                         conversation: conversationToEmit,
                         message: populatedMessage
                     })
+
+                    if (pid.toString() !== userId1.toString()) {
+
+                        const notification = await notificationModel.create({
+                            recipient: pid.toString(),
+                            type: "CHAT RELATED",
+                            content: `"${group.group_name}" group details just updated"`,
+                            navigation_link: `/chat/${group._id}`
+                        })
+
+                        io.to(pid.toString()).emit("notify", {
+                            _id: notification._id,
+                            recipient: pid.toString(),
+                            type: "CHAT RELATED",
+                            content: `"${group.group_name}" group details just updated"`,
+                            navigation_link: `/chat/${group._id}`,
+                            isRead: false
+                        })
+                    }
                 })
             }
 
@@ -507,6 +542,21 @@ io.on("connection", async (socket) => {
                 })
             })
 
+            const notification = await notificationModel.create({
+                recipient: memberId,
+                type: "CHAT RELATED",
+                content: `You have been joined group "${group.group_name}" by "${adminUserId}"`,
+                navigation_link: `/chat/${group._id}`
+            })
+
+            io.to(memberId.toString()).emit("notify", {
+                _id: notification._id,
+                recipient: memberId,
+                type: "CHAT RELATED",
+                content: `You have been joined group "${group.group_name}" by "${adminUserId}"`,
+                navigation_link: `/chat/${group._id}`,
+                isRead: false
+            })
 
         } catch (error) {
             console.log("Error while add member in group", error)
@@ -603,6 +653,22 @@ io.on("connection", async (socket) => {
                 group_id,
                 removedBy: adminId,
                 message: populatedMessage
+            })
+
+            const notification = await notificationModel.create({
+                recipient: memberId,
+                type: "CHAT RELATED",
+                content: `You have been removed from group "${group.group_name}" by "${adminUserId}"`,
+                navigation_link: `/chat/${group._id}`
+            })
+
+            io.to(memberId.toString()).emit("notify", {
+                _id: notification._id,
+                recipient: memberId,
+                type: "CHAT RELATED",
+                content: `You have been removed from group "${group.group_name}" by "${adminUserId}"`,
+                navigation_link: `/chat/${group._id}`,
+                isRead: false
             })
 
         } catch (error) {
@@ -924,7 +990,8 @@ io.on("connection", async (socket) => {
                     { _id: 1 }
                 ).lean()
 
-                assignUser_id.forEach(id => {
+                assignUser_id.forEach(async (id) => {
+
                     io.to(id._id.toString()).emit(
                         "task_assigned", {
                         message: "New task assigned to you",
@@ -932,6 +999,22 @@ io.on("connection", async (socket) => {
                         columnId: columnId,
                         columnName: column.name,
                         taskBoardId: taskBoard._id
+                    })
+
+                    const notification = await notificationModel.create({
+                        recipient: id._id.toString(),
+                        type: "TASK ASSIGNED",
+                        content: `In taskboard "${taskBoard.name}" , new task just assigned to you`,
+                        navigation_link: `/board`
+                    })
+
+                    io.to(m.userId.toString()).emit("notify", {
+                        _id: notification._id,
+                        recipient: id._id.toString(),
+                        type: "TASK ASSIGNED",
+                        content: `In taskboard "${taskBoard.name}" , new task just assigned to you`,
+                        navigation_link: `/board`,
+                        isRead: false
                     })
                 })
             }
@@ -1231,16 +1314,33 @@ io.on("connection", async (socket) => {
                 return socket.emit("collabNameChange_error", { message: "Permission Denied." })
             }
 
+            const oldname = task.name
+
             task.name = newName
             await task.save()
 
-            team.member.forEach((m => {
+            team.member.forEach(async (m) => {
                 io.to(m.userId.toString()).emit("collabName_success", {
                     newName: task.name,
                     message: "CollabDesk name successfully changed.",
                     taskBoardId: task._id
                 })
-            }))
+                const notification = await notificationModel.create({
+                    recipient: m.userId.toString(),
+                    type: "TEAM UPDATE",
+                    content: `CollabDesk name changed from "${oldname}" to "${task.name}" bt leader`,
+                    navigation_link: "/board"
+                })
+
+                io.to(m.userId.toString()).emit("notify", {
+                    _id: notification._id,
+                    recipient: m.userId.toString(),
+                    type: "TEAM UPDATE",
+                    content: `CollabDesk name changed from "${oldname}" to "${task.name}" bt leader`,
+                    navigation_link: "/board",
+                    isRead: false
+                })
+            })
 
 
         } catch (error) {
@@ -1523,6 +1623,30 @@ io.on("connection", async (socket) => {
                 })
             })
 
+            // send team laaders notifications
+            team.member.forEach(async (l) => {
+
+                if (l.role.toString() !== "MEMBER" && l.userId.toString() !== userId) {
+
+                    const notification = await notificationModel.create({
+                        recipient: l.userId.toString(),
+                        type: "TASK COMPLETED",
+                        content: `${userName} submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
+                        navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`
+                    })
+
+                    io.to(l.userId.toString()).emit("notify", {
+                        _id: notification._id,
+                        recipient: l.userId.toString(),
+                        type: "TASK COMPLETED",
+                        content: `${userName} submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
+                        navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`,
+                        isRead: false
+                    })
+                }
+
+            })
+
         } catch (error) {
             console.log("Error while submit report.", error)
             socket.emit("error", { message: "Server error while submit report", error: true })
@@ -1644,6 +1768,30 @@ io.on("connection", async (socket) => {
                 updateData: report
             })
 
+            const team = await teamModel.findById(teamId)
+
+            team.member.forEach(async (l) => {
+
+                if (l.role.toString() !== "MEMBER" && l.userId.toString() !== userId) {
+
+                    const notification = await notificationModel.create({
+                        recipient: l.userId.toString(),
+                        type: "TASK COMPLETED",
+                        content: `Members just update it's submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
+                        navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`
+                    })
+
+                    io.to(l.userId.toString()).emit("notify", {
+                        _id: notification._id,
+                        recipient: l.userId.toString(),
+                        type: "TASK COMPLETED",
+                        content: `Members just update it's submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
+                        navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`,
+                        isRead: false
+                    })
+                }
+            })
+
         } catch (error) {
             console.log("Error while update report.", error)
             socket.emit("error", { message: "Server error while update report", error: true })
@@ -1698,29 +1846,29 @@ io.on("connection", async (socket) => {
             team.description = teamAbout
             await team.save()
 
-            team.member.forEach(async(m) => {
+            team.member.forEach(async (m) => {
                 io.to(m.userId.toString()).emit("teamDetails_updated", {
                     teamId: team._id,
                     name: team.name,
                     description: team.description,
                     message: "Team details updated"
                 })
-                if(userId.toString() !== m.userId.toString()){
+                if (userId.toString() !== m.userId.toString()) {
 
                     const notification = await notificationModel.create({
-                        recipient : m.userId.toString(),
-                        type : "TEAM UPDATE",
-                        content : "Team details just updated",
-                        navigation_link : `/board/${m.userName}-${m.userId}/${teamId}`
+                        recipient: m.userId.toString(),
+                        type: "TEAM UPDATE",
+                        content: "Team details just updated",
+                        navigation_link: `/board/${m.userName}-${m.userId}/${teamId}`
                     })
 
-                    io.to(m.userId.toString()).emit("notify",{
-                        _id : notification._id,
-                        recipient : m.userId.toString(),
-                        type : "TEAM UPDATE",
-                        content : "Team details just updated",
-                        navigation_link : `/board/${m.userName}-${m.userId}/${teamId}`,
-                        isRead : false
+                    io.to(m.userId.toString()).emit("notify", {
+                        _id: notification._id,
+                        recipient: m.userId.toString(),
+                        type: "TEAM UPDATE",
+                        content: "Team details just updated",
+                        navigation_link: `/board`,
+                        isRead: false
                     })
                 }
             })
@@ -1824,6 +1972,22 @@ io.on("connection", async (socket) => {
                 })
             })
 
+            const notification = await notificationModel.create({
+                recipient: memberId,
+                type: "TEAM UPDATE",
+                content: `Your role have been promoted to leader in team "${team.name}"`,
+                navigation_link: `/board/${findTarget.userName}-${findTarget.userId}/${team._id}`
+            })
+
+            io.to(memberId.toString()).emit("notify", {
+                _id: notification._id,
+                recipient: memberId,
+                type: "TEAM UPDATE",
+                content: `Your role have been promoted to leader in team "${team.name}"`,
+                navigation_link: `/board/${findTarget.userName}-${findTarget.userId}/${team._id}`,
+                isRead: false
+            })
+
         } catch (error) {
             console.log("Error while make admin of member of team.", error)
             socket.emit("error", { message: "Server error while make admin of member of team.", error: true })
@@ -1923,6 +2087,22 @@ io.on("connection", async (socket) => {
                 })
             })
 
+            const notification = await notificationModel.create({
+                recipient: member._id,
+                type: "TEAM UPDATE",
+                content: `Your role have been demoted to member in team "${team.name}"`,
+                navigation_link: `/board/${findTarget.userName}-${findTarget.userId}/${team._id}`
+            })
+
+            io.to(member._id.toString()).emit("notify", {
+                _id: notification._id,
+                recipient: member._id,
+                type: "TEAM UPDATE",
+                content: `Your role have been demoted to member in team "${team.name}"`,
+                navigation_link: `/board/${findTarget.userName}-${findTarget.userId}/${team._id}`,
+                isRead: false
+            })
+
         } catch (error) {
             console.log("Error while make demote of member of team.", error)
             socket.emit("error", { message: "Server error while make demote of member of team.", error: true })
@@ -2008,6 +2188,22 @@ io.on("connection", async (socket) => {
                     memberId: memberId,
                     teamName: team.name
                 })
+            })
+
+            const notification = await notificationModel.create({
+                recipient: memberId,
+                type: "TEAM UPDATE",
+                content: `You have been removed from the team "${team.name}"`,
+                navigation_link: ""
+            })
+
+            io.to(memberId.toString()).emit("notify", {
+                _id: notification._id,
+                recipient: memberId,
+                type: "TEAM UPDATE",
+                content: `You have been removed from the team "${team.name}"`,
+                navigation_link: "",
+                isRead: false
             })
 
         } catch (error) {
@@ -2184,7 +2380,7 @@ io.on("connection", async (socket) => {
                 }
             })
 
-            team.member.forEach((m) => {
+            team.member.forEach(async (m) => {
 
                 if (m.userId.toString() !== userId.toString()) {
 
@@ -2197,6 +2393,25 @@ io.on("connection", async (socket) => {
                             userName: user.userId,
                         }
                     })
+
+                    if (m.role !== "MEMBER") {
+
+                        const notification = await notificationModel.create({
+                            recipient: m.userId,
+                            type: "TEAM INVITE",
+                            content: `New member ( ${user.userId} ) just joined through invite code.`,
+                            navigation_link: `/board/${m.userName}-${m.userId}/${team._id}`
+                        })
+
+                        io.to(m.userId.toString()).emit("notify", {
+                            _id: notification._id,
+                            recipient: m.userId,
+                            type: "TEAM INVITE",
+                            content: `New member ( ${user.userId} ) just joined through invite code.`,
+                            navigation_link: `/board/${m.userName}-${m.userId}/${team._id}`,
+                            isRead: false
+                        })
+                    }
                 }
             })
 
@@ -2422,6 +2637,22 @@ io.on("connection", async (socket) => {
                         _id: "N/A"
                     }
                 })
+            })
+
+            const notification = await notificationModel.create({
+                recipient: memberId,
+                type: "TEAM INVITE",
+                content: `You have team request from team "${team.name}"`,
+                navigation_link: ``
+            })
+
+            io.to(memberId.toString()).emit("notify", {
+                _id : notification._id,
+                recipient: memberId,
+                type: "TEAM INVITE",
+                content: `You have team request from team "${team.name}"`,
+                navigation_link: ``,
+                isRead : false
             })
 
         } catch (error) {
@@ -2761,7 +2992,7 @@ io.on("connection", async (socket) => {
             const userId = payload1.id;
             await notificationModel.updateMany({ recipient: userId, isRead: false }, { isRead: true })
 
-            callback({ success: true, message: "All message marked as read"})
+            callback({ success: true, message: "All message marked as read" })
         } catch (error) {
             console.log("Error while marked all notification.", error)
             socket.emit("error", { message: "Server error while marked all notification.", error: true })
