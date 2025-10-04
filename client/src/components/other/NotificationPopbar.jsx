@@ -49,7 +49,7 @@ const NotificationPopbar = ({ close }) => {
                     >
                         {/* to={n?.navigation_link} */}
                         <BsDot size={20} className="text-blue-600" />
-                        <Link className="max-w-[180px] sm:max-w-[190px] ">{n.content}</Link>
+                        <Link className="max-w-[180px] sm:max-w-[190px] leading-tight">{n.content}</Link>
                         <button
                             className="text-sm text-blue-600 ml-2 cursor-pointer sm:block hidden sm:self-center"
                         // onClick={() => markAsRead(n._id)}
