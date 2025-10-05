@@ -6,17 +6,17 @@
 
 ## live deploy link
 
--[collabBoard](https://collab-desk-team-collaboration-app.vercel.app)
+-[collabBoard](collab-board-jet-six.vercel.app)
 
 ## 🚀 Features
 
 - 🔐 User authentication using JWT
 - 💬 Group and private chat using Socket.io
-- 📝 Project task board (like Trello)
+- 📝 Project task board  
 - 👥 Team creation & role-based access (Admin/Member)
 - 🔔 Real-time notifications
-- 🌙 Light/Dark theme toggle (optional)
-- 📧 Email notifications for invites or mentions (optional)
+- 📊 Reports & Tracking tasks
+- ✅ Task Management (Custom Column-Based System)
 
 ---
 
@@ -31,6 +31,7 @@
 | **Auth**       | JWT, Bcrypt        |
 | **State Mgmt** | React Context / Redux (optional) |
 | **Hosting**    | Vercel (Frontend), Render / Railway (Backend) |
+| **API**        | Gemini Api (gemini-2.5-flash) | 
 
 ---
 
