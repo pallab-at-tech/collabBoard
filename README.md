@@ -6,7 +6,7 @@
 
 ## live deploy link
 
--[collabBoard](collab-board-jet-six.vercel.app)
+-[collabDesk](collab-board-jet-six.vercel.app)
 
 ## 🚀 Features
 
