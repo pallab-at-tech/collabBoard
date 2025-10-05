@@ -57,16 +57,16 @@
 }
 
 .decrease-Width-slidebar::-webkit-scrollbar-track {
-  background: #f1f1f1; 
+  background: #f1f1f1;
 }
 
 .decrease-Width-slidebar::-webkit-scrollbar-thumb {
-  background: #888; 
+  background: #888;
   border-radius: 10px;
 }
 
 .decrease-Width-slidebar::-webkit-scrollbar-thumb:hover {
-  background: #555; 
+  background: #555;
 }
 
 .narrow-scrollbar::-webkit-scrollbar {
@@ -374,3 +374,34 @@
     transform: rotate(1turn)
   }
 }
+
+
+/* home page loader */
+/* HTML: <div class="loader"></div> */
+.home_loader {
+  width: 75px;
+  aspect-ratio: 1;
+  --g1: conic-gradient(from 90deg at 2px 2px, #0000 90deg, #fff 0);
+  --g2: conic-gradient(from -90deg at 13px 13px, #0000 90deg, #fff 0);
+  background:
+    var(--g1), var(--g1), var(--g1), var(--g1), var(--g1), var(--g1), var(--g1), var(--g1),
+    var(--g2), var(--g2), var(--g2), var(--g2), var(--g2), var(--g2), var(--g2), var(--g2);
+  background-size: 15px 15px;
+  background-repeat: no-repeat;
+  animation: l968 1s infinite alternate linear;
+}
+
+@keyframes l968 {
+
+  0%,
+  30% {
+    background-position: 0 0, 50% 0, 100% 0, 0 50%, 100% 50%, 0 100%, 50% 100%, 100% 100%
+  }
+
+  70%,
+  100% {
+    background-position: 15% 15%, 50% 0, 85% 15%, 0 50%, 100% 50%, 15% 85%, 50% 100%, 85% 85%
+  }
+}
+
+

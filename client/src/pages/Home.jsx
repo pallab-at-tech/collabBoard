@@ -5,9 +5,10 @@ import { FaAngleLeft } from "react-icons/fa";
 import { FaChevronRight } from "react-icons/fa";
 import { FaSquare } from "react-icons/fa6";
 import { useState } from 'react';
+import LoaderPage from '../utils/LoaderPage';
 
 const Home = () => {
-  const { isLogin } = useGlobalContext();
+  const { isLogin, homeLoading } = useGlobalContext();
   const [emailValue, setEmailValue] = useState("")
 
   if (isLogin === null) return null;
@@ -164,6 +165,9 @@ const Home = () => {
       ) : (
         <RealHome />
       )}
+
+      {homeLoading && <LoaderPage />}
+
     </section>
   );
 };

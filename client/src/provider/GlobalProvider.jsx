@@ -23,12 +23,16 @@ const GlobalProvider = ({ children }) => {
     const [slideExpand, setSlideExpand] = useState(true)
     const [isTeamLeader, setIsTeamLeader] = useState(false)
 
+    const [homeLoading, setHomeLoading] = useState(false)
+
     useEffect(() => {
         setLoginGlobal = setIsLogin
     }, [setIsLogin])
 
     const fetchUserAllDetails = async () => {
         try {
+            setHomeLoading(true)
+
             const response = await Axios({
                 ...SummaryApi?.user_deatails
             })
@@ -42,9 +46,11 @@ const GlobalProvider = ({ children }) => {
                 localStorage.setItem('login', 'false')
                 setIsLogin(false)
             }
+            setHomeLoading(false)
         } catch (error) {
             localStorage.setItem('login', 'false')
             setIsLogin(false)
+            setHomeLoading(false)
             console.log("error from global provider", error)
         }
     }
@@ -155,7 +161,8 @@ const GlobalProvider = ({ children }) => {
             slideExpand,
             setSlideExpand,
             setIsTeamLeader,
-            isTeamLeader
+            isTeamLeader,
+            homeLoading
         }}>
             {children}
         </GlobalContext.Provider>
