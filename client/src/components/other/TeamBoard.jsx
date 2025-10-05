@@ -212,7 +212,7 @@ const TeamBoard = () => {
                     </div>
                 </div>
 
-                <div className={`flex gap-x-6 sm:gap-x-8`}>
+                <div className={`flex gap-x-4 sm:gap-x-8`}>
 
                     <Link to={`/board/${params.user}/${params.team}/edit`} className={`bg-blue-700  transition-colors duration-200 px-3 text-white py-1 rounded-md cursor-pointer border border-white ${isTeamLeader ? "block" : "hidden"}`}>Edit</Link>
 

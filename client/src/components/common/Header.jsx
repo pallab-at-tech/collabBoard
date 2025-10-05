@@ -5,7 +5,6 @@ import { IoIosNotifications } from "react-icons/io"
 import { useSelector } from 'react-redux'
 import { CgProfile } from "react-icons/cg"
 import { IoChatbubbleEllipsesSharp } from "react-icons/io5"
-import { FaChartBar } from "react-icons/fa6"
 import logo1 from "../../assets/logo1.png"
 import NotificationPopbar from '../other/NotificationPopbar'
 import { useDispatch } from 'react-redux'
@@ -14,7 +13,7 @@ import SummaryApi from '../../common/SummaryApi'
 import { setNotification } from '../../store/notificationSlice'
 
 const Header = () => {
-  const { isLogin, socketConnection } = useGlobalContext()
+  const { isLogin } = useGlobalContext()
   const user = useSelector(state => state.user)
 
   const [NotificationbarOpen, setNotificationbarOpen] = useState(false)
@@ -62,7 +61,6 @@ const Header = () => {
   useEffect(() => {
     fetchedUnread_notification()
   }, [])
-
 
 
 

@@ -89,9 +89,17 @@ const SummaryApi = {
         url: "/app/notify/get-unread-notify",
         method: "post"
     },
-    fetch_all_notification : {
-        url : "/app/notify/get-all-notify",
-        method : "post"
+    fetch_all_notification: {
+        url: "/app/notify/get-all-notify",
+        method: "post"
+    },
+    markedOne: {
+        url: "/app/notify/marked-one",
+        method: "put"
+    },
+    markedAll: {
+        url: "/app/notify/marked-all",
+        method: "post"
     }
 }
 
