@@ -179,9 +179,6 @@ const NotificationPage = () => {
   }
 
 
-  // console.log("all n data", data)
-  // console.log("temp set", temp)
-
   return (
     <section className="bg-[#202128] relative min-h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] px-4 sm:px-10 py-4 sm:grid sm:grid-cols-[200px_1fr]  gap-4">
 

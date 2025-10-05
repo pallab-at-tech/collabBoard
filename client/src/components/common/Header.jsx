@@ -73,8 +73,8 @@ const Header = () => {
   return (
     <header
       className={`${isLogin ? "bg-[#1b1c29]/90 backdrop-blur-md" : "bg-white backdrop-blur-md shadow-md"} 
-  min-h-[60px] grid sm:grid-cols-[1fr_2fr_2fr] grid-cols-[120px_1fr] 
-  items-center z-50 sticky top-0 border-b border-white/10`}
+      min-h-[60px] grid sm:grid-cols-[1fr_2fr_2fr] grid-cols-[120px_1fr] 
+      items-center z-50 sticky top-0 border-b border-white/10`}
     >
       {/* Logo */}
       <Link to={"/"} className={`pl-4 sm:pl-6 flex items-center gap-2 w-fit`}>
@@ -93,14 +93,14 @@ const Header = () => {
           } font-medium tracking-wide mini_tab:flex hidden pl-14`}
       >
         <Link
-          to=""
+          to="/features"
           className={`${isLogin ? "hover:text-emerald-400" : "text-gray-600 hover:text-indigo-600"} transition-colors duration-200`}
         >
           Features
         </Link>
 
         <Link
-          to=""
+          to="/about"
           className={`${isLogin ? "hover:text-emerald-400" : "text-gray-600 hover:text-indigo-600"} transition-colors duration-200`}
         >
           About
