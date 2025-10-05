@@ -15,9 +15,9 @@ const Home = () => {
   return (
     <section>
       {!isLogin ? (
-        <div className='bg-gradient-to-l from-blue-500 to-blue-100'>
+        <div className='bg-gradient-to-l from-blue-500 to-blue-100 overflow-y-auto hide-scrollbar h-[calc(100vh-60px)]' style={{ willChange: "transform" }}>
 
-          <div className='min-h-[calc(100vh-60px)] xl:grid xl:grid-cols-[1fr_550px]'>
+          <div className=' xl:grid xl:grid-cols-[1fr_550px]'>
 
             <div className="w-full py-8 sm:py-[80px] xl:py-[14%] px-6 custom-sm:px-10  ipad_pro:px-[110px] xl:pl-[150px] ipad_pro:pl-[160px] xl:pr-10">
 
@@ -33,11 +33,11 @@ const Home = () => {
                   type="email"
                   placeholder="Enter email..."
                   value={emailValue}
-                  onChange={(e)=>setEmailValue(e.target.value)}
+                  onChange={(e) => setEmailValue(e.target.value)}
                   className="w-[310px] bg-white md:py-[9px] py-[5px] rounded px-1.5 outline-none border text-[#07014e] border-blue-500"
                 />
                 <Link
-                  to={"/signup"} state={{email : emailValue}}
+                  to={"/signup"} state={{ email: emailValue }}
                   className="block bg-[#005eff] md:py-[9px] py-[5px] px-2 rounded text-white transition-all duration-150 hover:bg-[#0055e8] hover:scale-105 cursor-pointer text-center"
                 >
                   get started
@@ -130,9 +130,36 @@ const Home = () => {
               </div>
 
             </div>
-
           </div>
 
+          {/* Mobile-only Links to Features and About */}
+          <div className="block sm:hidden mt-8 p-4 text-center">
+            <h2 className="text-[22px] font-semibold text-blue-800 mb-2">
+              Learn More About CollabDesk
+            </h2>
+            <p className="text-gray-800 text-sm mb-6">
+              Discover how CollabDesk can help your team collaborate efficiently and manage tasks seamlessly.
+            </p>
+
+            <div className="flex flex-col gap-2 px-2">
+              <Link
+                to="/features"
+                className="block bg-blue-700 text-white py-2 px-4 hover:bg-blue-700 transition-all rounded"
+              >
+                Explore Features
+              </Link>
+              <Link
+                to="/about"
+                className="block bg-gray-100 text-gray-900 py-2 px-4 rounded hover:bg-gray-300 transition-all"
+              >
+                About CollabDesk
+              </Link>
+            </div>
+          </div>
+
+          <p className="text-gray-800 text-center text-sm py-3 rounded-md mt-2 leading-[1.3]">
+            <strong>&copy; {new Date().getFullYear()}  CollabDesk</strong> — Empower your team to work smarter, faster, and together - wherever they are.
+          </p>
         </div>
       ) : (
         <RealHome />
