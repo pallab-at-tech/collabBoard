@@ -30,7 +30,7 @@
 | **Real-Time**  | Socket.io          |
 | **Auth**       | JWT, Bcrypt        |
 | **State Mgmt** | React Context / Redux (optional) |
-| **Hosting**    | Vercel (Frontend), Render / Railway (Backend) |
+| **Hosting**    | Vercel (Frontend), Render (Backend) |
 | **API**        | Gemini Api (gemini-2.5-flash) | 
 
 ---
