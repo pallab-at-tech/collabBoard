@@ -13,7 +13,7 @@ const AboutPage = () => {
       <div>
         {/* Header */}
         <h1
-          className={`text-3xl md:text-4xl font-bold mb-3 sm:mb-6 text-center ${isLogin ? "text-blue-600" : "text-blue-700"
+          className={`text-3xl md:text-4xl font-bold mb-3 sm:mb-6 text-center ${isLogin ? "text-[#4365ff]" : "text-blue-700"
             }`}
         >
           About CollabDesk
@@ -81,7 +81,6 @@ const AboutPage = () => {
         </div>
 
         {/* Section: Our Values */}
-
         <div className="mb-10">
           <h2
             className={`text-2xl font-semibold mb-2 ${isLogin ? "text-blue-500" : "text-blue-600"
@@ -116,7 +115,7 @@ const AboutPage = () => {
           <p className={isLogin ? "text-gray-300 leading-relaxed" : "text-gray-700 leading-relaxed"}>
             CollabDesk isn’t just another task manager — it’s a complete teamwork ecosystem.
             From <strong>integrated chat</strong> and <strong>role-based task controls</strong> to
-            <strong>report generation</strong> and <strong>progress tracking</strong>,
+            <strong> report generation</strong> and <strong>progress tracking</strong>,
             our platform connects every part of your workflow.
             We help teams move from scattered tools to a single, focused, and productive environment.
           </p>
@@ -172,22 +171,22 @@ const AboutPage = () => {
             Have questions, feedback, or collaboration ideas? Let’s connect!
           </p>
           <div className="space-y-2 text-gray-700 flex flex-col items-center justify-start">
-            <p className={isLogin ? "text-gray-300" : "text-gray-700"}>
+            <p className={`${isLogin ? "text-gray-300" : "text-gray-700"}`}>
               📧 Email:{" "}
               <a
                 href="mailto:pallab861774@gmail.com"
-                className="text-blue-600 hover:underline"
+                className={`${isLogin ? "text-blue-400" : "text-blue-700"} hover:underline`}
               >
                 pallab861774@gmail.com
               </a>
             </p>
-            <p className={isLogin ? "text-gray-300" : "text-gray-700"}>
+            <p className={`${isLogin ? "text-gray-300" : "text-gray-700"} pl-7`}>
               💼 LinkedIn:{" "}
               <a
                 href="https://www.linkedin.com/in/pallab-bag-35115a2b1/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className={`${isLogin ? "text-blue-400" : "text-blue-700"} hover:underline`}
               >
                 linkedin.com/in/pallab-bag
               </a>

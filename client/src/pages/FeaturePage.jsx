@@ -12,7 +12,7 @@ const FeaturePage = () => {
       <div>
         {/* Header */}
         <h1
-          className={`text-2xl md:text-4xl font-bold mb-3 sm:mb-5 text-center ${isLogin ? "text-blue-600" : "text-blue-700"
+          className={`text-2xl md:text-4xl font-bold mb-3 sm:mb-5 text-center ${isLogin ? "text-[#4365ff]" : "text-blue-700"
             }`}
         >
           Features of Our CollabDesk

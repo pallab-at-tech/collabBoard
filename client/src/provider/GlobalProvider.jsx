@@ -24,6 +24,7 @@ const GlobalProvider = ({ children }) => {
     const [isTeamLeader, setIsTeamLeader] = useState(false)
 
     const [homeLoading, setHomeLoading] = useState(false)
+    const [teamLoading, setTeamLoading] = useState(false)
 
     useEffect(() => {
         setLoginGlobal = setIsLogin
@@ -70,6 +71,7 @@ const GlobalProvider = ({ children }) => {
     };
 
     const fetchTeamDetails = async (teamId) => {
+        setTeamLoading(true)
         try {
             const response = await Axios({
                 ...SummaryApi.team_details,
@@ -82,7 +84,9 @@ const GlobalProvider = ({ children }) => {
 
             if (responseData?.error) toast.error(responseData?.message)
             if (responseData?.success) dispatch(setTeamDetails(responseData?.data))
+            setTeamLoading(false)
         } catch (error) {
+            setTeamLoading(false)
             console.log("error for fetchTeamDetails", error)
         }
     }
@@ -162,7 +166,8 @@ const GlobalProvider = ({ children }) => {
             setSlideExpand,
             setIsTeamLeader,
             isTeamLeader,
-            homeLoading
+            homeLoading,
+            teamLoading
         }}>
             {children}
         </GlobalContext.Provider>

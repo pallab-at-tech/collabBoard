@@ -47,6 +47,7 @@ const MessagePage = () => {
     const params = useParams()
 
     const [loading, setLoading] = useState(false)
+    const [messageLoading, setMessageLoading] = useState(false)
 
     useEffect(() => {
         setIsGroup(location?.allMessageDetails?.group_type === "GROUP");
@@ -165,6 +166,8 @@ const MessagePage = () => {
         (async () => {
             try {
 
+                setMessageLoading(true)
+
                 const matchingChats = chat_details?.filter(chat =>
                     chat?._id === params?.conversation
                 );
@@ -182,7 +185,10 @@ const MessagePage = () => {
                     setMessages(responseData?.data)
                 }
 
+                setMessageLoading(false)
+
             } catch (error) {
+                setMessageLoading(false)
                 setMessages([])
                 console.log("error for fetching all messages", error)
             }
@@ -265,9 +271,6 @@ const MessagePage = () => {
         setConversation(conversation)
     }, [])
 
-    // console.log("location?.allMessageDetails",location?.allMessageDetails)
-    // console.log("group details",conversation)
-
 
     return (
         <>
@@ -282,8 +285,8 @@ const MessagePage = () => {
 
                                 {
                                     isGroup ? (
-                                        location?.allMessageDetails?.group_image || conversation?.group_image  ? (
-                                            <img src={location?.allMessageDetails?.group_image || conversation?.group_image} alt="" className='h-[36px] w-[36px] rounded-full' />
+                                        location?.allMessageDetails?.group_image ? (
+                                            <img src={location?.allMessageDetails?.group_image} alt="" className='h-[36px] w-[36px] rounded-full' />
                                         ) : (
                                             <FaUserGroup size={30} />
                                         )
@@ -307,9 +310,9 @@ const MessagePage = () => {
                                     isGroup ? (
                                         <FaUserGroup size={30} />
                                     ) : (
-                                         
+
                                         location?.allMessageDetails?.otherUser?.avatar ? (
-                                            <img src={location?.allMessageDetails?.otherUser?.avatar} alt="" className='h-[40px] w-[40px] border-2 border-[#205b67] p-1 rounded-full object-cover'/>
+                                            <img src={location?.allMessageDetails?.otherUser?.avatar} alt="" className='h-[40px] w-[40px] border-2 border-[#205b67] p-1 rounded-full object-cover' />
                                         ) : (
                                             <RxAvatar size={38} />
                                         )
@@ -334,57 +337,66 @@ const MessagePage = () => {
 
                 {/* Messages */}
                 <div className="overflow-y-auto  h-[var(--message-heigh)] px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0 messages-container" >
-                    {Array.isArray(messages) &&
-                        messages.map((value, index) => {
-                            const isSelfMessage =
-                                value?.senderId?._id === user?._id || value?.senderId === user?._id;
-                            const date = new Date(value?.createdAt);
-                            const indianTime = date.toLocaleString("en-IN", {
-                                timeZone: "Asia/Kolkata",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit",
-                            });
+                    {
+                        messageLoading ? (
+                            <div className='flex flex-col gap-4 items-center justify-center mt-[180px]'>
+                                <div className='team_loader'></div>
+                                <div className='text-gray-300 text-[18px] pl-2'>fetching...</div>
+                            </div>
+                        ) : (
+                            Array.isArray(messages) &&
+                            messages.map((value, index) => {
+                                const isSelfMessage =
+                                    value?.senderId?._id === user?._id || value?.senderId === user?._id;
+                                const date = new Date(value?.createdAt);
+                                const indianTime = date.toLocaleString("en-IN", {
+                                    timeZone: "Asia/Kolkata",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    year: "numeric",
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                });
 
-                            return (
-                                <div
-                                    ref={messagesEndRef}
-                                    key={`msg-${index}`}
-                                    className={` max-w-[75%] break-words text-base rounded text-blue-950 px-2.5 py-1  ${(isGroup && index === 0) || value?.optional_msg ? "self-center" : isSelfMessage ? "self-end bg-[#f1f1f1]" : "self-start bg-[#f1f1f1]"
-                                        }`}
-                                >
-                                    {isGroup && !isSelfMessage && (
-                                        <p className="text-xs font-medium text-gray-600 -mb-1">{value?.senderName}</p>
-                                    )}
+                                return (
+                                    <div
+                                        ref={messagesEndRef}
+                                        key={`msg-${index}`}
+                                        className={` max-w-[75%] break-words text-base rounded text-blue-950 px-2.5 py-1  ${(isGroup && index === 0) || value?.optional_msg ? "self-center" : isSelfMessage ? "self-end bg-[#f1f1f1]" : "self-start bg-[#f1f1f1]"
+                                            }`}
+                                    >
+                                        {isGroup && !isSelfMessage && (
+                                            <p className="text-xs font-medium text-gray-600 -mb-1">{value?.senderName}</p>
+                                        )}
 
-                                    <div className={`bg-[#f1f1f1] p-1 rounded-md text-sm ${value?.optional_msg ? "block" : "hidden"}`}>
-                                        <p className='text-center'>
-                                            {value?.optional_msg}
-                                        </p>
-                                        <p>
-                                            {indianTime}
-                                        </p>
+                                        <div className={`bg-[#f1f1f1] p-1 rounded-md text-sm ${value?.optional_msg ? "block" : "hidden"}`}>
+                                            <p className='text-center'>
+                                                {value?.optional_msg}
+                                            </p>
+                                            <p>
+                                                {indianTime}
+                                            </p>
+                                        </div>
+
+                                        {value?.image && <img src={value.image} alt="" className="w-[200px] rounded-md" />}
+                                        {value?.video && <video src={value.video} controls className="w-[200px] rounded-md"></video>}
+                                        {value?.other_fileUrl_or_external_link && (
+                                            <button
+                                                onClick={() => window.open(value.other_fileUrl_or_external_link, "_blank")}
+                                                className="bg-blue-500 text-white px-3 py-1 rounded mt-1"
+                                            >
+                                                Open File
+                                            </button>
+                                        )}
+
+                                        {value?.text && <p className={`mt-1 ${isGroup && index === 0 && "text-[#dedede] leading-[19px]"}`}>{value.text}</p>}
+
+                                        <p className={`text-xs opacity-60 ${value?.optional_msg ? "hidden" : "block"} ${isSelfMessage ? "text-right" : "text-left"}`}>{indianTime}</p>
                                     </div>
-
-                                    {value?.image && <img src={value.image} alt="" className="w-[200px] rounded-md" />}
-                                    {value?.video && <video src={value.video} controls className="w-[200px] rounded-md"></video>}
-                                    {value?.other_fileUrl_or_external_link && (
-                                        <button
-                                            onClick={() => window.open(value.other_fileUrl_or_external_link, "_blank")}
-                                            className="bg-blue-500 text-white px-3 py-1 rounded mt-1"
-                                        >
-                                            Open File
-                                        </button>
-                                    )}
-
-                                    {value?.text && <p className={`mt-1 ${isGroup && index === 0 && "text-[#dedede] leading-[19px]"}`}>{value.text}</p>}
-
-                                    <p className={`text-xs opacity-60 ${value?.optional_msg ? "hidden" : "block"} ${isSelfMessage ? "text-right" : "text-left"}`}>{indianTime}</p>
-                                </div>
-                            );
-                        })}
+                                );
+                            })
+                        )
+                    }
                 </div>
 
                 {/* Footer */}

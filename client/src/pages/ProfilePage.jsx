@@ -211,14 +211,6 @@ const ProfilePage = () => {
 
                       </NavLink>
 
-                      <NavLink to={`/profile/${params?.user}/request`}
-                        className={({ isActive }) => `flex items-center transition-colors duration-75 ease-in-out gap-x-1 cursor-pointer relative px-2 py-0.5 ${path === "request" && "bg-green-600  rounded"}`}
-                      >
-                        <FaEnvelopeOpenText />
-                        <p>Inbox</p>
-
-                      </NavLink>
-
                     </div>
 
                     <div className='border-b-[0.5px] border-b-[#b4b3b3] shadow-md'></div>

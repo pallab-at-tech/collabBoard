@@ -138,7 +138,7 @@ const Home = () => {
             <h2 className="text-[22px] font-semibold text-blue-800 mb-2">
               Learn More About CollabDesk
             </h2>
-            <p className="text-gray-800 text-sm mb-6">
+            <p className="text-gray-800 text-sm mb-6 px-6">
               Discover how CollabDesk can help your team collaborate efficiently and manage tasks seamlessly.
             </p>
 

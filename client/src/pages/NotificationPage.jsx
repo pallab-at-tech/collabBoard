@@ -15,12 +15,15 @@ const NotificationPage = () => {
   const [temp, setTemp] = useState(new Set())
 
   const [markedAllLoading, setMarkedAllLoading] = useState(false)
+  const [pageLoading, setPageLoading] = useState(false)
 
   const dispatch = useDispatch()
 
   // function for fetch all notification
   const fetch_all_notify = async (page = 1) => {
     try {
+      setPageLoading(true)
+
       const response = await Axios({
         ...SummaryApi.fetch_all_notification,
         data: {
@@ -38,7 +41,11 @@ const NotificationPage = () => {
           curr_page: responseData?.curr_page
         })
       }
+
+      setPageLoading(false)
+
     } catch (error) {
+      setPageLoading(false)
       console.log("fetch all notification error", error)
     }
   }
@@ -46,6 +53,8 @@ const NotificationPage = () => {
   // function for fetch all unread notification
   const fetch_unread_notify = async (page = 1) => {
     try {
+      setPageLoading(true)
+
       const response = await Axios({
         ...SummaryApi.fetch_unread_notification,
         data: {
@@ -64,7 +73,10 @@ const NotificationPage = () => {
         })
       }
 
+      setPageLoading(false)
+
     } catch (error) {
+      setPageLoading(false)
       console.log("fetchedUnread_notification error", error)
     }
   }
@@ -229,66 +241,72 @@ const NotificationPage = () => {
 
       </div>
 
-      {/* Notification list (only this scrolls) 60 110*/}
+      {/* Notification list */}
       <div className={`bg-[#2a2b33]  rounded-lg p-5 ${activeTab === "unread" && data && data?.notifications.length > 0 ? "mt-12 sm:mt-9 max-h-[calc(100vh-190px-32px)] sm:max-h-[calc(100vh-135px-32px)]" : "mt-4 sm:mt-0 max-h-[calc(100vh-160px-32px)] sm:max-h-[calc(100vh-110px-32px)]"}  overflow-y-auto decrease-Width-slidebar`}>
 
         {
-          !data || data?.notifications.length === 0 ? (
-            <div className="w-full h-full flex justify-center items-center text-gray-200 text-[16px] sm:text-lg select-none">
-              No Notification have ?!
+          pageLoading ? (
+            <div className='flex flex-col gap-4 items-center justify-center mt-[180px]'>
+              <div className='team_loader'></div>
+              <div className='text-gray-300 text-[18px] pl-2'>fetching...</div>
             </div>
           ) : (
-            <div className="">
-              {
-                activeTab === "unread" && (
-                  <div className="flex justify-start sm:justify-end items-center w-full text-blue-600 text-sm fixed top-[122px] sm:top-[73px] sm:right-14 -right-[17px]">
-                    <button onClick={() => markedAllRead()} className={`w-fit px-2 py-1 bg-white rounded-md ${markedAllLoading ? "cursor-not-allowed" : "cursor-pointer"}`}>
-                      Mark all read
-                    </button>
-                  </div>
-                )
-              }
-              {
-                data?.notifications?.map((v, i) => {
-                  return (
-                    <div
-                      key={v?._id}
-                      className="bg-[#343540] p-4 rounded-md mb-3 hover:bg-[#3d3e4a] transition flex justify-between"
-                    >
-
-                      <div className="text-gray-200">
-
-                        <h1 className="font-bold text-blue-500">{v?.type}</h1>
-                        <p className="text-gray-200 text-sm">
-                          {v?.content}
-                        </p>
-
-                      </div>
-
-                      <div className="flex flex-col-reverse sm:flex-row gap-3 items-center justify-end text-sm">
-
-                        <span className="text-xs text-gray-400 whitespace-nowrap">{timeLeftFromNow(v?.createdAt)}</span>
-
-                        {v?.isRead || temp.has(v?._id) ? (
-                          <span className="text-gray-400 italic">Read</span>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              markOneRead(v._id)
-                            }}
-                            className={`text-blue-800 hover:text-blue-600 bg-gray-200 px-2 py-1 rounded ${markedLoading.has(v._id) ? "cursor-not-allowed" : "cursor-pointer"} transition`}
-                          >
-                            Mark
-                          </button>
-                        )}
-                      </div>
-
+            !data || data?.notifications.length === 0 ? (
+              <div className="w-full h-full flex justify-center items-center text-gray-200 text-[16px] sm:text-lg select-none">
+                No Notification have ?!
+              </div>
+            ) : (
+              <div>
+                {
+                  activeTab === "unread" && (
+                    <div className="flex justify-start sm:justify-end items-center w-full text-blue-600 text-sm fixed top-[122px] sm:top-[73px] sm:right-14 -right-[17px]">
+                      <button onClick={() => markedAllRead()} className={`w-fit px-2 py-1 bg-white rounded-md ${markedAllLoading ? "cursor-not-allowed" : "cursor-pointer"}`}>
+                        Mark all read
+                      </button>
                     </div>
                   )
-                })
-              }
+                }
+                {
+                  data?.notifications?.map((v, i) => {
+                    return (
+                      <div
+                        key={v?._id}
+                        className="bg-[#343540] p-4 rounded-md mb-3 hover:bg-[#3d3e4a] transition flex justify-between"
+                      >
 
-            </div>
+                        <div className="text-gray-200">
+
+                          <h1 className="font-bold text-blue-500">{v?.type}</h1>
+                          <p className="text-gray-200 text-sm">
+                            {v?.content}
+                          </p>
+
+                        </div>
+
+                        <div className="flex flex-col-reverse sm:flex-row gap-3 items-center justify-end text-sm">
+
+                          <span className="text-xs text-gray-400 whitespace-nowrap">{timeLeftFromNow(v?.createdAt)}</span>
+
+                          {v?.isRead || temp.has(v?._id) ? (
+                            <span className="text-gray-400 italic">Read</span>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                markOneRead(v._id)
+                              }}
+                              className={`text-blue-800 hover:text-blue-600 bg-gray-200 px-2 py-1 rounded ${markedLoading.has(v._id) ? "cursor-not-allowed" : "cursor-pointer"} transition`}
+                            >
+                              Mark
+                            </button>
+                          )}
+                        </div>
+
+                      </div>
+                    )
+                  })
+                }
+              </div>
+            )
           )
         }
       </div>
