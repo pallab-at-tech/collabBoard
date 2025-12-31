@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { useGlobalContext } from '../../provider/GlobalProvider'
-import { useSelector } from 'react-redux'
+import { useSelector , useDispatch } from 'react-redux'
 import toast from 'react-hot-toast'
-import { useDispatch } from 'react-redux'
 import { updateGroupName } from '../../store/chatSlice'
+
 
 const GroupNameChanged = ({ close, initialValue, group_id, onUpdated }) => {
 
@@ -11,7 +11,6 @@ const GroupNameChanged = ({ close, initialValue, group_id, onUpdated }) => {
     const [name, setName] = useState(initialValue?.value)
     const user = useSelector(state => state.user)
     const dispatch = useDispatch()
-
 
     const handleOnSubmit = async (e) => {
 
@@ -48,7 +47,6 @@ const GroupNameChanged = ({ close, initialValue, group_id, onUpdated }) => {
             }
         }, 500);
     };
-
 
     return (
         <section className="fixed inset-0 flex items-center justify-center z-50 bg-gray-800/40">

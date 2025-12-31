@@ -1,35 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useLocation, useParams } from 'react-router-dom'
+import { useParams , useNavigate } from 'react-router-dom'
 import { FaUserGroup } from 'react-icons/fa6';
 import { useGlobalContext } from '../../provider/GlobalProvider';
 import Axios from '../../utils/Axios';
 import SummaryApi from '../../common/SummaryApi';
 import { CgProfile } from "react-icons/cg";
 import { BiDotsVertical } from "react-icons/bi";
-import ChatMemberSetting from '../other/ChatMemberSetting';
+import ChatMemberSetting from './ChatMemberSetting';
 import { ImExit } from "react-icons/im";
 import { RiUserAddFill } from "react-icons/ri";
 import { IoLink } from "react-icons/io5";
 import { FiEdit3 } from "react-icons/fi";
 import { LuCircleFadingPlus } from "react-icons/lu";
-import GroupNameChanged from '../other/GroupNameChanged';
-import GroupImageChanged from '../other/GroupImageChanged';
+import GroupNameChanged from './GroupNameChanged';
+import GroupImageChanged from './GroupImageChanged';
 import AddMemberGroup from './AddMemberGroup';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-const MessageEdit = () => {
-    const chat_details = useSelector(state => state.chat?.all_message)
-    const user = useSelector(state => state?.user)
 
+const MessageEdit = () => {
+    const user = useSelector(state => state?.user)
     const { socketConnection } = useGlobalContext()
 
     const [all_details, setAll_details] = useState(null)
 
-
     const dotsRef = useRef(null);
-    const location = useLocation()
     const params = useParams()
     const navigate = useNavigate()
 
@@ -114,8 +110,6 @@ const MessageEdit = () => {
         }, 500);
     }
 
-
-    // console.log("all_details", all_details)
 
     return (
         <section className='bg-[#21222b] text-white h-[calc(100vh-60px)] overflow-y-auto px-4 py-3 sm:px-6 sm:py-5'>

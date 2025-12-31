@@ -4,7 +4,8 @@ import { useGlobalContext } from '../../provider/GlobalProvider'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
 
-const ChatMemberSetting = ({ close, memberId, memberUserId, onUpdated , onUpdatedForAdmin }) => {
+
+const ChatMemberSetting = ({ close, memberId, memberUserId, onUpdated, onUpdatedForAdmin }) => {
 
     const params = useParams()
     const { socketConnection } = useGlobalContext()
@@ -71,7 +72,6 @@ const ChatMemberSetting = ({ close, memberId, memberUserId, onUpdated , onUpdate
 
         }, 500)
     }
-
 
     return (
         <div className="absolute right-6 -top-14 w-48 bg-white rounded-xl rounded-br-md shadow-lg border border-gray-200 overflow-hidden z-50">

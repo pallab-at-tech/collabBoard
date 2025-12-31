@@ -1,30 +1,25 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { CgProfile } from "react-icons/cg";
 import { RiChatSmile2Line } from "react-icons/ri";
 import { HiOutlineUserAdd } from "react-icons/hi";
-import SearchNewMember from './SearchNewMember';
-import Axios from '../utils/Axios';
-import SummaryApi from '../common/SummaryApi';
-import { updateparticipantsForRemove, removeConversation, setMessageDetails, updateGroupImage, updateGroupName, updateparticipantsForAdd, } from '../store/chatSlice';
-import { useDispatch } from 'react-redux';
+import SearchNewMember from '../SearchNewMember';
+import Axios from '../../utils/Axios';
+import SummaryApi from '../../common/SummaryApi';
+import { updateparticipantsForRemove, removeConversation, setMessageDetails, updateGroupImage, updateGroupName, updateparticipantsForAdd, updateConversationWithNewMessage } from '../../store/chatSlice';
 import { FiArrowUpLeft } from 'react-icons/fi'
 import { RxAvatar } from 'react-icons/rx';
-import { Link, useParams } from 'react-router-dom';
-import { Outlet } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { HiUserGroup } from "react-icons/hi2";
-import CreateGroup from '../components/common/CreateGroup';
+import CreateGroup from '../../components/common/CreateGroup';
 import { FaUserGroup } from "react-icons/fa6";
-import { useGlobalContext } from '../provider/GlobalProvider';
-import { updateConversationWithNewMessage } from '../store/chatSlice';
+import { useGlobalContext } from '../../provider/GlobalProvider';
 
 const ChatPage = () => {
 
     const user = useSelector(state => state.user)
     const chat_details = useSelector(state => state.chat?.all_message)
     const location = useLocation()
-    const params = useParams()
 
     const dispatch = useDispatch()
 
@@ -143,7 +138,7 @@ const ChatPage = () => {
                             <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#2e2f38]">
                                 {
                                     user?.avatar ? (
-                                        <img src={user?.avatar} alt="" className='h-[32px] w-[32px] object-cover rounded-full'/>
+                                        <img src={user?.avatar} alt="" className='h-[32px] w-[32px] object-cover rounded-full' />
                                     ) : (
                                         <CgProfile size={24} className="text-gray-300" />
                                     )
@@ -161,7 +156,7 @@ const ChatPage = () => {
                         </div>
 
                         <div>
-                            <HiUserGroup size={28} onClick={() => setOpenGroupCreateWindow(true)} title='create group' className='cursor-pointer'/>
+                            <HiUserGroup size={28} onClick={() => setOpenGroupCreateWindow(true)} title='create group' className='cursor-pointer' />
                         </div>
 
                         <div>

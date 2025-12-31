@@ -1,26 +1,19 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { IoSendOutline } from "react-icons/io5";
-import { MdAttachment } from "react-icons/md";
+import React, { useEffect, useRef, useState } from 'react'
+import { IoSendOutline , IoImage } from "react-icons/io5";
+import { MdAttachment, MdManageSearch } from "react-icons/md";
 import { RxAvatar } from "react-icons/rx";
-import { MdManageSearch } from "react-icons/md";
-import { useSelector } from 'react-redux';
-import { Outlet, useLocation } from 'react-router-dom';
-import { useGlobalContext } from '../provider/GlobalProvider';
-import Axios from '../utils/Axios';
-import SummaryApi from '../common/SummaryApi';
-import { updateConversationWithNewMessage, updateGroupImage, updateGroupName } from '../store/chatSlice';
-import { useDispatch } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useSelector , useDispatch } from 'react-redux';
+import { Outlet, useLocation , useParams , useNavigate , Link } from 'react-router-dom';
+import { useGlobalContext } from '../../provider/GlobalProvider';
+import Axios from '../../utils/Axios';
+import SummaryApi from '../../common/SummaryApi';
+import { updateConversationWithNewMessage, updateGroupImage, updateGroupName } from '../../store/chatSlice';
 import { FaFileAlt } from "react-icons/fa";
 import { RiFolderVideoFill } from "react-icons/ri";
-import { IoImage } from "react-icons/io5";
-import { HiOutlineUserGroup } from "react-icons/hi";
-import uploadFile from '../utils/uploadFile';
-import { useNavigate } from 'react-router-dom';
-import { IoClose } from "react-icons/io5";
+import uploadFile from '../../utils/uploadFile';
 import { FaUserGroup } from 'react-icons/fa6';
-import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+
 
 const MessagePage = () => {
 
