@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { IoIosClose, IoIosSearch } from 'react-icons/io'
-import Axios from '../utils/Axios'
-import SummaryApi from '../common/SummaryApi'
+import Axios from '../../utils/Axios'
+import SummaryApi from '../../common/SummaryApi'
 import { RxAvatar } from 'react-icons/rx'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
+
 
 const SearchNewMember = ({ close }) => {
 
@@ -54,17 +55,14 @@ const SearchNewMember = ({ close }) => {
 
     }, [data])
 
-
-    console.log("url xheck chat",chatData)
-    const urlFind = (val) =>{
+    const urlFind = (val) => {
 
         const filterData = chatData.filter(preve => {
-           return preve.group_type === "PRIVATE" && preve?.otherUser?.userId === val?.userId
+            return preve.group_type === "PRIVATE" && preve?.otherUser?.userId === val?.userId
         })
 
         return filterData[0]?._id
     }
-
 
     return (
         <section className='fixed inset-0 flex items-center justify-center z-50 bg-black/60'>

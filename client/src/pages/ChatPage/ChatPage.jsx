@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { CgProfile } from "react-icons/cg";
 import { RiChatSmile2Line } from "react-icons/ri";
 import { HiOutlineUserAdd } from "react-icons/hi";
-import SearchNewMember from '../SearchNewMember';
+import SearchNewMember from '../../components/ChatComponent/SearchNewMember';
 import Axios from '../../utils/Axios';
 import SummaryApi from '../../common/SummaryApi';
 import { updateparticipantsForRemove, removeConversation, setMessageDetails, updateGroupImage, updateGroupName, updateparticipantsForAdd, updateConversationWithNewMessage } from '../../store/chatSlice';
