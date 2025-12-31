@@ -6,6 +6,7 @@ import { FaChevronRight } from "react-icons/fa";
 import { FaSquare } from "react-icons/fa6";
 import { useState } from 'react';
 import LoaderPage from '../utils/LoaderPage';
+import { useSelector } from 'react-redux';
 
 const Home = () => {
   const { isLogin, homeLoading } = useGlobalContext();

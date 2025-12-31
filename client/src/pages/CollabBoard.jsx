@@ -29,7 +29,7 @@ const CollabBoard = () => {
 
 
   return (
-    <section className={`bg-[#202128]  min-h-[calc(100vh-60px)] lg-real:px-[50px] px-6 py-4 grid ${slideExpand ? "lg-real:grid-cols-[1fr_500px]" : "lg-real:grid-cols-[1fr_60px]"} transform-view duration-500`}>
+    <section className={`bg-[#202128] min-h-[calc(100vh-60px)] lg-real:px-[50px] px-6 py-4 grid ${slideExpand ? "lg-real:grid-cols-[1fr_500px]" : "lg-real:grid-cols-[1fr_60px]"} transform-view duration-500`}>
 
       <div className=''>
         {

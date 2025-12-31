@@ -84,6 +84,7 @@ const GlobalProvider = ({ children }) => {
 
             if (responseData?.error) toast.error(responseData?.message)
             if (responseData?.success) dispatch(setTeamDetails(responseData?.data))
+            console.log("task responseData?.data",responseData?.data)
             setTeamLoading(false)
         } catch (error) {
             setTeamLoading(false)

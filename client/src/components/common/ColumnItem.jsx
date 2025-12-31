@@ -215,11 +215,11 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                             </div>
 
                                             {/* edit options */}
-                                            <div className='text-white absolute sm:top-2 sm:-right-2.5 top-0 -right-6 flex sm:flex-col flex-row items-center'>
+                                            <div className='text-white absolute lg-real:-right-[30px] custom-sm:top-2 custom-sm:-right-2.5 top-0 -right-6 flex sm:flex-col flex-row items-center'>
 
                                                 <Link to={`/task/task-assign-${v?._id}`} state={{ val: v, columnId: val?._id, teamId: team?._id, report: val?.reportSubmit || [], isLeader: isTeamLeader || false }} className={`h-fit w-fit`}>
                                                     <FaExternalLinkAlt
-                                                        size={17}
+                                                        size={15}
                                                         className='my-1.5 mx-1.5 cursor-pointer text-[#cccdcc] hover:text-[#f0f1f0] transition-colors'
                                                         title='Open in new window'
                                                     />
@@ -230,7 +230,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                                         setEditTaskOpen(true)
                                                         setCurrentTaskToEdit(v)
                                                     }}
-                                                    size={20}
+                                                    size={18}
                                                     className={`my-1.5 mx-1.5 cursor-pointer text-[#50c900] hover:text-[#409f00] transition-colors ${isTeamLeader ? "block" : "hidden"}`} title='Edit task'
                                                 />
 
@@ -240,7 +240,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting }) => {
                                                         setCurrentTaskToEdit(v)
                                                     }}
                                                     className={`my-1.5 mx-1.5 cursor-pointer text-[#f36900] hover:text-red-500 transition-colors ${isTeamLeader ? "block" : "hidden"}`} title='Delete task'
-                                                    size={20}
+                                                    size={18}
                                                 />
                                             </div>
 

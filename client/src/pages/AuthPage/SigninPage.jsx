@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Axios from "../utils/Axios"
-import SummaryApi from '../common/SummaryApi'
+import Axios from '../../utils/Axios'
+import SummaryApi from '../../common/SummaryApi'
 import toast from 'react-hot-toast'
 import { useDispatch } from 'react-redux'
-import { setUserDetails } from '../store/userSlice'
-import fetchUserDetails from '../utils/fetchUserDetails'
-import { useGlobalContext } from '../provider/GlobalProvider'
-import yourLogo from "../assets/logo1.png"
+import { setUserDetails } from '../../store/userSlice'
+import fetchUserDetails from '../../utils/fetchUserDetails'
+import { useGlobalContext } from '../../provider/GlobalProvider'
+import yourLogo from "../../assets/logo1.png"
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { HiOutlineMail, HiOutlineLockClosed } from 'react-icons/hi';
 
