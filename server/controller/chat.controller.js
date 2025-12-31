@@ -51,7 +51,6 @@ export const getPreviousChatUsers = async (request, response) => {
 
 export const fetchAllMessages = async (request, response) => {
     try {
-
         const { allMessageId = [] } = request.body || {}
 
         if (!Array.isArray(allMessageId) || allMessageId.length === 0) {
@@ -84,7 +83,6 @@ export const fetchAllMessages = async (request, response) => {
 
 export const getConversationDetails = async (request, response) => {
     try {
-
         const userId = request?.userId
         const { conversationID } = request.query || {}
 

@@ -69,10 +69,11 @@ export const getTaskDetailsController = async (request, response) => {
             })
         }
 
-        const team = await teamModel.findById(teamId)
-        const user = await userModel.findById(userId)
-
-        const userName = user.userId
+        const [team, user, data] = await Promise.all([
+            teamModel.findById(teamId),
+            userModel.findById(userId),
+            taskModel.findOne({ teamId: teamId })
+        ])
 
         if (!team) {
             return response.status(400).json({
@@ -82,10 +83,16 @@ export const getTaskDetailsController = async (request, response) => {
             })
         }
 
-        const isLeader = team.member.some(c => c.userId.toString() === userId && c.role.toString() !== "MEMBER")
-        const data = await taskModel.findOne({ teamId: teamId })
+        if (!user) {
+            return response.status(400).json({
+                message: "User not found",
+                error: true,
+                success: false
+            })
+        }
 
-        // console.log("check server for task data",data)
+        const userName = user.userId
+        const isLeader = team.member.some(c => c.userId.toString() === userId && c.role.toString() !== "MEMBER")
 
         if (!isLeader && data !== null) {
 
@@ -101,24 +108,19 @@ export const getTaskDetailsController = async (request, response) => {
                 }).filter(Boolean) || []
             }
 
-            // console.log("Filter data",filterData)
-
             return response.json({
                 message: 'Get task details',
                 data: filterData,
                 error: false,
                 success: true
             })
-
         } else {
-
             return response.json({
                 message: 'Get task details',
                 data: data,
                 error: false,
                 success: true
             })
-
         }
 
     } catch (error) {
@@ -177,7 +179,7 @@ export const createColumnController = async (request, response) => {
             tasks: []
         }
 
-        const upadateColumn = await taskModel.findOneAndUpdate({ teamId: teamId },
+        await taskModel.findOneAndUpdate({ teamId: teamId },
             {
                 $push: {
                     column: payload
@@ -223,7 +225,10 @@ export const createTaskController = async (request, response) => {
             })
         }
 
-        const user = await userModel.findById(userId)
+        const [user, taskBoard] = await Promise.all([
+            userModel.findById(userId),
+            taskModel.findOne({ teamId: teamId })
+        ])
 
         if (!user) {
             return response.status(404).json({
@@ -232,8 +237,6 @@ export const createTaskController = async (request, response) => {
                 success: false
             });
         }
-
-        const taskBoard = await taskModel.findOne({ teamId: teamId })
 
         if (!taskBoard) {
             return response.status(404).json({
@@ -259,7 +262,6 @@ export const createTaskController = async (request, response) => {
                 success: false
             })
         }
-
 
         const column = taskBoard.column.id(columnId)
 
@@ -321,7 +323,6 @@ export const renameColumnLabelController = async (request, response) => {
             }
         })
 
-
         if (!isLeader) {
             return response.status(400).json({
                 message: "Permission denied",
@@ -329,8 +330,6 @@ export const renameColumnLabelController = async (request, response) => {
                 success: false
             })
         }
-
-
 
         if (!columnName || !columnName.trim()) {
             return response.status(400).json({
@@ -486,10 +485,10 @@ export const fetchReportController = async (request, response) => {
         const report = await reportModel.findById(reportId)
 
         return response.json({
-            message : "get report",
-            report : report,
-            error : false,
-            success : true
+            message: "get report",
+            report: report,
+            error: false,
+            success: true
         })
 
     } catch (error) {

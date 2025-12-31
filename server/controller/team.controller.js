@@ -43,8 +43,7 @@ export const teamCreateController = async (request, response) => {
 
         const save = await Team.save()
 
-
-        const userDataUpdate = await userModel.findByIdAndUpdate(
+        await userModel.findByIdAndUpdate(
             userId,
             {
                 $push: {
@@ -153,15 +152,12 @@ export const teamSearchController = async (request, response) => {
             });
         }
 
-
         return response.json({
             message: 'All result of query',
             error: false,
             success: true,
             query: result
         })
-
-
     } catch (error) {
         return response.status(500).json({
             message: error.message || error,

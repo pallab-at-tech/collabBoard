@@ -13,7 +13,6 @@ import notificationModel from '../model/notification.model.js'
 dotenv.config()
 
 
-
 const app = express()
 const server = createServer(app)
 
@@ -52,7 +51,6 @@ io.on("connection", async (socket) => {
 
     // socket.emit("receive_message", { message: { text: "Test message from server" } });
 
-
     // join in a room and online
     socket.on("join_room", (userId) => {
 
@@ -63,7 +61,6 @@ io.on("connection", async (socket) => {
 
         console.log("User connected:", `${socket.id} -- ${userId}`);
     })
-
 
     // Message related controller start from here ...
 
@@ -250,33 +247,34 @@ io.on("connection", async (socket) => {
                 messages: createGroup.messages
             }
 
-            uniqueParticipants.forEach(async (pid) => {
+            await Promise.all(
+                uniqueParticipants.map(async (pid) => {
 
-                io.to(pid.toString()).emit("receive_message", {
-                    conversation: conversationToEmit,
-                    message: populateMessage
+                    io.to(pid.toString()).emit("receive_message", {
+                        conversation: conversationToEmit,
+                        message: populateMessage
+                    })
+
+                    if (userId.toString() !== pid?.toString()) {
+
+                        const notification = await notificationModel.create({
+                            recipient: pid.toString(),
+                            type: "CHAT RELATED",
+                            content: `You have been joined "${createGroup.group_name}" by "${createrUserName}"`,
+                            navigation_link: `/chat/${createGroup._id}`
+                        })
+
+                        io.to(pid.toString()).emit("notify", {
+                            _id: notification._id,
+                            recipient: pid.toString(),
+                            type: "CHAT RELATED",
+                            content: `You have been joined "${createGroup.group_name}" by "${createrUserName}"`,
+                            navigation_link: `/chat/${createGroup._id}`,
+                            isRead: false
+                        })
+                    }
                 })
-
-                if (userId.toString() !== pid?.toString()) {
-
-                    const notification = await notificationModel.create({
-                        recipient: pid.toString(),
-                        type: "CHAT RELATED",
-                        content: `You have been joined "${createGroup.group_name}" by "${createrUserName}"`,
-                        navigation_link: `/chat/${createGroup._id}`
-                    })
-
-                    io.to(pid.toString()).emit("notify", {
-                        _id: notification._id,
-                        recipient: pid.toString(),
-                        type: "CHAT RELATED",
-                        content: `You have been joined "${createGroup.group_name}" by "${createrUserName}"`,
-                        navigation_link: `/chat/${createGroup._id}`,
-                        isRead: false
-                    })
-                }
-
-            })
+            )
 
         } catch (error) {
             console.log("Error from creating group", error)
@@ -328,11 +326,6 @@ io.on("connection", async (socket) => {
         const otherUserId = conversation.participants.find(
             (pId) => pId.toString() !== senderId.toString()
         )
-
-        const otherUser = await userModel.findById(otherUserId)
-            .select("_id name avatar email userId")
-            .lean();
-
 
         const conversationToEmit = {
             _id: conversation._id,
@@ -422,31 +415,33 @@ io.on("connection", async (socket) => {
                     .populate("senderId", "_id name avatar userId")
                     .lean();
 
-                group.participants.forEach(async (pid) => {
-                    io.to(pid.toString()).emit("receive_message", {
-                        conversation: conversationToEmit,
-                        message: populatedMessage
+                await Promise.all(
+                    group.participants.map(async (pid) => {
+                        io.to(pid.toString()).emit("receive_message", {
+                            conversation: conversationToEmit,
+                            message: populatedMessage
+                        })
+
+                        if (pid.toString() !== userId1.toString()) {
+
+                            const notification = await notificationModel.create({
+                                recipient: pid.toString(),
+                                type: "CHAT RELATED",
+                                content: `"${group.group_name}" group details just updated`,
+                                navigation_link: `/chat/${group._id}`
+                            })
+
+                            io.to(pid.toString()).emit("notify", {
+                                _id: notification._id,
+                                recipient: pid.toString(),
+                                type: "CHAT RELATED",
+                                content: `"${group.group_name}" group details just updated`,
+                                navigation_link: `/chat/${group._id}`,
+                                isRead: false
+                            })
+                        }
                     })
-
-                    if (pid.toString() !== userId1.toString()) {
-
-                        const notification = await notificationModel.create({
-                            recipient: pid.toString(),
-                            type: "CHAT RELATED",
-                            content: `"${group.group_name}" group details just updated`,
-                            navigation_link: `/chat/${group._id}`
-                        })
-
-                        io.to(pid.toString()).emit("notify", {
-                            _id: notification._id,
-                            recipient: pid.toString(),
-                            type: "CHAT RELATED",
-                            content: `"${group.group_name}" group details just updated`,
-                            navigation_link: `/chat/${group._id}`,
-                            isRead: false
-                        })
-                    }
-                })
+                )
             }
 
         } catch (error) {
@@ -904,9 +899,7 @@ io.on("connection", async (socket) => {
     // create task
     socket.on("create-task", async (data) => {
         try {
-
             const { userId, teamId, columnId, title, description, assignTo, status, aditional_link, dueDate, dueTime, labels, image, video } = data || {}
-
 
             const token = socket.handshake.auth?.token;
             if (!token) {
@@ -935,13 +928,14 @@ io.on("connection", async (socket) => {
                 return socket.emit("create_task_error", { message: "You must assign task to your member." })
             }
 
-            const user = await userModel.findById(userId)
+            const [user, taskBoard] = await Promise.all([
+                userModel.findById(userId),
+                taskModel.findOne({ teamId: teamId })
+            ])
 
             if (!user) {
                 return socket.emit("create_task_error", { message: "User not found" })
             }
-
-            const taskBoard = await taskModel.findOne({ teamId: teamId })
 
             if (!taskBoard) {
                 return socket.emit("create_task_error", { message: "Task board not found for team" })
@@ -982,7 +976,6 @@ io.on("connection", async (socket) => {
 
             io.to(user._id.toString()).emit("task_create_success", { message: "Task created successfully" })
 
-
             if (Array.isArray(assignTo)) {
 
                 const assignUser_id = await userModel.find(
@@ -990,33 +983,34 @@ io.on("connection", async (socket) => {
                     { _id: 1 }
                 ).lean()
 
-                assignUser_id.forEach(async (id) => {
+                await Promise.all(
+                    assignUser_id.map(async (id) => {
+                        io.to(id._id.toString()).emit(
+                            "task_assigned", {
+                            message: "New task assigned to you",
+                            task: newTask,
+                            columnId: columnId,
+                            columnName: column.name,
+                            taskBoardId: taskBoard._id
+                        })
 
-                    io.to(id._id.toString()).emit(
-                        "task_assigned", {
-                        message: "New task assigned to you",
-                        task: newTask,
-                        columnId: columnId,
-                        columnName: column.name,
-                        taskBoardId: taskBoard._id
-                    })
+                        const notification = await notificationModel.create({
+                            recipient: id._id.toString(),
+                            type: "TASK ASSIGNED",
+                            content: `In taskboard "${taskBoard.name}" , new task just assigned to you`,
+                            navigation_link: `/board`
+                        })
 
-                    const notification = await notificationModel.create({
-                        recipient: id._id.toString(),
-                        type: "TASK ASSIGNED",
-                        content: `In taskboard "${taskBoard.name}" , new task just assigned to you`,
-                        navigation_link: `/board`
+                        io.to(m.userId.toString()).emit("notify", {
+                            _id: notification._id,
+                            recipient: id._id.toString(),
+                            type: "TASK ASSIGNED",
+                            content: `In taskboard "${taskBoard.name}" , new task just assigned to you`,
+                            navigation_link: `/board`,
+                            isRead: false
+                        })
                     })
-
-                    io.to(m.userId.toString()).emit("notify", {
-                        _id: notification._id,
-                        recipient: id._id.toString(),
-                        type: "TASK ASSIGNED",
-                        content: `In taskboard "${taskBoard.name}" , new task just assigned to you`,
-                        navigation_link: `/board`,
-                        isRead: false
-                    })
-                })
+                )
             }
 
             io.to(user._id.toString()).emit("task_assigned", {
@@ -1070,22 +1064,23 @@ io.on("connection", async (socket) => {
                 return socket.emit("task_update_error", { message: "Task id missing." })
             }
 
-            const user = await userModel.findById(userId)
+            const [user, taskBoard] = await Promise.all([
+                userModel.findById(userId),
+                taskModel.findOne({ teamId: teamId })
+            ])
 
             if (!user) {
                 return socket.emit("task_update_error", { message: "User not found." })
+            }
+
+            if (!taskBoard) {
+                return socket.emit("task_update_error", { message: "Task board not found" })
             }
 
             const hasPermission = user.roles.some((role) => role.teamId.toString() === teamId && role.role !== "MEMBER")
 
             if (!hasPermission) {
                 return socket.emit("task_update_error", { message: "Permission denied." })
-            }
-
-            const taskBoard = await taskModel.findOne({ teamId: teamId })
-
-            if (!taskBoard) {
-                return socket.emit("task_update_error", { message: "Task board not found" })
             }
 
             const column = taskBoard.column.id(columnId)
@@ -1212,22 +1207,23 @@ io.on("connection", async (socket) => {
                 return socket.emit("task_delete_error", { message: "Task id missing." })
             }
 
-            const user = await userModel.findById(userId)
+            const [user, taskBoard] = await Promise.all([
+                userModel.findById(userId),
+                taskModel.findOne({ teamId: teamId })
+            ])
 
             if (!user) {
                 return socket.emit("task_delete_error", { message: "User not found" })
+            }
+
+            if (!taskBoard) {
+                return socket.emit("task_delete_error", { message: "Task board not found" })
             }
 
             const hasPermission = user.roles.some((role) => role.teamId.toString() === teamId && role.role !== "MEMBER")
 
             if (!hasPermission) {
                 return socket.emit("task_delete_error", { message: "Permission Denied" })
-            }
-
-            const taskBoard = await taskModel.findOne({ teamId: teamId })
-
-            if (!taskBoard) {
-                return socket.emit("task_delete_error", { message: "Task board not found" })
             }
 
             const column = taskBoard.column.id(columnId)
@@ -1296,13 +1292,14 @@ io.on("connection", async (socket) => {
                 return socket.emit("collabNameChange_error", { message: "CollabDesk Id required !" })
             }
 
-            const task = await taskModel.findById(deskId)
+            const [task, team] = await Promise.all([
+                taskModel.findById(deskId),
+                teamModel.findById(teamId)
+            ])
 
             if (!task) {
                 return socket.emit("collabNameChange_error", { message: "Task not found !" })
             }
-
-            const team = await teamModel.findById(teamId)
 
             if (!team) {
                 return socket.emit("collabNameChange_error", { message: "Team not found !" })
@@ -1319,29 +1316,32 @@ io.on("connection", async (socket) => {
             task.name = newName
             await task.save()
 
-            team.member.forEach(async (m) => {
-                io.to(m.userId.toString()).emit("collabName_success", {
-                    newName: task.name,
-                    message: "CollabDesk name successfully changed.",
-                    taskBoardId: task._id
-                })
-                const notification = await notificationModel.create({
-                    recipient: m.userId.toString(),
-                    type: "TEAM UPDATE",
-                    content: `CollabDesk name changed from "${oldname}" to "${task.name}" bt leader`,
-                    navigation_link: "/board"
-                })
+            await Promise.all(
+                team.member.forEach(async (m) => {
 
-                io.to(m.userId.toString()).emit("notify", {
-                    _id: notification._id,
-                    recipient: m.userId.toString(),
-                    type: "TEAM UPDATE",
-                    content: `CollabDesk name changed from "${oldname}" to "${task.name}" bt leader`,
-                    navigation_link: "/board",
-                    isRead: false
-                })
-            })
+                    io.to(m.userId.toString()).emit("collabName_success", {
+                        newName: task.name,
+                        message: "CollabDesk name successfully changed.",
+                        taskBoardId: task._id
+                    })
 
+                    const notification = await notificationModel.create({
+                        recipient: m.userId.toString(),
+                        type: "TEAM UPDATE",
+                        content: `CollabDesk name changed from "${oldname}" to "${task.name}" bt leader`,
+                        navigation_link: "/board"
+                    })
+
+                    io.to(m.userId.toString()).emit("notify", {
+                        _id: notification._id,
+                        recipient: m.userId.toString(),
+                        type: "TEAM UPDATE",
+                        content: `CollabDesk name changed from "${oldname}" to "${task.name}" bt leader`,
+                        navigation_link: "/board",
+                        isRead: false
+                    })
+                })
+            )
 
         } catch (error) {
             console.log("Error while collabDesk name change.", error)
@@ -1352,7 +1352,6 @@ io.on("connection", async (socket) => {
     // create taskDesk
     socket.on("createDesk", async (data) => {
         try {
-
             const { name, teamId } = data || {}
 
             const token = socket.handshake.auth?.token;
@@ -1373,17 +1372,18 @@ io.on("connection", async (socket) => {
             if (!name) return socket.emit("createDeskError", { message: "Desk name required!" })
             if (!teamId) return socket.emit("createDeskError", { message: "Team Id required!" })
 
-            const team = await teamModel.findById(teamId)
+            const [team, desk] = await Promise.all([
+                teamModel.findById(teamId),
+                taskModel.findOne({ teamId: teamId })
+            ])
 
-            if (!team) return socket.emit("Team not found!")
+            if (!team) return socket.emit("createDeskError", { message: "Team not found!" })
+            if (desk) return socket.emit("createDeskError", { message: "Task Desk already exist." })
 
             const isTeamLeader = team.member.some((c) => c.userId.toString() === userId.toString() && c.role !== "MEMBER")
 
             if (!isTeamLeader) return socket.emit("createDeskError", { message: "Permission Denied!" })
 
-            const desk = await taskModel.findOne({ teamId: teamId })
-
-            if (desk) return socket.emit("createDeskError", { message: "Task Desk already exist." })
 
             const newDesk = await taskModel.create({
                 teamId: teamId,
@@ -1433,13 +1433,14 @@ io.on("connection", async (socket) => {
                 return socket.emit("DeskDelete_error", { message: "CollabDesk Id required!" })
             }
 
-            const task = await taskModel.findById(deskId)
+            const [task, team] = await Promise.all([
+                taskModel.findById(deskId),
+                teamModel.findById(teamId)
+            ])
 
             if (!task) {
                 return socket.emit("DeskDelete_error", { message: "CollabDesk not found!" })
             }
-
-            const team = await teamModel.findById(teamId)
 
             if (!team) {
                 return socket.emit("DeskDelete_error", { message: "Team not found!" })
@@ -1600,7 +1601,13 @@ io.on("connection", async (socket) => {
 
             await taskBoard.save()
 
-            const team = await teamModel.findById(teamId)
+            const [team, users] = await Promise.all([
+                teamModel.findById(teamId),
+                userModel.find(
+                    { userId: { $in: task.assignTo } },
+                    { _id: 1 }
+                )
+            ])
 
             team.member.forEach((m) => {
                 io.to(m.userId.toString()).emit("report-submitted", {
@@ -1610,11 +1617,6 @@ io.on("connection", async (socket) => {
                 })
             })
 
-            const users = await userModel.find(
-                { userId: { $in: task.assignTo } },
-                { _id: 1 }
-            )
-
             users.forEach((m) => {
                 io.to(m._id.toString()).emit("report-submitted", {
                     message: "Report submitted successfully",
@@ -1623,29 +1625,29 @@ io.on("connection", async (socket) => {
                 })
             })
 
-            // send team laaders notifications
-            team.member.forEach(async (l) => {
+            // send team leaders notifications
+            await Promise.all(
+                team.member.map(async (l) => {
+                    if (l.role.toString() !== "MEMBER" && l.userId.toString() !== userId) {
 
-                if (l.role.toString() !== "MEMBER" && l.userId.toString() !== userId) {
+                        const notification = await notificationModel.create({
+                            recipient: l.userId.toString(),
+                            type: "TASK COMPLETED",
+                            content: `${userName} submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
+                            navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`
+                        })
 
-                    const notification = await notificationModel.create({
-                        recipient: l.userId.toString(),
-                        type: "TASK COMPLETED",
-                        content: `${userName} submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
-                        navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`
-                    })
-
-                    io.to(l.userId.toString()).emit("notify", {
-                        _id: notification._id,
-                        recipient: l.userId.toString(),
-                        type: "TASK COMPLETED",
-                        content: `${userName} submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
-                        navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`,
-                        isRead: false
-                    })
-                }
-
-            })
+                        io.to(l.userId.toString()).emit("notify", {
+                            _id: notification._id,
+                            recipient: l.userId.toString(),
+                            type: "TASK COMPLETED",
+                            content: `${userName} submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
+                            navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`,
+                            isRead: false
+                        })
+                    }
+                })
+            )
 
         } catch (error) {
             console.log("Error while submit report.", error)
@@ -1703,7 +1705,10 @@ io.on("connection", async (socket) => {
                 })
             }
 
-            const taskBoard = await taskModel.findOne({ teamId: teamId })
+            const [taskBoard, team] = await Promise.all([
+                taskModel.findOne({ teamId: teamId }),
+                teamModel.findById(teamId)
+            ])
 
             if (!taskBoard) {
                 return socket.emit("reportSubmitError", {
@@ -1768,29 +1773,29 @@ io.on("connection", async (socket) => {
                 updateData: report
             })
 
-            const team = await teamModel.findById(teamId)
+            await Promise.all(
+                team.member.map(async (l) => {
 
-            team.member.forEach(async (l) => {
+                    if (l.role.toString() !== "MEMBER" && l.userId.toString() !== userId) {
 
-                if (l.role.toString() !== "MEMBER" && l.userId.toString() !== userId) {
+                        const notification = await notificationModel.create({
+                            recipient: l.userId.toString(),
+                            type: "TASK COMPLETED",
+                            content: `Members just update it's submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
+                            navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`
+                        })
 
-                    const notification = await notificationModel.create({
-                        recipient: l.userId.toString(),
-                        type: "TASK COMPLETED",
-                        content: `Members just update it's submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
-                        navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`
-                    })
-
-                    io.to(l.userId.toString()).emit("notify", {
-                        _id: notification._id,
-                        recipient: l.userId.toString(),
-                        type: "TASK COMPLETED",
-                        content: `Members just update it's submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
-                        navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`,
-                        isRead: false
-                    })
-                }
-            })
+                        io.to(l.userId.toString()).emit("notify", {
+                            _id: notification._id,
+                            recipient: l.userId.toString(),
+                            type: "TASK COMPLETED",
+                            content: `Members just update it's submitted task report from collabDesk name : "${taskBoard.name} , column name : "${column.name}" and assigned task : ${task.title} `,
+                            navigation_link: `/board/${l.userName}-${l.userId}/${team._id}`,
+                            isRead: false
+                        })
+                    }
+                })
+            )
 
         } catch (error) {
             console.log("Error while update report.", error)
@@ -1846,32 +1851,36 @@ io.on("connection", async (socket) => {
             team.description = teamAbout
             await team.save()
 
-            team.member.forEach(async (m) => {
-                io.to(m.userId.toString()).emit("teamDetails_updated", {
-                    teamId: team._id,
-                    name: team.name,
-                    description: team.description,
-                    message: "Team details updated"
+            await Promise.all(
+                team.member.map(async (m) => {
+
+                    io.to(m.userId.toString()).emit("teamDetails_updated", {
+                        teamId: team._id,
+                        name: team.name,
+                        description: team.description,
+                        message: "Team details updated"
+                    })
+
+                    if (userId.toString() !== m.userId.toString()) {
+
+                        const notification = await notificationModel.create({
+                            recipient: m.userId.toString(),
+                            type: "TEAM UPDATE",
+                            content: "Team details just updated",
+                            navigation_link: `/board/${m.userName}-${m.userId}/${teamId}`
+                        })
+
+                        io.to(m.userId.toString()).emit("notify", {
+                            _id: notification._id,
+                            recipient: m.userId.toString(),
+                            type: "TEAM UPDATE",
+                            content: "Team details just updated",
+                            navigation_link: `/board`,
+                            isRead: false
+                        })
+                    }
                 })
-                if (userId.toString() !== m.userId.toString()) {
-
-                    const notification = await notificationModel.create({
-                        recipient: m.userId.toString(),
-                        type: "TEAM UPDATE",
-                        content: "Team details just updated",
-                        navigation_link: `/board/${m.userName}-${m.userId}/${teamId}`
-                    })
-
-                    io.to(m.userId.toString()).emit("notify", {
-                        _id: notification._id,
-                        recipient: m.userId.toString(),
-                        type: "TEAM UPDATE",
-                        content: "Team details just updated",
-                        navigation_link: `/board`,
-                        isRead: false
-                    })
-                }
-            })
+            )
 
         } catch (error) {
             console.log("Error while update team details by leader.", error)
@@ -2171,8 +2180,10 @@ io.on("connection", async (socket) => {
             team.member = filterMemberData
             user.roles = filterUserData
 
-            await team.save()
-            await user.save()
+            await Promise.all([
+                team.save(),
+                user.save()
+            ])
 
             io.to(memberId).emit("kickOutSuccess", {
                 message: `${user.userId} removed from the team by leader`,
@@ -2317,11 +2328,20 @@ io.on("connection", async (socket) => {
                 })
             }
 
-            const team = await teamModel.findById(invite.teamId)
+            const [team, user] = await Promise.all([
+                teamModel.findById(invite.teamId),
+                userModel.findById(userId)
+            ])
 
             if (!team) {
                 return socket.emit("join_teamError", {
                     message: "Team not found!"
+                })
+            }
+
+            if (!user) {
+                return socket.emit("join_teamError", {
+                    message: "User doesn't exist!"
                 })
             }
 
@@ -2330,14 +2350,6 @@ io.on("connection", async (socket) => {
             if (alreadyMember) {
                 return socket.emit("join_teamError", {
                     message: `You are already a member of the team "${team.name}"`
-                })
-            }
-
-            const user = await userModel.findById(userId)
-
-            if (!user) {
-                return socket.emit("join_teamError", {
-                    message: "User doesn't exist!"
                 })
             }
 
@@ -2364,9 +2376,11 @@ io.on("connection", async (socket) => {
                 userName: user.userId
             })
 
-            await user.save()
-            await team.save()
-            await invite.save()
+            await Promise.all([
+                user.save(),
+                team.save(),
+                invite.save()
+            ])
 
             io.to(userId.toString()).emit("join_teamSuccess", {
 
@@ -2380,41 +2394,41 @@ io.on("connection", async (socket) => {
                 }
             })
 
-            team.member.forEach(async (m) => {
+            await Promise.all(
+                team.member.map(async (m) => {
+                    if (m.userId.toString() !== userId.toString()) {
 
-                if (m.userId.toString() !== userId.toString()) {
+                        io.to(m.userId.toString()).emit("join_teamSuccess", {
+                            message: `New member ( ${user.userId} ) just joined.`,
+                            teamId: team._id,
+                            newMember: {
+                                userId: userId,
+                                role: "MEMBER",
+                                userName: user.userId,
+                            }
+                        })
 
-                    io.to(m.userId.toString()).emit("join_teamSuccess", {
-                        message: `New member ( ${user.userId} ) just joined.`,
-                        teamId: team._id,
-                        newMember: {
-                            userId: userId,
-                            role: "MEMBER",
-                            userName: user.userId,
+                        if (m.role !== "MEMBER") {
+
+                            const notification = await notificationModel.create({
+                                recipient: m.userId,
+                                type: "TEAM INVITE",
+                                content: `New member ( ${user.userId} ) just joined through invite code.`,
+                                navigation_link: `/board/${m.userName}-${m.userId}/${team._id}`
+                            })
+
+                            io.to(m.userId.toString()).emit("notify", {
+                                _id: notification._id,
+                                recipient: m.userId,
+                                type: "TEAM INVITE",
+                                content: `New member ( ${user.userId} ) just joined through invite code.`,
+                                navigation_link: `/board/${m.userName}-${m.userId}/${team._id}`,
+                                isRead: false
+                            })
                         }
-                    })
-
-                    if (m.role !== "MEMBER") {
-
-                        const notification = await notificationModel.create({
-                            recipient: m.userId,
-                            type: "TEAM INVITE",
-                            content: `New member ( ${user.userId} ) just joined through invite code.`,
-                            navigation_link: `/board/${m.userName}-${m.userId}/${team._id}`
-                        })
-
-                        io.to(m.userId.toString()).emit("notify", {
-                            _id: notification._id,
-                            recipient: m.userId,
-                            type: "TEAM INVITE",
-                            content: `New member ( ${user.userId} ) just joined through invite code.`,
-                            navigation_link: `/board/${m.userName}-${m.userId}/${team._id}`,
-                            isRead: false
-                        })
                     }
-                }
-            })
-
+                })
+            )
         } catch (error) {
             console.log("Error while joining team through team code.", error)
             socket.emit("error", { message: "Server error while joining team through team code.", error: true })
@@ -2446,15 +2460,16 @@ io.on("connection", async (socket) => {
                 })
             }
 
-            const user = await userModel.findById(userId)
+            const [user, team] = await Promise.all([
+                userModel.findById(userId),
+                teamModel.findById(teamId)
+            ])
 
             if (!user) {
                 return socket.emit("team_joinError", {
                     message: "User not found!"
                 })
             }
-
-            const team = await teamModel.findById(teamId)
 
             if (!team) {
                 return socket.emit("team_joinError", {
@@ -2478,17 +2493,17 @@ io.on("connection", async (socket) => {
                 role: "MEMBER"
             })
 
-            await user.save()
-
             team.request_send = team.request_send.filter((m) => m.sendTo_userId.toString() !== userId.toString())
-
             team.member.push({
                 userId: userId,
                 userName: user.userId,
                 role: "MEMBER"
             })
 
-            await team.save()
+            await Promise.all([
+                user.save(),
+                team.save()
+            ])
 
             socket.emit("team_join_success", {
                 message: `You are successfully the member of team "${team.name}"`,
@@ -2587,8 +2602,10 @@ io.on("connection", async (socket) => {
                 })
             }
 
-            const userLeader = await userModel.findById(userId)
-            const userUpdate = await userModel.findById(memberId)
+            const [userLeader, userUpdate] = await Promise.all([
+                userModel.findById(userId),
+                userModel.findById(memberId)
+            ])
 
             userUpdate.request.push({
                 teamId: teamId,
@@ -2647,12 +2664,12 @@ io.on("connection", async (socket) => {
             })
 
             io.to(memberId.toString()).emit("notify", {
-                _id : notification._id,
+                _id: notification._id,
                 recipient: memberId,
                 type: "TEAM INVITE",
                 content: `You have team request from team "${team.name}"`,
                 navigation_link: ``,
-                isRead : false
+                isRead: false
             })
 
         } catch (error) {
@@ -2713,12 +2730,12 @@ io.on("connection", async (socket) => {
             const user = await userModel.findById(memberId)
 
             team.request_send = team.request_send.filter((u) => u.sendTo_userId.toString() !== memberId.toString())
-
-            await team.save()
-
             user.request = user.request.filter((u) => u.teamId.toString() !== teamId.toString())
 
-            await user.save()
+            await Promise.all([
+                team.save(),
+                user.save()
+            ])
 
             io.to(memberId.toString()).emit("request_targetPulled", {
                 message: `Pull out your team request from team "${team.name}"`,
@@ -2766,15 +2783,18 @@ io.on("connection", async (socket) => {
                 })
             }
 
+            const [user, team] = await Promise.all([
+                userModel.findById(userId),
+                teamModel.findById(teamId)
+            ])
+
             // check is team member or not
-            const user = await userModel.findById(userId)
             if (!user) {
                 return socket.emit("exitError", {
                     message: "User not found!"
                 })
             }
 
-            const team = await teamModel.findById(teamId)
             if (!team) {
                 return socket.emit("exitError", {
                     message: "Team not found!"
@@ -2815,8 +2835,10 @@ io.on("connection", async (socket) => {
                         // exit group and delete team model
                         isTeamDelete = true
                         user.roles = user.roles.filter((u) => u.teamId.toString() !== teamId.toString())
-                        await taskModel.deleteMany({ teamId: teamId })
-                        await team.deleteOne()
+                        await Promise.all([
+                            taskModel.deleteMany({ teamId: teamId }),
+                            team.deleteOne()
+                        ])
                     }
                     else {
                         // exit group and make another member leader
