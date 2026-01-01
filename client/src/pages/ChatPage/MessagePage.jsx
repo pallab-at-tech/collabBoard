@@ -41,6 +41,7 @@ const MessagePage = () => {
 
     const [loading, setLoading] = useState(false)
     const [messageLoading, setMessageLoading] = useState(false)
+    const [removeMessageLoading, setRemoveMessageLoading] = useState(false)
 
     useEffect(() => {
         setIsGroup(location?.allMessageDetails?.group_type === "GROUP");
@@ -156,6 +157,11 @@ const MessagePage = () => {
     // fetch all messages
     useEffect(() => {
 
+        if(removeMessageLoading){
+            setMessageLoading(false)
+            return
+        }
+
         (async () => {
             try {
 
@@ -187,7 +193,7 @@ const MessagePage = () => {
             }
 
         })()
-    }, [params?.conversation, chat_details])
+    }, [params?.conversation , chat_details])
 
     // recieved message and update globally [ all chat member ]
     useEffect(() => {
@@ -223,6 +229,8 @@ const MessagePage = () => {
                 })
 
             }
+
+            setRemoveMessageLoading(true)
         });
 
         return () => {
@@ -279,7 +287,7 @@ const MessagePage = () => {
                                 {
                                     isGroup ? (
                                         location?.allMessageDetails?.group_image ? (
-                                            <img src={location?.allMessageDetails?.group_image} alt="" className='h-[36px] w-[36px] rounded-full' />
+                                            <img src={location?.allMessageDetails?.group_image} alt="" className='h-[36px] w-[36px] rounded-full object-cover' />
                                         ) : (
                                             <FaUserGroup size={30} />
                                         )

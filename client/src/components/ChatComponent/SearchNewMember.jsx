@@ -10,7 +10,6 @@ import { Link } from 'react-router-dom'
 const SearchNewMember = ({ close }) => {
 
     const [data, setData] = useState("")
-    const [searchTerm, setSearchTerm] = useState("")
     const [allSearchData, setallSearchData] = useState([])
 
     const userId = useSelector(state => state.user?.userId)
@@ -46,7 +45,6 @@ const SearchNewMember = ({ close }) => {
 
         const delayBounce = setTimeout(() => {
             if (data.trim()) {
-                setSearchTerm(data.trim())
                 searchUserFromServer(data)
             }
         }, 1500)

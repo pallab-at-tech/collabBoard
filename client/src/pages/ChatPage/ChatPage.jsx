@@ -25,8 +25,32 @@ const ChatPage = () => {
 
     const { socketConnection } = useGlobalContext()
 
+    const [chatForSearch, setchatForSearch] = useState([])
+    const [search, setSearch] = useState("")
+
     const [openSearchForNewMember, setOpenSearchForNewMember] = useState(false)
     const [openGroupCreateWindow, setOpenGroupCreateWindow] = useState(false)
+
+    const searchIn = (searchTerm) => {
+        if (!chat_details || !Array.isArray(chat_details) || chat_details.length === 0) return []
+
+        const term = searchTerm.toLowerCase()
+
+        return chat_details.filter((c) => {
+
+            const isGroup = c?.group_type === "GROUP"
+
+            const group_name = isGroup ? c?.group_name?.toLowerCase() : ""
+            const name = isGroup ? "" : c?.otherUser?.name?.toLowerCase()
+            const userId = isGroup ? "" : c?.otherUser?.userId?.toLowerCase()
+
+            return (
+                (group_name && group_name.includes(term)) ||
+                (name && name.includes(term)) ||
+                (userId && userId.includes(term))
+            )
+        })
+    }
 
     useEffect(() => {
 
@@ -81,6 +105,20 @@ const ChatPage = () => {
             }
         })();
     }, [])
+
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            if (!search) {
+                setchatForSearch(chat_details)
+            }
+            else {
+                let result = searchIn(search)
+                setchatForSearch(result)
+            }
+        }, 400)
+
+        return () => clearTimeout(delay)
+    }, [search, chat_details])
 
     // update for remove member for all members of group
     useEffect(() => {
@@ -152,6 +190,9 @@ const ChatPage = () => {
                                 type="text"
                                 placeholder="Search..."
                                 className="bg-transparent outline-none text-sm placeholder-gray-400 w-full"
+                                onChange={(e) => {
+                                    setSearch(e.target.value)
+                                }}
                             />
                         </div>
 
@@ -173,55 +214,67 @@ const ChatPage = () => {
                                 <FiArrowUpLeft size={50} />
                             </div>
                         ) : (
-                            <div className="p-3 space-y-2">
-                                {
-                                    chat_details?.map((v, i) => {
-                                        return (
-                                            <Link to={`/chat/${v?._id}`} state={{ allMessageDetails: v }} key={v?._id || `x-${v?.otherUser?._id}`}
-                                                className="rounded-lg bg-[#205b67] hover:bg-[#2e4d66] transition-colors flex gap-3 items-center px-4 py-2.5 cursor-pointer"
-                                            >
-
-                                                {
-                                                    v?.group_type === "GROUP" ? (
-                                                        <FaUserGroup
-                                                            size={38}
-                                                            className="text-gray-300 border border-gray-500 rounded-full p-1"
-                                                        />
-                                                    ) : (
-                                                        <RxAvatar
-                                                            size={38}
-                                                            className="text-gray-300 border border-gray-500 rounded-full p-1"
-                                                        />
-                                                    )
-                                                }
-
-                                                <div className='flex flex-col leading-tight text-sm text-gray-200'>
+                            chatForSearch.length === 0 ? (
+                                <div className='flex items-center justify-center h-[400px] text-gray-500 select-none'>
+                                    No Result Found!
+                                </div>
+                            ) : (
+                                <div className="p-3 space-y-2">
+                                    {
+                                        chatForSearch?.map((v, i) => {
+                                            return (
+                                                <Link to={`/chat/${v?._id}`} state={{ allMessageDetails: v }} key={v?._id || `x-${v?.otherUser?._id}`}
+                                                    className="rounded-lg bg-[#205b67] hover:bg-[#2e4d66] transition-colors flex gap-3 items-center px-4 py-2.5 cursor-pointer"
+                                                >
 
                                                     {
-                                                        v?.group_type === "GROUP" ? (
-                                                            <p className="font-medium text-[16px] text-white max-w-[24ch] truncate">
-                                                                {v?.group_name}
-                                                            </p>
+                                                        v?.group_image ? (
+                                                            <div className='p-1 border border-[#5ba2b2] rounded-full'>
+                                                                <img src={v?.group_image} alt="" className='w-[28px] h-[28px] object-cover rounded-full border border-[#5ba2b2]' />
+                                                            </div>
+                                                        ) : v?.group_type === "GROUP" ? (
+                                                            <FaUserGroup
+                                                                size={38}
+                                                                className="text-gray-300 border border-gray-500 rounded-full p-1"
+                                                            />
+                                                        ) : v?.otherUser?.avatar ? (
+                                                            <div className='p-1 border border-[#5ba2b2] rounded-full'>
+                                                                <img src={v?.otherUser?.avatar} alt="" className='w-[28px] h-[28px] object-cover rounded-full border border-[#5ba2b2]' />
+                                                            </div>
                                                         ) : (
-                                                            <>
-                                                                <p className="font-medium text-[16px] text-white max-w-[24ch] truncate">
-                                                                    {v?.otherUser?.name}
-                                                                </p>
-                                                                <p className="text-[12px] text-gray-400 max-w-[24ch] truncate">
-                                                                    {v?.otherUser?.userId}
-                                                                </p>
-                                                            </>
+                                                            <RxAvatar
+                                                                size={38}
+                                                                className="text-gray-300 border border-gray-500 rounded-full p-1"
+                                                            />
                                                         )
                                                     }
 
-                                                </div>
-                                            </Link>
-                                        )
-                                    })
-                                }
+                                                    <div className='flex flex-col leading-tight text-sm text-gray-200'>
 
+                                                        {
+                                                            v?.group_type === "GROUP" ? (
+                                                                <p className="font-medium text-[16px] text-white max-w-[24ch] truncate">
+                                                                    {v?.group_name}
+                                                                </p>
+                                                            ) : (
+                                                                <>
+                                                                    <p className="font-medium text-[16px] text-white max-w-[24ch] truncate">
+                                                                        {v?.otherUser?.name}
+                                                                    </p>
+                                                                    <p className="text-[12px] text-gray-400 max-w-[24ch] truncate">
+                                                                        {v?.otherUser?.userId}
+                                                                    </p>
+                                                                </>
+                                                            )
+                                                        }
 
-                            </div>
+                                                    </div>
+                                                </Link>
+                                            )
+                                        })
+                                    }
+                                </div>
+                            )
                         )
                     }
 
