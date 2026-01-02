@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { IoSendOutline , IoImage } from "react-icons/io5";
+import { IoSendOutline, IoImage } from "react-icons/io5";
 import { MdAttachment, MdManageSearch } from "react-icons/md";
 import { RxAvatar } from "react-icons/rx";
-import { useSelector , useDispatch } from 'react-redux';
-import { Outlet, useLocation , useParams , useNavigate , Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { Outlet, useLocation, useParams, useNavigate, Link } from 'react-router-dom';
 import { useGlobalContext } from '../../provider/GlobalProvider';
 import Axios from '../../utils/Axios';
 import SummaryApi from '../../common/SummaryApi';
@@ -13,18 +13,28 @@ import { RiFolderVideoFill } from "react-icons/ri";
 import uploadFile from '../../utils/uploadFile';
 import { FaUserGroup } from 'react-icons/fa6';
 import toast from 'react-hot-toast';
+import { AiOutlineClose } from "react-icons/ai";
 
 
 const MessagePage = () => {
 
+    const { socketConnection } = useGlobalContext()
     const chat_details = useSelector(state => state.chat?.all_message)
+    const user = useSelector(state => state.user)
+
     const location = useLocation().state
     const pathname = useLocation().pathname
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+    const params = useParams()
 
-    const imgRef = useRef()
-    const videoRef = useRef()
-    const fileUrlRef = useRef()
+    const chatRef = useRef(null);
+    const messagesEndRef = useRef(null);
+    const attachRef = useRef(null)
+
+    const [messages, setMessages] = useState([])
+    const [conversation, setConversation] = useState(null)
+
     const [messageText, setMessageText] = useState("")
     const [attachData, setAttachData] = useState({
         image: "",
@@ -33,28 +43,19 @@ const MessagePage = () => {
     })
 
     const [isGroup, setIsGroup] = useState(true)
-
-    const dispatch = useDispatch()
-    const user = useSelector(state => state.user)
-    const messagesEndRef = useRef(null);
-    const params = useParams()
-
     const [loading, setLoading] = useState(false)
     const [messageLoading, setMessageLoading] = useState(false)
-    const [removeMessageLoading, setRemoveMessageLoading] = useState(false)
 
-    useEffect(() => {
-        setIsGroup(location?.allMessageDetails?.group_type === "GROUP");
-    }, [location?.allMessageDetails?.group_type]);
+    const [loadBlocker, setLoadBlocker] = useState({
+        messageLoader: false,
+        scrollEnding: false
+    })
 
-    const [messages, setMessages] = useState([])
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [openAttach, setOpenAttach] = useState(false)
-    const attachRef = useRef(null)
 
-    const [conversation, setConversation] = useState(null)
-
-    const { socketConnection } = useGlobalContext()
-
+    // Handle external files and media
     const handleAllAtachFile = async (e) => {
 
         try {
@@ -76,7 +77,7 @@ const MessagePage = () => {
 
             if (name === "image") {
                 const img = new Image();
-                img.src = attachData.image;
+                img.src = response?.secure_url;
 
                 img.onload = () => setLoading(false);
                 img.onerror = () => {
@@ -86,7 +87,7 @@ const MessagePage = () => {
 
             } else if (name === "video") {
                 const video = document.createElement("video");
-                video.src = attachData.video;
+                video.src = response?.secure_url;
 
                 video.onloadeddata = () => setLoading(false);
                 video.onerror = () => {
@@ -127,6 +128,7 @@ const MessagePage = () => {
 
     }
 
+    // send message in group conversation
     const handleGroupMessageSend = async () => {
         if (!messageText.trim() && !attachData.image && !attachData.video && !attachData.other_fileUrl_or_external_link.trim()) return
 
@@ -154,11 +156,77 @@ const MessagePage = () => {
         })
     }
 
+    // load more for message for scrolling at top / pagination
+    const loadMoreMessages = async () => {
+
+        if (!chat_details || !chatRef.current) return
+        setLoadingMore(true);
+
+        const prevScrollHeight = chatRef.current.scrollHeight;
+        const prevScrollTop = chatRef.current.scrollTop;
+
+        try {
+            const matchingChats = chat_details?.filter(chat =>
+                chat?._id === params?.conversation
+            );
+
+            const response = await Axios({
+                ...SummaryApi.get_all_messages,
+                data: {
+                    allMessageId: matchingChats[0]?.messages || [],
+                    before: (messages && messages.length !== 0) ? messages[0]?.createdAt : null
+                }
+            })
+
+            const { data: responseData } = response
+
+            if (responseData?.success) {
+                setLoadBlocker((prev) => {
+                    return {
+                        ...prev,
+                        scrollEnding: true
+                    }
+                })
+                setMessages((prev) => {
+                    return [...responseData?.data, ...prev]
+                })
+                setHasMore(responseData?.hasMore)
+
+                requestAnimationFrame(() => {
+                    const newScrollHeight = chatRef.current.scrollHeight;
+                    chatRef.current.scrollTop =
+                        newScrollHeight - prevScrollHeight + prevScrollTop;
+                });
+            }
+
+            setLoadingMore(false);
+        } catch (error) {
+            console.log("error for fetching all messages", error)
+            setLoadingMore(false);
+        }
+    }
+
+    // handle scroll
+    const handleScroll = async () => {
+        if (!chatRef.current || loadingMore || !hasMore) {
+            return
+        }
+
+        if (chatRef.current.scrollTop === 0) {
+            loadMoreMessages();
+        }
+    }
+
     // fetch all messages
     useEffect(() => {
 
-        if(removeMessageLoading){
-            setMessageLoading(false)
+        if (loadBlocker.messageLoader) {
+            setLoadBlocker((prev) => {
+                return {
+                    ...prev,
+                    messageLoader: false
+                }
+            })
             return
         }
 
@@ -174,7 +242,7 @@ const MessagePage = () => {
                 const response = await Axios({
                     ...SummaryApi.get_all_messages,
                     data: {
-                        allMessageId: matchingChats[0]?.messages
+                        allMessageId: matchingChats[0]?.messages || []
                     }
                 })
 
@@ -193,7 +261,7 @@ const MessagePage = () => {
             }
 
         })()
-    }, [params?.conversation , chat_details])
+    }, [params?.conversation, chat_details])
 
     // recieved message and update globally [ all chat member ]
     useEffect(() => {
@@ -230,7 +298,13 @@ const MessagePage = () => {
 
             }
 
-            setRemoveMessageLoading(true)
+            setLoadBlocker((prev) => {
+                return {
+                    ...prev,
+                    messageLoader: true
+                }
+            })
+
         });
 
         return () => {
@@ -238,14 +312,25 @@ const MessagePage = () => {
         };
     }, [socketConnection, dispatch]);
 
-
+    // Scroll ending at last load message handler
     useEffect(() => {
+
+        if (loadBlocker.scrollEnding) {
+            setLoadBlocker((prev) => {
+                return {
+                    ...prev,
+                    scrollEnding: false
+                }
+            })
+            return
+        }
+
         if (messagesEndRef.current) {
-            messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: 'end' });
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
 
-
+    // App resize dynamically
     useEffect(() => {
         const setAppHeight = () => {
             document.documentElement.style.setProperty('--app-height', `${window.innerHeight - 60}px`);
@@ -255,7 +340,6 @@ const MessagePage = () => {
         window.addEventListener('resize', setAppHeight);
         return () => window.removeEventListener('resize', setAppHeight);
     }, []);
-
 
     useEffect(() => {
         const setAppHeight = () => {
@@ -267,11 +351,30 @@ const MessagePage = () => {
         return () => window.removeEventListener('resize', setAppHeight);
     }, []);
 
+    // set particular conversation and conversation type
     useEffect(() => {
-        const conversation = chat_details?.find(c => c._id === params?.conversation)
-        setConversation(conversation)
-    }, [])
+        const conversation_details = chat_details?.find(c => c._id === params?.conversation)
+        setConversation(conversation_details)
 
+        if (conversation_details?.group_type === "GROUP") {
+            // console.log("conversation_details", conversation_details)
+            setIsGroup(true);
+        }
+        else {
+            setIsGroup(false)
+        }
+    }, [chat_details, params?.conversation])
+
+    // close media window if click outside of section 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (attachRef.current && !attachRef.current.contains(event.target)) {
+                setOpenAttach(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [])
 
     return (
         <>
@@ -337,7 +440,11 @@ const MessagePage = () => {
                 </div>
 
                 {/* Messages */}
-                <div className="overflow-y-auto  h-[var(--message-heigh)] px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0 messages-container" >
+                <div
+                    ref={chatRef}
+                    onScroll={handleScroll}
+                    className="overflow-y-auto h-[var(--message-heigh)] px-2.5 py-4 flex flex-col gap-2.5 chat-scrollbar min-h-0 messages-container"
+                >
                     {
                         messageLoading ? (
                             <div className='flex flex-col gap-4 items-center justify-center mt-[180px]'>
@@ -404,24 +511,31 @@ const MessagePage = () => {
                 <div className="bg-[#1f2029] py-3 w-full grid grid-cols-[60px_1fr_60px] items-center text-white shadow-md shadow-[#154174]">
                     {/* Attachments */}
                     <div className="flex items-center justify-center relative">
-                        <MdAttachment size={26} onClick={() => setOpenAttach(!openAttach)} className="cursor-pointer" />
+                        <MdAttachment size={26} onClick={() => {
+                            setOpenAttach(true)
+                        }}
+                            className="cursor-pointer"
+                        />
                         {openAttach && (
-                            <div ref={attachRef} className="absolute bottom-12 left-6 bg-white text-blue-950 rounded-lg p-3 flex gap-4">
-                                <div onClick={() => imgRef.current.click()} className="cursor-pointer flex flex-col items-center">
+                            <div ref={attachRef} className="absolute z-40 bottom-12 left-6 bg-white text-blue-950 rounded-lg p-3 flex gap-4">
+
+                                <label htmlFor="image" className="cursor-pointer flex flex-col items-center">
                                     <IoImage size={32} />
                                     <p className="text-xs">Image</p>
-                                    <input ref={imgRef} onChange={handleAllAtachFile} type="file" accept="image/*" name="image" hidden />
-                                </div>
-                                <div onClick={() => videoRef.current.click()} className="cursor-pointer flex flex-col items-center">
+                                    <input onChange={handleAllAtachFile} type="file" accept="image/*" id='image' name="image" hidden />
+                                </label>
+
+                                <label htmlFor="video">
                                     <RiFolderVideoFill size={32} />
                                     <p className="text-xs">Video</p>
-                                    <input ref={videoRef} onChange={handleAllAtachFile} type="file" accept="video/*" name="video" hidden />
-                                </div>
-                                <div onClick={() => fileUrlRef.current.click()} className="cursor-pointer flex flex-col items-center">
+                                    <input onChange={handleAllAtachFile} type="file" accept="video/*" id='video' name="video" hidden />
+                                </label>
+
+                                {/* <label htmlFor="other_fileUrl_or_external_link">
                                     <FaFileAlt size={32} />
                                     <p className="text-xs">File</p>
-                                    <input ref={fileUrlRef} onChange={handleAllAtachFile} type="file" accept="application/pdf" name="other_fileUrl_or_external_link" hidden />
-                                </div>
+                                    <input onChange={handleAllAtachFile} type="file" accept="application/pdf" id='other_fileUrl_or_external_link' name="other_fileUrl_or_external_link" hidden />
+                                </label> */}
                             </div>
                         )}
                     </div>
@@ -446,6 +560,107 @@ const MessagePage = () => {
                         <IoSendOutline size={26} onClick={() => (isGroup ? handleGroupMessageSend() : handleOnClick())} />
                     </div>
                 </div>
+
+                {
+                    loading && (
+                        <section className='fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 bg-[#1e293979]'>
+                            <div className='team_loader'></div>
+                        </section>
+                    )
+                }
+
+                {attachData.image && (
+                    <section className="
+                        fixed top-0 left-0 right-0 bottom-[60px] z-50
+                        flex items-end sm:items-center justify-center
+                        bg-[#2b2b2b]/15 backdrop-blur-[2px]
+                        px-4 py-14 sm:py-0
+                    ">
+                        <div className="
+                            relative
+                            max-w-[80vw] max-h-[85vh]
+                            rounded-xl overflow-hidden
+                            shadow-2xl
+                            animate-fadeIn
+                        ">
+                            {/* Close Button */}
+                            <button
+                                onClick={() =>
+                                    setAttachData(prev => ({ ...prev, image: "" }))
+                                }
+                                className="
+                                    absolute top-3 right-3 z-10
+                                    h-9 w-9
+                                    rounded-full
+                                    bg-black/60 hover:bg-black/80
+                                    flex items-center justify-center
+                                    transition cursor-pointer
+                                "
+                            >
+                                <AiOutlineClose size={20} className="text-white" />
+                            </button>
+
+                            {/* Image */}
+                            <img
+                                src={attachData.image}
+                                alt="Preview"
+                                className="
+                                    max-w-full max-h-[65vh]
+                                    object-contain
+                                    bg-black
+                                "
+                            />
+                        </div>
+                    </section>
+                )}
+
+
+                {
+                    attachData.video && (
+                        <section
+                            className='
+                            fixed top-0 left-0 right-0 bottom-[60px] z-50
+                            flex items-end sm:items-center justify-center
+                            bg-[#2b2b2b]/15 backdrop-blur-[2px]
+                            px-4 py-14 sm:py-0'
+                        >
+                            <div className="
+                                relative
+                                max-w-[80vw] max-h-[85vh]
+                                rounded-xl overflow-hidden
+                                shadow-2xl
+                                animate-fadeIn
+                            ">
+                                {/* Close Button */}
+                                <button
+                                    onClick={() =>
+                                        setAttachData(prev => ({ ...prev, video: "" }))
+                                    }
+                                    className="
+                                    absolute top-3 right-3 z-10
+                                    h-9 w-9
+                                    rounded-full
+                                    bg-black/60 hover:bg-black/80
+                                    flex items-center justify-center
+                                    transition cursor-pointer
+                                "
+                                >
+                                    <AiOutlineClose size={20} className="text-white" />
+                                </button>
+
+                                <video src={attachData.video}
+                                    className='max-w-full max-h-[65vh] object-contain bg-black'
+                                    controls
+                                    controlsList="nofullscreen noremoteplayback nodownload"
+                                    disablePictureInPicture
+                                    preload="metadata"
+                                    playsInline
+                                >
+                                </video>
+                            </div>
+                        </section>
+                    )
+                }
             </section>
 
             <div className={`${`/chat/${params?.conversation}/edit` !== pathname && "hidden"} w-full`}>

@@ -11,7 +11,7 @@ import { FiArrowUpLeft } from 'react-icons/fi'
 import { RxAvatar } from 'react-icons/rx';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { HiUserGroup } from "react-icons/hi2";
-import CreateGroup from '../../components/common/CreateGroup';
+import CreateGroup from '../../components/ChatComponent/CreateGroup';
 import { FaUserGroup } from "react-icons/fa6";
 import { useGlobalContext } from '../../provider/GlobalProvider';
 
@@ -206,7 +206,6 @@ const ChatPage = () => {
 
                     </div>
 
-
                     {
                         chat_details?.length === 0 ? (
                             <div className='h-full w-full flex flex-col gap-2 justify-center items-center  text-[#8c8c8c] pb-[120px]'>
@@ -277,7 +276,6 @@ const ChatPage = () => {
                             )
                         )
                     }
-
 
                 </div>
 

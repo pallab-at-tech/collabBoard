@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import { RxAvatar } from "react-icons/rx";
 import { MdUpload } from "react-icons/md";
 import uploadFile from '../../utils/uploadFile';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { IoMdClose } from "react-icons/io";
 import { updateConversationWithNewMessage } from '../../store/chatSlice';
 import { useGlobalContext } from '../../provider/GlobalProvider';
 import toast from 'react-hot-toast';
-import { useDispatch } from 'react-redux';
+
 
 const CreateGroup = ({ close }) => {
 
@@ -19,8 +19,6 @@ const CreateGroup = ({ close }) => {
         return v?.group_type === "PRIVATE"
     })
     const user = useSelector(state => state.user)
-
-
 
     const [memberSearchSpace, setMemberSearchSpace] = useState([...chat_details])
     const [searchData, setSearchData] = useState("")
@@ -108,7 +106,7 @@ const CreateGroup = ({ close }) => {
                 participants: extractId || [],
                 group_image: data.group_image,
                 group_name: data.group_name,
-                createrUserName : user?.userId
+                createrUserName: user?.userId
             })
 
             socketConnection.on("receive_message", (data) => {
@@ -127,8 +125,6 @@ const CreateGroup = ({ close }) => {
             console.log("Error from handleCreateGroup", error)
         }
     }
-
-    // console.log("choose user in set", user)
 
     return (
         <section className="fixed inset-0 flex gap-4 items-center justify-center z-50 bg-black/60">
@@ -199,20 +195,61 @@ const CreateGroup = ({ close }) => {
 
                                                 {
                                                     v.avatar ? (
-                                                        <div className='overflow-hidden rounded-full h-[30px] w-[30px]  relative'>
-                                                            <img src="" alt="" className='object-cover h-[30px] w-[30px]' />
-                                                            <IoMdClose onClick={() => removeUser(v?._id)} size={18} className='absolute -top-1 -right-1.5 hover:text-red-500' />
+                                                        <div className="relative group w-[38px] h-[38px]">
+                                                            {/* Avatar */}
+                                                            <img
+                                                                src={v?.avatar}
+                                                                alt=""
+                                                                className="w-full h-full object-cover rounded-full border-2 border-[#3e75b0]"
+                                                            />
+
+                                                            {/* Overlay */}
+                                                            <div
+                                                                className="
+                                                                absolute inset-0
+                                                                rounded-full
+                                                                bg-black/60
+                                                                opacity-0
+                                                                group-hover:opacity-100
+                                                                flex items-center justify-center
+                                                                transition-opacity duration-200
+                                                                cursor-pointer
+                                                                "
+                                                                onClick={() => removeUser(v?._id)}
+                                                            >
+                                                                <IoMdClose size={28} className="text-red-500" />
+                                                            </div>
                                                         </div>
+
                                                     ) : (
-                                                        <div className="bg-blue-200 p-1 rounded-full w-fit  relative">
+                                                        <div className="bg-blue-200 p-1 rounded-full w-fit relative group">
+                                                            {/* Icon */}
                                                             <RxAvatar size={30} />
-                                                            <IoMdClose onClick={() => removeUser(v?._id)} size={18} className='absolute -top-1 -right-1.5 hover:text-red-500' />
+
+                                                            {/* Overlay */}
+                                                            <div
+                                                                className="
+                                                                absolute inset-0
+                                                                rounded-full
+                                                                bg-black/60
+                                                                opacity-0
+                                                                group-hover:opacity-100
+                                                                flex items-center justify-center
+                                                                transition-opacity duration-200
+                                                                cursor-pointer
+                                                                "
+                                                                onClick={() => removeUser(v?._id)}
+                                                            >
+                                                                <IoMdClose size={28} className="text-red-500" />
+                                                            </div>
                                                         </div>
                                                     )
                                                 }
 
-                                                <p className='text-gray-900 text-sm font-semibold'>{v.name}</p>
-                                                <p className="text-gray-600 text-xs">{v.userId}</p>
+                                                <div className='flex flex-col items-center'>
+                                                    <p className='text-gray-900 text-sm font-semibold'>{v.name}</p>
+                                                    <p className="text-gray-600 text-xs">{v.userId}</p>
+                                                </div>
 
                                             </div>
                                         )
@@ -237,7 +274,7 @@ const CreateGroup = ({ close }) => {
                                                     updated.add(chat_data._id);
                                                     setChooseUserData(dataPrev => [...dataPrev, {
                                                         _id: chat_data._id,
-                                                        user_id : chat_data?.otherUser?._id,
+                                                        user_id: chat_data?.otherUser?._id,
                                                         name: chat_data.otherUser?.name,
                                                         userId: chat_data.otherUser?.userId,
                                                         avatar: chat_data.otherUser?.avatar || ""
@@ -251,8 +288,8 @@ const CreateGroup = ({ close }) => {
 
                                         {
                                             chat_data?.otherUser?.avatar ? (
-                                                <div className='overflow-hidden rounded-full h-[30px] w-[30px]'>
-                                                    <img src="" alt="" className='object-cover h-[30px] w-[30px]' />
+                                                <div className='rounded-full'>
+                                                    <img src={chat_data?.otherUser?.avatar} alt="" className='object-cover h-[38px] w-[38px] rounded-full border-2 border-[#bedbef]' />
                                                 </div>
                                             ) : (
                                                 <div className="bg-blue-200 p-1 rounded-full">
@@ -272,7 +309,6 @@ const CreateGroup = ({ close }) => {
                         }
                     </div>
                 </div>
-
 
                 <div className="flex justify-end gap-2">
                     <button onClick={() => close()} className="px-3 py-1.5 rounded bg-gray-300 hover:bg-gray-400 transition cursor-pointer">
