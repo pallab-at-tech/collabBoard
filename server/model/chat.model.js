@@ -34,7 +34,12 @@ const messageSchema = new mongoose.Schema({
             type: mongoose.Schema.ObjectId,
             ref: "user"
         }
-    ]
+    ],
+    messageType : {
+        type : String,
+        enum : ["USER" , "SYSTEM"],
+        default : "USER"
+    }
 }, {
     timestamps: true
 })
@@ -59,7 +64,6 @@ const conversationSchema = new mongoose.Schema({
             type: mongoose.Schema.ObjectId,
             ref: "user"
         },
-
     ],
     admin: [
         {
@@ -74,6 +78,7 @@ const conversationSchema = new mongoose.Schema({
             ref: "message"
         }
     ],
+
 
 }, {
     timestamps: true

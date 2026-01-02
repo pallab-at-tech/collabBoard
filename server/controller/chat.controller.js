@@ -51,7 +51,9 @@ export const getPreviousChatUsers = async (request, response) => {
 
 export const fetchAllMessages = async (request, response) => {
     try {
-        const { allMessageId = [] } = request.body || {}
+        const { allMessageId = [], before } = request.body || {}
+
+        const limit = 50
 
         if (!Array.isArray(allMessageId) || allMessageId.length === 0) {
             return response.status(400).json({
@@ -61,13 +63,22 @@ export const fetchAllMessages = async (request, response) => {
             })
         }
 
+        const query = {
+            _id: { $in: allMessageId }
+        }
+
+        if (before) {
+            query.createdAt = { $lt: new Date(before) }
+        }
+
         const messages = await messageModel.find(
-            { _id: { $in: allMessageId } }
-        ).sort({ createdAt: 1 }).lean()
+            query
+        ).sort({ createdAt: -1 }).limit(limit).lean()
 
         return response.json({
-            message: 'all messages get',
-            data: messages,
+            message: 'Messages Fetched',
+            data: messages.reverse(),
+            hasMore: messages.length === limit,
             error: false,
             success: true
         })
