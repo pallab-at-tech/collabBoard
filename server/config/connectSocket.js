@@ -228,8 +228,8 @@ io.on("connection", async (socket) => {
 
             const systemMessage = await messageModel.create({
                 senderId: createrId,
-                text: `Group "${group_name}" created by ${createrUserName}`,
-                readBy: [createrId]
+                readBy: [createrId],
+                optional_msg: `Group "${group_name}" created by ${createrUserName}`
             })
 
             createGroup.messages.push(systemMessage._id)
@@ -347,6 +347,93 @@ io.on("connection", async (socket) => {
                 message: populatedMessage
             })
         })
+
+    })
+
+    // edit message
+    socket.on("edit_msg", async (data) => {
+
+        const token = socket.handshake.auth?.token;
+        if (!token) {
+            return socket.emit("session_expired", { message: "No token found. Please login again." });
+        }
+
+        let payload1;
+        try {
+            payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+        } catch (err) {
+            return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+        }
+
+        const userId = payload1.id;
+
+        const { textId, text, conversationId } = data || {}
+
+        if (!textId) {
+            return socket.emit("edit_msgErr", {
+                message: "TextId required!"
+            })
+        }
+
+        if (!text) {
+            return socket.emit("edit_msgErr", {
+                message: "Text can't be empty"
+            })
+        }
+
+        if (!conversationId) {
+            return socket.emit("edit_msgErr", {
+                message: "Conversation Id required!"
+            })
+        }
+
+        const [message, conversation] = await Promise.all([
+            messageModel.findById(textId),
+            conversationModel.findById(conversationId)
+        ])
+
+        if (!message) {
+            return socket.emit("edit_msgErr", {
+                message: "Message not found!"
+            })
+        }
+
+        if (!conversation) {
+            return socket.emit("edit_msgErr", {
+                message: "conversation not found!"
+            })
+        }
+
+        const ONE_HOUR_MS = 60 * 60 * 1000;
+        const diffMs = Date.now() - new Date(message.createdAt)
+
+        if (diffMs >= ONE_HOUR_MS) {
+            return socket.emit("edit_msgErr", {
+                message: "Message can't be edited after 1 hour!",
+            });
+        }
+
+        if (message.senderId.toString() !== userId.toString()) {
+            return socket.emit("edit_msgErr", {
+                message: "Unauthorized Access!"
+            })
+        }
+
+        message.text = text
+        await message.save()
+
+        conversation.participants.forEach((pid) => {
+            io.to(pid.toString()).emit("edited_msg", {
+                textId: message._id,
+                updatedAt: message.updatedAt,
+                text: message.text,
+            })
+        })
+
+        // ✅ Ack to editor
+        socket.emit("edit_msgSuccess", {
+            message: "Message Edited"
+        });
 
     })
 

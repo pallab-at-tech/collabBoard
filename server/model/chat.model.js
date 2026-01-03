@@ -34,12 +34,7 @@ const messageSchema = new mongoose.Schema({
             type: mongoose.Schema.ObjectId,
             ref: "user"
         }
-    ],
-    messageType : {
-        type : String,
-        enum : ["USER" , "SYSTEM"],
-        default : "USER"
-    }
+    ]
 }, {
     timestamps: true
 })
