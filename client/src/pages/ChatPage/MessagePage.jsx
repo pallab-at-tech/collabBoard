@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { IoSendOutline, IoImage } from "react-icons/io5";
-import { MdAttachment, MdManageSearch } from "react-icons/md";
+import { MdAttachment, MdManageSearch, MdOutlineFileCopy } from "react-icons/md";
 import { RxAvatar } from "react-icons/rx";
 import { useSelector, useDispatch } from 'react-redux';
 import { Outlet, useLocation, useParams, useNavigate, Link } from 'react-router-dom';
@@ -14,6 +14,7 @@ import uploadFile from '../../utils/uploadFile';
 import { FaUserGroup } from 'react-icons/fa6';
 import toast from 'react-hot-toast';
 import { AiOutlineClose } from "react-icons/ai";
+import { HiOutlineDotsVertical } from "react-icons/hi";
 
 
 const MessagePage = () => {
@@ -31,15 +32,30 @@ const MessagePage = () => {
     const chatRef = useRef(null);
     const messagesEndRef = useRef(null);
     const attachRef = useRef(null)
+    const dataSetRef = useRef(null)
 
     const [messages, setMessages] = useState([])
     const [conversation, setConversation] = useState(null)
 
     const [messageText, setMessageText] = useState("")
+    const [deletIdSet, setDeletIdSet] = useState(new Set())
     const [attachData, setAttachData] = useState({
         image: "",
         video: "",
         other_fileUrl_or_external_link: "",
+    })
+
+    const [editEnable, setEditEnable] = useState({
+        enable: false,
+        loader: false,
+        text: "",
+        textId: ""
+    })
+
+    const [deleteMsg, setDeleteMsg] = useState({
+        enable: false,
+        textId: "",
+        loader: false
     })
 
     const [isGroup, setIsGroup] = useState(true)
@@ -106,6 +122,7 @@ const MessagePage = () => {
         }
     }
 
+    // send private message
     const handleOnClick = async () => {
 
         if (!messageText.trim() && !attachData.image && !attachData.video && !attachData.other_fileUrl_or_external_link.trim()) return
@@ -153,6 +170,84 @@ const MessagePage = () => {
             image: "",
             video: "",
             other_fileUrl_or_external_link: ""
+        })
+    }
+
+    // edit message
+    const handleEdit = async () => {
+
+        if (!editEnable.enable || !editEnable.text || !editEnable.text.trim('') || !socketConnection) return
+
+        setEditEnable((prev) => {
+            return {
+                ...prev,
+                loader: true
+            }
+        })
+
+        socketConnection.on("edit_msgSuccess", (editData) => {
+            toast.success(editData?.message)
+            setEditEnable(() => {
+                return {
+                    enable: false,
+                    loader: false,
+                    text: "",
+                    textId: ""
+                }
+            })
+        })
+
+        socketConnection.on("edit_msgErr", (editData) => {
+            toast.error(editData?.message)
+            setEditEnable(() => {
+                return {
+                    enable: false,
+                    loader: false,
+                    text: "",
+                    textId: ""
+                }
+            })
+        })
+
+        socketConnection.emit("edit_msg", {
+            textId: editEnable.textId,
+            text: editEnable.text,
+            conversationId: params?.conversation
+        })
+    }
+
+    // delete message
+    const handleDeleteMsg = async () => {
+        if (!deleteMsg.enable || !deleteMsg.textId || !socketConnection) return
+
+        setDeleteMsg((prev) => {
+            return {
+                ...prev,
+                loader: true
+            }
+        })
+
+        socketConnection.on("delete_msgErr", (deleteData) => {
+            toast.error(deleteData?.message)
+            setDeleteMsg({
+                enable: false,
+                textId: "",
+                loader: false
+            })
+        })
+
+        socketConnection.on("delete_msgSuccess", (deleteData) => {
+            toast.success(deleteData?.message)
+            setDeleteMsg({
+                enable: false,
+                textId: "",
+                loader: false
+            })
+        })
+
+        socketConnection.emit("delete_msg", {
+            textId: deleteMsg.textId,
+            conversationId: params?.conversation
         })
     }
 
@@ -263,7 +358,7 @@ const MessagePage = () => {
         })()
     }, [params?.conversation, chat_details])
 
-    // recieved message and update globally [ all chat member ]
+    // recieved message , edit message and update globally [ all chat member ]
     useEffect(() => {
         if (!socketConnection) return;
 
@@ -295,7 +390,6 @@ const MessagePage = () => {
                         allMessageDetails: data.conversation
                     }
                 })
-
             }
 
             setLoadBlocker((prev) => {
@@ -307,8 +401,61 @@ const MessagePage = () => {
 
         });
 
+        socketConnection.on("edited_msg", (data) => {
+            const { textId, conversationId, updatedAt, text } = data || {}
+
+            const url = params.conversation === conversationId
+
+            if (url) {
+
+                setMessages((prev) => {
+                    const msg = [...prev]
+                    const findIdx = msg.findIndex((i) => i && i?._id === textId)
+
+                    if (findIdx >= 0) {
+                        msg[findIdx] = {
+                            ...msg[findIdx],
+                            updatedAt: updatedAt,
+                            text: text
+                        }
+                    }
+                    return msg
+                })
+
+                setLoadBlocker((prev) => {
+                    return {
+                        ...prev,
+                        messageLoader: true
+                    }
+                })
+            }
+        })
+
+        socketConnection.on("deleted_msg", (data) => {
+            const { textId, conversationId } = data || {}
+
+            const url = params.conversation === conversationId
+
+            if (url) {
+                setMessages((prev) => {
+                    let msg = [...prev]
+                    msg = msg.filter((m) => m && m._id !== textId)
+                    return msg
+                })
+
+                setLoadBlocker((prev) => {
+                    return {
+                        ...prev,
+                        messageLoader: true
+                    }
+                })
+            }
+        })
+
         return () => {
             socketConnection.off("receive_message");
+            socketConnection.off("edited_msg")
+            socketConnection.off("deleted_msg")
         };
     }, [socketConnection, dispatch]);
 
@@ -370,6 +517,17 @@ const MessagePage = () => {
         const handleClickOutside = (event) => {
             if (attachRef.current && !attachRef.current.contains(event.target)) {
                 setOpenAttach(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [])
+
+    // remove all data set if click outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dataSetRef.current && !dataSetRef.current.contains(event?.target)) {
+                setDeletIdSet(() => new Set())
             }
         }
         document.addEventListener("mousedown", handleClickOutside)
@@ -454,8 +612,7 @@ const MessagePage = () => {
                         ) : (
                             Array.isArray(messages) &&
                             messages.map((value, index) => {
-                                const isSelfMessage =
-                                    value?.senderId?._id === user?._id || value?.senderId === user?._id;
+                                const isSelfMessage = value?.senderId?._id === user?._id || value?.senderId === user?._id;
                                 const date = new Date(value?.createdAt);
                                 const indianTime = date.toLocaleString("en-IN", {
                                     timeZone: "Asia/Kolkata",
@@ -466,39 +623,144 @@ const MessagePage = () => {
                                     day: "2-digit",
                                 });
 
+                                const isEdited = new Date(value?.createdAt) < new Date(value?.updatedAt)
+
                                 return (
                                     <div
                                         ref={messagesEndRef}
                                         key={`msg-${index}`}
-                                        className={` max-w-[75%] break-words text-base rounded text-blue-950 px-2.5 py-1  ${(isGroup && index === 0) || value?.optional_msg ? "self-center" : isSelfMessage ? "self-end bg-[#f1f1f1]" : "self-start bg-[#f1f1f1]"
+                                        className={`relative max-w-[75%] break-words text-base rounded ${value?.optional_msg ? "text-gray-400" : "text-blue-950"} px-2.5 py-1.5  ${(value?.optional_msg) ? "self-center" : isSelfMessage ? "self-end bg-[#f1f1f1]" : "self-start bg-[#f1f1f1]"
                                             }`}
                                     >
+                                        {
+                                            (isSelfMessage || value?.image || value?.video) && (!value?.optional_msg) && (
+                                                <HiOutlineDotsVertical
+                                                    onClick={() => {
+                                                        setDeletIdSet(() => {
+                                                            const set = new Set()
+                                                            set.add(value?._id)
+                                                            return set
+                                                        })
+                                                    }}
+                                                    size={15}
+                                                    className='absolute top-1.5 right-1 cursor-pointer'
+                                                />
+                                            )
+                                        }
+
+                                        {
+                                            deletIdSet.has(value?._id) && (
+                                                <div ref={dataSetRef}
+                                                    className="
+                                                    absolute top-10 right-4 z-50
+                                                    w-32
+                                                    bg-white
+                                                    rounded-lg
+                                                    shadow-lg
+                                                    border border-gray-200
+                                                    overflow-hidden
+                                                    animate-scaleIn
+                                                "
+                                                >
+                                                    {/* Edit button */}
+                                                    {
+                                                        value?.text && (
+                                                            <button
+                                                                className="
+                                                                    w-full px-4 py-2
+                                                                    text-sm text-left
+                                                                    hover:bg-gray-100
+                                                                    transition cursor-pointer
+                                                                "
+                                                                onClick={() => {
+                                                                    setEditEnable((prev) => {
+                                                                        return {
+                                                                            ...prev,
+                                                                            enable: true,
+                                                                            text: value?.text || "",
+                                                                            textId: value?._id || ""
+                                                                        }
+                                                                    })
+                                                                }}
+                                                            >
+                                                                ✏️ Edit
+                                                            </button>
+                                                        )
+                                                    }
+
+                                                    {/* Copy button */}
+                                                    {
+                                                        value?.text && (
+                                                            <button
+                                                                className="
+                                                                    w-full px-4 py-2
+                                                                    text-sm text-left
+                                                                    hover:bg-green-50
+                                                                    transition flex gap-1
+                                                                    cursor-pointer
+                                                                "
+                                                                onClick={() => {
+                                                                    navigator.clipboard.writeText(value?.text)
+                                                                    toast.success("Copied!")
+                                                                    setDeletIdSet(new Set())
+                                                                }}
+                                                            >
+                                                                <MdOutlineFileCopy size={18} className='text-green-600' />
+                                                                <span>Copy</span>
+                                                            </button>
+                                                        )
+                                                    }
+
+                                                    {/* delete button */}
+                                                    <button
+                                                        className="
+                                                        w-full px-4 py-2
+                                                        text-sm text-left
+                                                        text-red-600
+                                                        hover:bg-red-50
+                                                        transition cursor-pointer
+                                                    "
+                                                        onClick={() => {
+                                                            setDeleteMsg((prev) => {
+                                                                return {
+                                                                    ...prev,
+                                                                    enable: true,
+                                                                    textId: value?._id
+                                                                }
+                                                            })
+                                                        }}
+                                                    >
+                                                        🗑️ Delete
+                                                    </button>
+                                                </div>
+                                            )
+                                        }
+
                                         {isGroup && !isSelfMessage && (
                                             <p className="text-xs font-medium text-gray-600 -mb-1">{value?.senderName}</p>
                                         )}
 
-                                        <div className={`bg-[#f1f1f1] p-1 rounded-md text-sm ${value?.optional_msg ? "block" : "hidden"}`}>
+                                        <div className={`p-1 rounded-md text-[13px] select-none ${value?.optional_msg ? "block" : "hidden"}`}>
                                             <p className='text-center'>
-                                                {value?.optional_msg}
-                                            </p>
-                                            <p>
-                                                {indianTime}
+                                                {value?.optional_msg} <span>{` - ${indianTime}`}</span>
                                             </p>
                                         </div>
 
-                                        {value?.image && <img src={value.image} alt="" className="w-[200px] rounded-md" />}
-                                        {value?.video && <video src={value.video} controls className="w-[200px] rounded-md"></video>}
+                                        {value?.image && <img src={value.image} alt="" className={`w-[200px] rounded-md py-1 pr-2.5`} />}
+                                        {value?.video && <video src={value.video} controls className={`w-[200px] rounded-md pr-2.5`}></video>}
                                         {value?.other_fileUrl_or_external_link && (
                                             <button
                                                 onClick={() => window.open(value.other_fileUrl_or_external_link, "_blank")}
-                                                className="bg-blue-500 text-white px-3 py-1 rounded mt-1"
+                                                className={`bg-blue-500 text-white px-3 py-1 rounded mt-1 ${isSelfMessage && "pr-2.5"}`}
                                             >
                                                 Open File
                                             </button>
                                         )}
 
-                                        {value?.text && <p className={`mt-1 ${isGroup && index === 0 && "text-[#dedede] leading-[19px]"}`}>{value.text}</p>}
-
+                                        {value?.text && <div className={`mt-1 ${isSelfMessage ? "pr-2" : "pr-3"}`}>
+                                            {value.text}
+                                            <span className='text-gray-500 select-none text-[12px]'>{isEdited && " (edited)"}</span>
+                                        </div>}
                                         <p className={`text-xs opacity-60 ${value?.optional_msg ? "hidden" : "block"} ${isSelfMessage ? "text-right" : "text-left"}`}>{indianTime}</p>
                                     </div>
                                 );
@@ -546,6 +808,7 @@ const MessagePage = () => {
                         value={messageText}
                         onChange={(e) => setMessageText(e.target.value)}
                         onKeyDown={(e) => {
+                            if (!messageText) return
                             if (e.key === "Enter" && !e.shiftKey) {
                                 e.preventDefault();
                                 isGroup ? handleGroupMessageSend() : handleOnClick();
@@ -556,10 +819,155 @@ const MessagePage = () => {
                     />
 
                     {/* Send */}
-                    <div className="flex items-center justify-center cursor-pointer">
-                        <IoSendOutline size={26} onClick={() => (isGroup ? handleGroupMessageSend() : handleOnClick())} />
+                    < div className={`flex items-center justify-center cursor-pointer`}>
+                        <IoSendOutline size={26}
+                            onClick={() => {
+                                if (!messageText) return
+                                (isGroup ? handleGroupMessageSend() : handleOnClick())
+                            }}
+                        />
                     </div>
+
                 </div>
+
+                {
+                    deleteMsg.enable && (
+                        <section
+                            className='fixed top-0 left-0 right-0 bottom-0 z-50
+                                flex items-end sm:items-center justify-center
+                                bg-[#2b2b2b]/15 backdrop-blur-[2px]
+                                px-4 py-14 sm:py-0'
+                        >
+
+                            <div className="w-full max-w-md rounded-xl bg-white shadow-xl p-6">
+                                {/* Title */}
+                                <h2 className="text-lg font-semibold text-gray-900">
+                                    Delete Message?
+                                </h2>
+
+                                {/* Description */}
+                                <p className="text-sm text-gray-600 mt-2">
+                                    Are you sure you want to delete this message? This action cannot be undone.
+                                </p>
+
+                                {/* Actions */}
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <button
+                                        disabled={deleteMsg.loader}
+                                        className={`px-4 py-2 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition ${deleteMsg.loader ? "cursor-not-allowed" : "cursor-pointer"}`}
+                                        onClick={() => {
+                                            setDeleteMsg({
+                                                enable: false,
+                                                textId: "",
+                                                loader: false
+                                            })
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+
+                                    <button
+                                        disabled={deleteMsg.loader}
+                                        className={`px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition ${deleteMsg.loader ? "cursor-not-allowed" : "cursor-pointer"}`}
+                                        onClick={() => handleDeleteMsg()}
+                                    >
+                                        {deleteMsg.loader ? "Deleting" : "Delete"}
+                                    </button>
+                                </div>
+                            </div>
+
+                        </section>
+                    )
+                }
+
+                {
+                    editEnable.enable && (
+                        <section
+                            className='fixed top-0 left-0 right-0 bottom-0 z-50
+                                flex items-end sm:items-center justify-center
+                                bg-[#2b2b2b]/15 backdrop-blur-[2px]
+                                px-4 py-14 sm:py-0'
+                        >
+
+                            <div className="w-full max-w-md rounded-xl overflow-hidden bg-white shadow-xl">
+
+                                {/* HEADER */}
+                                <div className="flex items-center justify-between px-4 py-3 border-b border-[#cbd4e7]">
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            disabled={editEnable.loader}
+                                            onClick={() => {
+                                                setEditEnable(() => {
+                                                    return {
+                                                        enable: false,
+                                                        text: "",
+                                                        textId: "",
+                                                        loader: false
+                                                    }
+                                                })
+                                            }}
+                                            className="text-gray-600 hover:text-black cursor-pointer"
+                                        >
+                                            ✕
+                                        </button>
+                                        <h2 className="text-sm font-semibold text-gray-800">
+                                            Edit message
+                                        </h2>
+                                    </div>
+                                </div>
+
+                                {/* BODY */}
+                                <div className="px-4 py-4 bg-white">
+                                    <textarea
+                                        value={editEnable.text}
+                                        onChange={(e) =>
+                                            setEditEnable((prev) => {
+                                                return {
+                                                    ...prev,
+                                                    text: e.target.value
+                                                }
+                                            })
+                                        }
+                                        rows={3}
+                                        className="w-full resize-none rounded-md border border-gray-300
+                                        px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#868d9a]"
+                                    />
+                                </div>
+
+                                {/* FOOTER */}
+                                <div className="flex items-center justify-end gap-3 px-4 py-3 border-t border-[#cbd4e7]">
+                                    <button
+                                        onClick={() => {
+                                            setEditEnable(() => {
+                                                return {
+                                                    enable: false,
+                                                    text: "",
+                                                    textId: "",
+                                                    loader: false
+                                                }
+                                            })
+                                        }}
+                                        className="text-sm px-4 py-2 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer"
+                                    >
+                                        Cancel
+                                    </button>
+
+                                    <button
+                                        disabled={editEnable.loader}
+                                        onClick={() => handleEdit()}
+                                        className={`text-sm px-4 py-2 rounded-md
+                                        bg-green-500 text-white hover:bg-green-600
+                                        disabled:opacity-60 ${editEnable.loader ? "cursor-not-allowed" : "cursor-pointer"}`}
+                                    >
+                                        {editEnable.loader ? "Saving..." : "Save"}
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </section>
+                    )
+                }
 
                 {
                     loading && (
@@ -614,7 +1022,6 @@ const MessagePage = () => {
                     </section>
                 )}
 
-
                 {
                     attachData.video && (
                         <section
@@ -661,7 +1068,7 @@ const MessagePage = () => {
                         </section>
                     )
                 }
-            </section>
+            </section >
 
             <div className={`${`/chat/${params?.conversation}/edit` !== pathname && "hidden"} w-full`}>
                 {

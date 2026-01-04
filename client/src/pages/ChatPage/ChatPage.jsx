@@ -6,7 +6,7 @@ import { HiOutlineUserAdd } from "react-icons/hi";
 import SearchNewMember from '../../components/ChatComponent/SearchNewMember';
 import Axios from '../../utils/Axios';
 import SummaryApi from '../../common/SummaryApi';
-import { updateparticipantsForRemove, removeConversation, setMessageDetails, updateGroupImage, updateGroupName, updateparticipantsForAdd, updateConversationWithNewMessage } from '../../store/chatSlice';
+import { updateparticipantsForRemove, removeConversation, setMessageDetails, updateGroupImage, updateGroupName, updateparticipantsForAdd, updateConversationWithNewMessage, deleteMessageUpdate } from '../../store/chatSlice';
 import { FiArrowUpLeft } from 'react-icons/fi'
 import { RxAvatar } from 'react-icons/rx';
 import { Link, Outlet, useLocation } from 'react-router-dom';
@@ -137,9 +137,17 @@ const ChatPage = () => {
             dispatch(removeConversation(group_id))
         })
 
+        socketConnection.on("deleted_msg", ({ textId, conversationId }) => {
+            dispatch(deleteMessageUpdate({
+                textId,
+                conversationId
+            }))
+        })
+
         return () => {
             socketConnection.off("member_removed")
             socketConnection.off("removed_from_group")
+            socketConnection.off("deleted_msg")
         }
 
     }, [dispatch, socketConnection])

@@ -83,6 +83,15 @@ const chatSlice = createSlice({
                 }
             }
         },
+        deleteMessageUpdate: (state, action) => {
+            const { textId, conversationId } = action.payload
+
+            const conversationFound = state.all_message.findIndex((i) => i && i?._id === conversationId)
+
+            if(conversationFound >= 0 && state.all_message[conversationFound]?.messages && Array.isArray(state.all_message[conversationFound].messages)){
+                state.all_message[conversationFound].messages = state.all_message[conversationFound].messages.filter((i) => i !== textId)
+            }
+        },
         setChatLogOut: (state, action) => {
             state.all_message = []
         }
@@ -92,7 +101,7 @@ const chatSlice = createSlice({
 
 export const { setMessageDetails, addMessageDetails, updateConversationWithNewMessage,
     updateGroupName, updateGroupImage, updateparticipantsForRemove, removeConversation,
-    updateparticipantsForAdd, setChatLogOut
+    updateparticipantsForAdd, deleteMessageUpdate, setChatLogOut
 } = chatSlice.actions
 
 export default chatSlice.reducer

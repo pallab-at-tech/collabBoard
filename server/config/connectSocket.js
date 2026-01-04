@@ -836,6 +836,10 @@ io.on("connection", async (socket) => {
                 isRead: false
             })
 
+            socket.emit("remove_memberSuccess",{
+                message : `${memberUserId} successfully removed from group.`
+            })
+
         } catch (error) {
             console.log("Error while remove member in group", error)
             socket.emit("error", { message: "Server error while remove member in group", error: true });
@@ -912,6 +916,96 @@ io.on("connection", async (socket) => {
                     conversation: conversationToEmit,
                     message: populatedMessage
                 })
+            })
+
+            socket.emit("admin_success", {
+                message: `${member_userId} successfully made admin.`
+            })
+
+        } catch (error) {
+            console.log("Error while make group admin", error)
+            socket.emit("error", { message: "Server error while make group admin", error: true });
+        }
+    })
+
+    // demote from group admin
+    socket.on("demote_admin", async (data) => {
+        try {
+            const token = socket.handshake.auth?.token;
+            if (!token) {
+                return socket.emit("session_expired", { message: "No token found. Please login again." });
+            }
+
+            let payload1;
+            try {
+                payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+            } catch (err) {
+                return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+            }
+
+            const userId = payload1.id;
+
+            const { group_id, member_id, member_userId, my_id, my_userId } = data || {}
+
+            if (!member_id || !group_id || !my_id) {
+                return socket.emit("demote_Err", { message: "Missing required fields" });
+            }
+
+            if (userId === member_userId) {
+                return socket.emit("demote_Err", {
+                    message: "You Can't Demote YourSelf!"
+                })
+            }
+
+            const group = await conversationModel.findById(group_id)
+
+            if (!group) {
+                return socket.emit("demote_Err", { message: "Group is not exist." })
+            }
+
+            const isAdmin = group.admin.some(c => c.toString() === my_id.toString())
+            if (!isAdmin) {
+                return socket.emit("demote_Err", { message: "Access denied" })
+            }
+
+            const isPresentInGroup = group.participants.some(c => c.toString() === member_id.toString())
+            if (!isPresentInGroup) {
+                return socket.emit("demote_Err", { message: "User not present in group." })
+            }
+
+            group.admin = group.admin.filter((m) => m.toString() !== member_id)
+
+            const newMessage = await messageModel.create({
+                optional_msg: `${member_userId} are made demote from group admin by ${my_userId}`,
+                senderId: my_id,
+                readBy: [my_id]
+            })
+
+            group.messages.push(newMessage._id)
+            await group.save()
+
+            const conversationToEmit = {
+                _id: group._id,
+                group_type: group.group_type,
+                participants: group.participants,
+                messages: group.messages,
+                group_name: group.group_name,
+                group_image: group.group_image
+            }
+
+            const populatedMessage = await messageModel.findById(newMessage._id)
+                .populate("senderId", "_id name avatar userId")
+                .lean();
+
+            group.participants.forEach(pid => {
+                io.to(pid.toString()).emit("receive_message", {
+                    conversation: conversationToEmit,
+                    message: populatedMessage
+                })
+            })
+
+            socket.emit("demote_success", {
+                message: `${member_userId} successfully made demote from admin.`
             })
 
         } catch (error) {
