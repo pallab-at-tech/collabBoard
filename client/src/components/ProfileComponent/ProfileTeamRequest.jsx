@@ -1,14 +1,13 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { SiTicktick } from "react-icons/si";
 import { RxCross2 } from "react-icons/rx";
-import Axios from "../utils/Axios"
-import SummaryApi from '../common/SummaryApi';
-import { useState } from 'react';
+import Axios from '../../utils/Axios';
+import SummaryApi from '../../common/SummaryApi';
 import toast from 'react-hot-toast';
-import { useGlobalContext } from '../provider/GlobalProvider';
-import { useDispatch } from 'react-redux';
-import { addingTeamDetails, requestAccept } from '../store/userSlice';
+import { useGlobalContext } from '../../provider/GlobalProvider';
+import { addingTeamDetails, requestAccept } from '../../store/userSlice';
+
 
 const ProfileTeamRequest = () => {
 
@@ -35,7 +34,7 @@ const ProfileTeamRequest = () => {
                     data: data?.roleData
                 }))
                 dispatch(requestAccept({
-                    teamId : data?.teamId
+                    teamId: data?.teamId
                 }))
                 setLoading(false)
             })
@@ -88,7 +87,6 @@ const ProfileTeamRequest = () => {
             setLoading(false)
         }
     }
-
 
     return (
         <div className='py-3 px-1'>

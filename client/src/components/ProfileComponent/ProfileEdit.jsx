@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { useGlobalContext } from '../../provider/GlobalProvider';
 import { useSelector } from 'react-redux';
 
+
 const ProfileEdit = ({ close }) => {
     const [data, setData] = useState({ about: '' });
     const [submitAvailable, setSubmitAvailable] = useState(true);
@@ -13,17 +14,17 @@ const ProfileEdit = ({ close }) => {
     const { fetchUserAllDetails } = useGlobalContext()
     const user = useSelector(state => state.user)
 
-    useEffect(()=>{
+    useEffect(() => {
         setData({
-            about : user?.about || ""
+            about: user?.about || ""
         })
-    },[])
+    }, [])
 
     const handleChange = (e) => {
         setData({ ...data, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
@@ -33,7 +34,7 @@ const ProfileEdit = ({ close }) => {
             const response = await Axios({
                 ...SummaryApi.user_update,
                 data: {
-                    about : data.about
+                    about: data.about
                 }
             })
 

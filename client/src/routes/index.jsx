@@ -7,10 +7,9 @@ import TeamBoard from '../components/other/TeamBoard'
 import MainTeamBoard from '../components/other/MainTeamBoard'
 import TeamBoardEdit from '../components/other/TeamBoardEdit'
 import MobileForCollabBoard from '../pages/MobileForCollabBoard'
-import ProfilePage from '../pages/ProfilePage'
-import EditProfile from '../pages/EditProfile'
+import ProfilePage from '../pages/ProfilePage/ProfilePage'
 import CollabBoard from "../pages/CollabBoard"
-import ProfileTeamRequest from '../pages/ProfileTeamRequest'
+import ProfileTeamRequest from '../components/ProfileComponent/ProfileTeamRequest'
 import ChatPage from '../pages/ChatPage/ChatPage'
 import MessagePage from '../pages/ChatPage/MessagePage'
 import MessageEdit from '../components/ChatComponent/MessageEdit'
@@ -21,8 +20,8 @@ import SeparateTabForTask from '../pages/SeparateTabForTask'
 import SubmitTaskReport from '../pages/SubmitTaskReport'
 import ShowColumnForTrack from '../components/TaskBoard/ShowColumnForTrack'
 import NotificationPage from '../pages/NotificationPage'
-import FeaturePage from '../pages/FeaturePage'
-import AboutPage from '../pages/AboutPage'
+import FeaturePage from '../pages/OtherPage/FeaturePage'
+import AboutPage from '../pages/OtherPage/AboutPage'
 
 const router = createBrowserRouter([
     {
@@ -92,14 +91,6 @@ const router = createBrowserRouter([
                     {
                         path: "",
                         element: <ProfileTeamRequest />
-                    },
-                    {
-                        path: "/profile/:user/chat",
-                        element: <ChatPage />
-                    },
-                    {
-                        path: '/profile/:user/edit',
-                        element: <EditProfile />
                     }
                 ]
             },
