@@ -371,7 +371,7 @@ io.on("connection", async (socket) => {
 
         if (!textId) {
             return socket.emit("edit_msgErr", {
-                message: "TextId required!"
+                message: "TextId Missing!"
             })
         }
 
@@ -383,7 +383,7 @@ io.on("connection", async (socket) => {
 
         if (!conversationId) {
             return socket.emit("edit_msgErr", {
-                message: "Conversation Id required!"
+                message: "Conversation Id Missing!"
             })
         }
 
@@ -394,13 +394,13 @@ io.on("connection", async (socket) => {
 
         if (!message) {
             return socket.emit("edit_msgErr", {
-                message: "Message not found!"
+                message: "Message Not Found!"
             })
         }
 
         if (!conversation) {
             return socket.emit("edit_msgErr", {
-                message: "conversation not found!"
+                message: "Conversation Not Found!"
             })
         }
 
@@ -427,12 +427,95 @@ io.on("connection", async (socket) => {
                 textId: message._id,
                 updatedAt: message.updatedAt,
                 text: message.text,
+                conversationId: conversation._id
             })
         })
 
         // ✅ Ack to editor
         socket.emit("edit_msgSuccess", {
             message: "Message Edited"
+        });
+
+    })
+
+    // delete message
+    socket.on("delete_msg", async (data) => {
+        const token = socket.handshake.auth?.token;
+        if (!token) {
+            return socket.emit("session_expired", { message: "No token found. Please login again." });
+        }
+
+        let payload1;
+        try {
+            payload1 = jwt.verify(token, process.env.SECRET_KEY_ACCESS_TOKEN);
+        } catch (err) {
+            return socket.emit("session_expired", { message: "Your session has expired. Please log in again." });
+        }
+
+        const userId = payload1.id;
+        const { textId, conversationId } = data || {}
+
+        if (!textId) {
+            return socket.emit("delete_msgErr", {
+                message: "Text Id Missing!"
+            })
+        }
+
+        if (!conversationId) {
+            return socket.emit("delete_msgErr", {
+                message: "Conversation Id Missing!"
+            })
+        }
+
+        const [message, conversation] = await Promise.all([
+            messageModel.findById(textId),
+            conversationModel.findById(conversationId)
+        ])
+
+        if (!message) {
+            return socket.emit("delete_msgErr", {
+                message: "Message Not Found!"
+            })
+        }
+
+        if (!conversation) {
+            return socket.emit("delete_msgErr", {
+                message: "Conversation Not Found!"
+            })
+        }
+
+        const ONE_HOUR_MS = 60 * 60 * 1000;
+        const diffMs = Date.now() - new Date(message.createdAt)
+
+        if (diffMs >= ONE_HOUR_MS) {
+            return socket.emit("delete_msgErr", {
+                message: "Message can't be deleted after 1 hour!",
+            });
+        }
+
+        if (userId.toString() !== message.senderId.toString()) {
+            return socket.emit("delete_msgErr", {
+                message: "Unauthorized Access!"
+            })
+        }
+
+        conversation.messages = conversation.messages.filter((m) => m._id.toString() !== textId)
+
+        await Promise.all([
+            conversation.save(),
+            message.deleteOne()
+        ])
+
+        conversation.participants.forEach((pid) => {
+            io.to(pid.toString()).emit("deleted_msg", {
+                textId: textId,
+                conversationId: conversation._id
+            })
+        })
+
+        // ✅ Ack to editor
+        socket.emit("delete_msgSuccess", {
+            message: "Message Deleted"
         });
 
     })
