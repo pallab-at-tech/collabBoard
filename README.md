@@ -18,7 +18,7 @@
 
 ## Demo
 
-🌐 Live Demo : [CollabBoard - Collaborate and manage projects by creating or joining a team](collab-board-jet-six.vercel.app)
+🌐 Live Demo : [CollabBoard - Collaborate and manage projects by creating or joining a team](https://collab-board-jet-six.vercel.app)
 
 🎥 Demo Video : will be available soon...
 
@@ -61,6 +61,7 @@ Currently, there are no automated tests implemented for this project.
 ## 🚀 About Me
 I'm a full stack developer passionate about building interactive MERN applications, real-time systems, and AI-assisted platforms like CollabDesk.  
 
+
 ## Deployment
 
 To deploy this project locally, run:
@@ -69,9 +70,7 @@ To deploy this project locally, run:
 npm install
 npm run dev
 
-## 👨‍💻 Contributor
 
-- [pallab-at-tech](https://github.com/pallab-at-tech)
 
 
 
