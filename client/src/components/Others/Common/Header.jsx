@@ -67,8 +67,6 @@ const Header = () => {
     const mobileBoardURL = `/board/${user?.name}-${user?._id}`
     const profileURL = `/profile/${user?.name}`
 
-    console.log("notifyData", notifyData)
-
     if (isLogin === null) return null
 
     return (

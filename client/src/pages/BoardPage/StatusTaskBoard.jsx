@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { FaCheckCircle, FaUsers, FaDownload  , FaExclamationTriangle , FaClipboardList, FaChartPie} from "react-icons/fa";
+import { FaCheckCircle, FaUsers, FaDownload, FaExclamationTriangle, FaClipboardList, FaChartPie } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { useGlobalContext } from "../../provider/GlobalProvider";
-import generateContent from "../../utils/GenerateText";
-import toast from "react-hot-toast";
-import jsPDF from "jspdf"
 
 
 const StatusTaskBoard = () => {
@@ -15,9 +12,6 @@ const StatusTaskBoard = () => {
     const teamId = useLocation().state?.teamId
 
     const [data, setData] = useState(null)
-
-    const [generatingForAll, setGeneratingForAll] = useState(false)
-    const [downloading, setDownloading] = useState(false)
 
     useEffect(() => {
         if (!teamId) return
@@ -103,66 +97,6 @@ const StatusTaskBoard = () => {
         setData(filteredData);
     }, [task]);
 
-    const generateText = async () => {
-        setGeneratingForAll(true)
-        try {
-            const stats = data
-            const columnsOfTask = task?.column || []
-
-            const res = await generateContent(stats, columnsOfTask)
-            setGeneratingForAll(false)
-
-            if (res) {
-                handleGeneratePdf(res)
-            }
-            else {
-                toast.error("Some error occured ! try again.")
-            }
-        } catch (error) {
-            setGeneratingForAll(false)
-            toast.error("Some error occured ! try again.")
-            console.log("Text genating error", error)
-        }
-    }
-
-    const handleGeneratePdf = async (text) => {
-        setDownloading(true);
-        try {
-            if (!text) {
-                toast.error("No content to download");
-                setDownloading(false);
-                return;
-            }
-
-            const doc = new jsPDF();
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
-            const marginX = 10; // left/right margin
-            const marginY = 20; // top margin
-            const lineHeight = 7; // space between lines
-
-            const lines = doc.splitTextToSize(text, pageWidth - 2 * marginX);
-            let y = marginY;
-
-            lines.forEach((line) => {
-                if (y > pageHeight - marginY) { // if exceeds page height
-                    doc.addPage();
-                    y = marginY; // reset y for new page
-                }
-                doc.text(line, marginX, y);
-                y += lineHeight;
-            });
-
-            doc.save("overall-task-report.pdf");
-            toast.success("Report downloaded successfully!");
-            setDownloading(false);
-        } catch (err) {
-            console.error(err);
-            toast.error("Downloading error, try again!");
-            setDownloading(false);
-        }
-    };
-
     const completionRate = ((data?.total_submitted.number / data?.total_task.number) * 100).toFixed(0);
 
     return (
@@ -214,14 +148,13 @@ const StatusTaskBoard = () => {
 
             {/* Generate report buttons */}
             <div className="mb-6 flex flex-col sm:flex-row gap-4">
-
-                <button
-                    onClick={() => generateText()}
-                    className={`bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition ${downloading || generatingForAll ? "cursor-not-allowed" : "cursor-pointer"}`}
+                <a
+                    className={`bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer`}
+                    href={`/report-download?type=overall&teamId=${teamId}`} target="_blank" rel="noopener noreferrer"
                 >
                     <FaDownload />
-                    <p>{generatingForAll ? "generating..." : downloading ? "downloading..." : "Generate Overall Report"}</p>
-                </button>
+                    <p>Generate Overall Report</p>
+                </a>
             </div>
 
             {/* Team Breakdown */}

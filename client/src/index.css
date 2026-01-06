@@ -462,3 +462,87 @@
     transform: scaleY(-1) rotate(-135deg)
   }
 }
+
+.pdf-safe {
+  /* Base */
+  background-color: #ffffff;
+  color: #111111;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Cards / Sections */
+.pdf-safe .card,
+.pdf-safe .popover,
+.pdf-safe .box {
+  background-color: #ffffff;
+  color: #111111;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+/* Headings */
+.pdf-safe h1,
+.pdf-safe h2,
+.pdf-safe h3,
+.pdf-safe h4,
+.pdf-safe h5,
+.pdf-safe h6 {
+  color: #111111;
+  font-weight: 600;
+}
+
+/* Text */
+.pdf-safe p,
+.pdf-safe span,
+.pdf-safe td,
+.pdf-safe th,
+.pdf-safe li {
+  color: #111111;
+}
+
+/* Table */
+.pdf-safe table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pdf-safe th,
+.pdf-safe td {
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+}
+
+/* Buttons */
+.pdf-safe button {
+  background-color: #059669;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 8px 16px;
+  border: none;
+}
+
+/* Muted text */
+.pdf-safe .muted {
+  color: #6b7280;
+}
+
+/* Success / Error */
+.pdf-safe .success {
+  color: #16a34a;
+}
+
+.pdf-safe .error {
+  color: #dc2626;
+}
+
+/* Images */
+.pdf-safe img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Remove shadows & modern effects */
+.pdf-safe * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}

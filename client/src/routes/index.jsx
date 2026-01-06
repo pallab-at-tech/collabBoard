@@ -21,6 +21,7 @@ import ShowColumnForTrack from '../components/BoardComponent/ShowColumnForTrack'
 import NotificationPage from '../pages/NotificationPage'
 import FeaturePage from '../pages/OtherPage/FeaturePage'
 import AboutPage from '../pages/OtherPage/AboutPage'
+import ReportStructure from '../components/Others/OtherTask/ReportStructure'
 
 const router = createBrowserRouter([
     {
@@ -116,6 +117,10 @@ const router = createBrowserRouter([
             {
                 path : "/about",
                 element : <AboutPage/>
+            },
+            {
+                path : "/report-download",
+                element : <ReportStructure/>
             }
         ]
     },
