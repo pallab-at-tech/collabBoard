@@ -22,7 +22,9 @@ Axios.interceptors.request.use(
 
 // Handle token expiration
 Axios.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        return response
+    },
     async (error) => {
         let originalRequest = error.config
 
@@ -63,7 +65,7 @@ const refreshAccessToken = async (refreshToken) => {
         const accessToken = response.data.data.accessToken
         localStorage.setItem('accesstoken', accessToken)
         localStorage.setItem("login", "true")
-        setLoginGlobal(true)  
+        setLoginGlobal(true)
         return accessToken
     } catch (error) {
         console.log(error)
