@@ -15,6 +15,7 @@ import { setNotification } from '../../../store/notificationSlice'
 const Header = () => {
     const { isLogin } = useGlobalContext()
     const user = useSelector(state => state.user)
+    const notifyData = useSelector(state => state?.notification)
 
     const [NotificationbarOpen, setNotificationbarOpen] = useState(false)
 
@@ -65,6 +66,8 @@ const Header = () => {
     const boardURL = `/board/${user?.name}-${user?._id}/${user?.roles[0]?.teamId}`
     const mobileBoardURL = `/board/${user?.name}-${user?._id}`
     const profileURL = `/profile/${user?.name}`
+
+    console.log("notifyData", notifyData)
 
     if (isLogin === null) return null
 
@@ -153,7 +156,21 @@ const Header = () => {
                             onClick={() => setNotificationbarOpen(prev => !prev)}
                             className="relative text-gray-200"
                         >
-                            <IoIosNotifications size={24} className=' hover:text-emerald-400  cursor-pointer' />
+                            <div>
+                                <IoIosNotifications size={24} className='hover:text-emerald-400 cursor-pointer relative z-50' />
+                                <span className={`
+                                    absolute -top-1 -right-1
+                                    min-w-[18px] h-[18px]
+                                    px-[5px]
+                                    text-[11px] font-semibold
+                                    ${(notifyData?.data && Array.isArray(notifyData?.data)) ? "flex" : "hidden"}
+                                    items-center justify-center rounded-full
+                                    bg-green-600 text-white
+                                    z-40
+                                `}>
+                                    {(notifyData?.data && Array.isArray(notifyData?.data)) && notifyData.data.length}
+                                </span>
+                            </div>
                             {NotificationbarOpen && (
                                 <NotificationPopbar close={() => {
                                     setNotificationbarOpen(prev => !prev)

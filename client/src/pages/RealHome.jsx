@@ -122,8 +122,11 @@ const RealHome = () => {
                     <h1 className="sm:text-5xl text-4xl font-bold text-white pb-4" style={{ textShadow: "rgb(13 155 108 / 30%) 0px 0px 12px" }}>
                         Welcome to Your Workspace
                     </h1>
-                    <p className="text-[#a9abaa] text-base md:text-lg">
+                    <p className="text-[#a9abaa] text-base md:text-lg hidden sm:block">
                         Collaborate, organize, and manage your projects. Start by creating or joining a team.
+                    </p>
+                    <p className="text-[#a9abaa] text-base md:text-lg block sm:hidden">
+                        Collaborate and manage projects by creating or joining a team.
                     </p>
                 </div>
 
@@ -149,7 +152,7 @@ const RealHome = () => {
                 </div>
 
                 {/* Learn More */}
-                <Link className="text-[#a9abaa] text-base underline hover:text-[#c4c4c4] hover:drop-shadow-[0_0_6px_rgba(255,255,205,0.2)] transition-colors duration-150">
+                <Link to={"/features"} className="text-[#a9abaa] text-base underline hover:text-[#c4c4c4] hover:drop-shadow-[0_0_6px_rgba(255,255,205,0.2)] transition-colors duration-150">
                     Know more about our service
                 </Link>
             </div>
@@ -204,7 +207,6 @@ const RealHome = () => {
                     </form>
                 </div>
             )}
-
             
         </section>
 
