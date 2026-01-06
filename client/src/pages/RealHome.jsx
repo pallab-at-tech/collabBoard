@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { MdOutlineCreateNewFolder, MdOutlinePostAdd } from "react-icons/md";
-import CreateTeam from "../components/other/CreateTeam";
+import CreateTeam from "../components/Others/Common/CreateTeam";
 import { useGlobalContext } from "../provider/GlobalProvider";
 import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";

@@ -21,8 +21,6 @@ const GlobalProvider = ({ children }) => {
     const [isLogin, setIsLogin] = useState(localStorage.getItem("login") === "true")
 
     const [slideExpand, setSlideExpand] = useState(true)
-    const [isTeamLeader, setIsTeamLeader] = useState(false)
-
     const [homeLoading, setHomeLoading] = useState(false)
     const [teamLoading, setTeamLoading] = useState(false)
 
@@ -79,12 +77,8 @@ const GlobalProvider = ({ children }) => {
             })
             const { data: responseData } = response
 
-            const x = await responseData?.data.member?.some((m) => m?.userId === user?._id && m?.role === "LEADER")
-            setIsTeamLeader(x)
-
             if (responseData?.error) toast.error(responseData?.message)
             if (responseData?.success) dispatch(setTeamDetails(responseData?.data))
-            console.log("task responseData?.data",responseData?.data)
             setTeamLoading(false)
         } catch (error) {
             setTeamLoading(false)
@@ -165,8 +159,6 @@ const GlobalProvider = ({ children }) => {
             logoutUser,
             slideExpand,
             setSlideExpand,
-            setIsTeamLeader,
-            isTeamLeader,
             homeLoading,
             teamLoading
         }}>

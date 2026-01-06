@@ -3,22 +3,21 @@ import App from "../App"
 import Home from '../pages/Home'
 import SigninPage from '../pages/AuthPage/SigninPage'
 import SignupPage from '../pages/AuthPage/SignupPage'
-import TeamBoard from '../components/other/TeamBoard'
-import MainTeamBoard from '../components/other/MainTeamBoard'
-import TeamBoardEdit from '../components/other/TeamBoardEdit'
-import MobileForCollabBoard from '../pages/MobileForCollabBoard'
+import TeamBoard from '../pages/BoardPage/TeamBoard'
+import MainTeamBoard from '../pages/BoardPage/MainTeamBoard'
+import TeamBoardEdit from '../components/BoardComponent/TeamBoardEdit'
+import MobileForCollabBoard from '../pages/BoardPage/MobileForCollabBoard'
 import ProfilePage from '../pages/ProfilePage/ProfilePage'
-import CollabBoard from "../pages/CollabBoard"
+import CollabBoard from "../pages/BoardPage/CollabBoard"
 import ProfileTeamRequest from '../components/ProfileComponent/ProfileTeamRequest'
 import ChatPage from '../pages/ChatPage/ChatPage'
 import MessagePage from '../pages/ChatPage/MessagePage'
 import MessageEdit from '../components/ChatComponent/MessageEdit'
-import TrackTaskBoard from '../components/common/TrackTaskBoard'
-import DeadlineTaskBoard from '../components/common/DeadlineTaskBoard'
-import StatusTaskBoard from '../components/common/StatusTaskBoard'
-import SeparateTabForTask from '../pages/SeparateTabForTask'
-import SubmitTaskReport from '../pages/SubmitTaskReport'
-import ShowColumnForTrack from '../components/TaskBoard/ShowColumnForTrack'
+import TrackTaskBoard from '../pages/BoardPage/TrackTaskBoard'
+import StatusTaskBoard from '../pages/BoardPage/StatusTaskBoard'
+import SeparateTabForTask from '../pages/BoardPage/SeparateTabForTask'
+import SubmitTaskReport from '../pages/BoardPage/SubmitTaskReport'
+import ShowColumnForTrack from '../components/BoardComponent/ShowColumnForTrack'
 import NotificationPage from '../pages/NotificationPage'
 import FeaturePage from '../pages/OtherPage/FeaturePage'
 import AboutPage from '../pages/OtherPage/AboutPage'
@@ -62,10 +61,6 @@ const router = createBrowserRouter([
                                         element: <ShowColumnForTrack />
                                     }
                                 ]
-                            },
-                            {
-                                path: "deadline",
-                                element: <DeadlineTaskBoard />
                             },
                             {
                                 path: "status",

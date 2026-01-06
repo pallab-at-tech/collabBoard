@@ -1,10 +1,8 @@
 import './App.css'
-import Header from './components/common/Header'
-import Footer from './components/common/Footer'
+import Header from './components/Others/Common/Header'
+import Footer from './components/Others/Common/Footer'
 import { Outlet } from 'react-router-dom'
 import { useGlobalContext } from './provider/GlobalProvider'
-import { useSelector } from 'react-redux'
-import { useEffect } from 'react'
 
 function App() {
   const { isLogin } = useGlobalContext()  // direct from context
