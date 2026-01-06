@@ -4,10 +4,6 @@
 
 ---
 
-## live deploy link
-
--[collabDesk](collab-board-jet-six.vercel.app)
-
 ## 🚀 Features
 
 - 🔐 User authentication using JWT
@@ -19,6 +15,12 @@
 - ✅ Task Management (Custom Column-Based System)
 
 ---
+
+## Demo
+
+🌐 Live Demo : [CollabBoard - Collaborate and manage projects by creating or joining a team](collab-board-jet-six.vercel.app)
+
+🎥 Demo Video : will be available soon...
 
 ## 🛠️ Tech Stack
 
@@ -34,6 +36,38 @@
 | **API**        | Gemini Api (gemini-2.5-flash) | 
 
 ---
+
+## Running Tests
+
+Currently, there are no automated tests implemented for this project.
+
+## Other Common GitHub Profile Sections
+
+🧠 **Currently learning:** Advanced AI Algorithm , real-time systems, and React performance optimizations  
+
+👯‍♀️ **Looking to collaborate on:** Open-source projects, educational apps, and AI-assisted platforms  
+
+🤔 **Looking for help with:** Best practices for scalable Node.js backends and React architectures  
+
+💬 **Ask me about:** MERN stack, AI integrations, and Other  
+
+📫 **How to reach me:** pallab861774@gmail.com | [LinkedIn](https://linkedin.com/in/pallab-bag)  
+
+😄 **Pronouns:** He/Him  
+
+⚡️ **Fun fact:** I love gamifying learning experiences and building interactive educational platforms
+
+
+## 🚀 About Me
+I'm a full stack developer passionate about building interactive MERN applications, real-time systems, and AI-assisted platforms like CollabDesk.  
+
+## Deployment
+
+To deploy this project locally, run:
+
+```bash
+npm install
+npm run dev
 
 ## 👨‍💻 Contributor
 
