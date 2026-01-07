@@ -146,13 +146,16 @@ const StatusTaskBoard = () => {
                 <p className="text-sm text-gray-400 mt-1">{completionRate}% completed</p>
             </div>
 
+            {/* 
+                target="_blank"
+                rel="noopener noreferrer"
+            */}
+
             {/* Generate report buttons */}
             <div className="mb-6 flex flex-col sm:flex-row gap-4">
                 <Link
                     className={`bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer`}
                     to={`/report-download?type=overall&teamId=${teamId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
                 >
                     <FaDownload />
                     <p>Generate Overall Report</p>
