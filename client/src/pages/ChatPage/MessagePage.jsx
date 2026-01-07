@@ -594,7 +594,7 @@ const MessagePage = () => {
                     }
 
                     {/* right */}
-                    <MdManageSearch size={30} className="cursor-pointer" />
+                    {/* <MdManageSearch size={30} className="cursor-pointer" /> */}
                 </div>
 
                 {/* Messages */}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaCheckCircle, FaUsers, FaDownload, FaExclamationTriangle, FaClipboardList, FaChartPie } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useGlobalContext } from "../../provider/GlobalProvider";
 
 
@@ -148,13 +148,15 @@ const StatusTaskBoard = () => {
 
             {/* Generate report buttons */}
             <div className="mb-6 flex flex-col sm:flex-row gap-4">
-                <a
+                <Link
                     className={`bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer`}
-                    href={`/report-download?type=overall&teamId=${teamId}`} target="_blank" rel="noopener noreferrer"
+                    to={`/report-download?type=overall&teamId=${teamId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                 >
                     <FaDownload />
                     <p>Generate Overall Report</p>
-                </a>
+                </Link>
             </div>
 
             {/* Team Breakdown */}

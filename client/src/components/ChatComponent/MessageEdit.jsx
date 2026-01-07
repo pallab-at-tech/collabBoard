@@ -110,8 +110,6 @@ const MessageEdit = () => {
         }, 500);
     }
 
-    console.log("all details", all_details)
-
 
     return (
         <section className='bg-[#21222b] text-white h-[calc(100vh-60px)] overflow-y-auto px-4 py-3 sm:px-6 sm:py-5'>
@@ -187,7 +185,7 @@ const MessageEdit = () => {
                 </div>
             </div>
 
-            <div className={`sm:mt-6 mt-4 flex justify-between lg-real:flex-row flex-col  bg-[#2b2c34] px-6 py-4 rounded-2xl shadow-md`}>
+            <div className={`sm:mt-6 mt-4 flex gap-4 justify-between lg-real:flex-row flex-col  bg-[#2b2c34] px-6 py-4 rounded-2xl shadow-md`}>
 
                 {/* Left side - Title */}
                 <div>
