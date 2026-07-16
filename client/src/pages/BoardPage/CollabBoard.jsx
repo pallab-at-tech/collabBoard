@@ -5,27 +5,25 @@ import Healthcare from '../../assets/Healthcare-banner.png'
 import government from '../../assets/government-banner.png'
 import manufacture from '../../assets/manufacture-banner.png'
 import other from '../../assets/other-banner.png'
-import { Outlet , Link } from 'react-router-dom'
+import { Outlet, Link } from 'react-router-dom'
 import { VscTriangleRight } from "react-icons/vsc";
 import { useGlobalContext } from '../../provider/GlobalProvider'
 
+const bannerCombo = {
+    "Engineering-IT": engineering,
+    "Student": student,
+    "Healthcare-Dept": Healthcare,
+    "Government employee": government,
+    "Manufacturing-Dept": manufacture,
+    "other": other
+}
 
 const CollabBoard = () => {
 
     const user = useSelector(state => state.user)
-
-    const bannerCombo = {
-        "Engineering-IT": engineering,
-        "Student": student,
-        "Healthcare-Dept": Healthcare,
-        "Government employee": government,
-        "Manufacturing-Dept": manufacture,
-        "other": other
-    }
     const boardURL = `/board/${user?.name}-${user?._id}`
 
     const { slideExpand, setSlideExpand } = useGlobalContext()
-
 
     return (
         <section className={`bg-[#202128] min-h-[calc(100vh-60px)] lg-real:px-[50px] px-6 py-4 grid ${slideExpand ? "lg-real:grid-cols-[1fr_500px]" : "lg-real:grid-cols-[1fr_60px]"} transform-view duration-500`}>

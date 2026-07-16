@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, lazy, Suspense } from 'react'
 import noTask from '../../assets/no-task.png'
 import { Link, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useSelector, useDispatch } from 'react-redux'
 import { useGlobalContext } from '../../provider/GlobalProvider'
-import CreateNewColumn from '../../components/Others/OtherTask/CreateNewColumn'
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import ColumnItem from '../../components/BoardComponent/ColumnItem'
 import {
@@ -12,8 +11,10 @@ import {
     sortColumnByUpdatedAt, sortColumnByDeadLine, setTaskLogOut, taskBoardNameChange,
     updateColumn
 } from '../../store/taskSlice'
-import RenameCollabDesk from '../../components/Others/OtherBoard/RenameCollabDesk'
-import DeleteCollabDesk from '../../components/Others/OtherBoard/DeleteCollabDesk'
+
+const CreateNewColumn = lazy(() => import("../../components/Others/OtherTask/CreateNewColumn"))
+const RenameCollabDesk = lazy(() => import("../../components/Others/OtherBoard/RenameCollabDesk"))
+const DeleteCollabDesk = lazy(() => import("../../components/Others/OtherBoard/DeleteCollabDesk"))
 
 
 const MainTeamBoard = () => {
@@ -216,7 +217,6 @@ const MainTeamBoard = () => {
                 ) : (
                     <div className='xl:border-1 xl:bg-[#282932] xl:bg-gradient-to-r xl:from-[#0a0a1880] xl:to-transparent mt-2 xl:border-[#596982] xl:ring-1 xl:ring-[#596982] border-white overflow-y-auto min-h-[calc(100vh-182px)] max-h-[calc(100vh-182px)] px-0.5 xl:px-6 py-8  mini_tab:mx-10 rounded-b relative '>
 
-
                         {
                             !task?._id ? (
                                 <form onSubmit={handleOnSubmit} className='ipad_pro:mx-6 ipad_pro:my-4 mini_tab:mx-6 mini_tab:my-4'>
@@ -366,23 +366,29 @@ const MainTeamBoard = () => {
 
             {
                 openCreateColumn && (
-                    <CreateNewColumn close={() => setOpenCreateColumn(false)} />
+                    <Suspense fallback={null}>
+                        <CreateNewColumn close={() => setOpenCreateColumn(false)} />
+                    </Suspense>
                 )
             }
 
             {
                 renameOpen && (
-                    <RenameCollabDesk close={() => setRenameOpen(false)} deskId={task?._id} />
+                    <Suspense fallback={null}>
+                        <RenameCollabDesk close={() => setRenameOpen(false)} deskId={task?._id} />
+                    </Suspense>
                 )
             }
 
             {
                 deleteColllabDeskOpen && (
-                    <DeleteCollabDesk
-                        close={() => setDeleteColllabDeskOpen(false)}
-                        title={task?.name}
-                        deskId={task?._id}
-                    />
+                    <Suspense fallback={null}>
+                        <DeleteCollabDesk
+                            close={() => setDeleteColllabDeskOpen(false)}
+                            title={task?.name}
+                            deskId={task?._id}
+                        />
+                    </Suspense>
                 )
             }
 

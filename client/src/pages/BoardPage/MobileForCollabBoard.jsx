@@ -43,7 +43,6 @@ const MobileForCollabBoard = () => {
 
             </div>
         </section>
-
     )
 }
 

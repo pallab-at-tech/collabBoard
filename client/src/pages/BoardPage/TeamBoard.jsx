@@ -1,13 +1,22 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
 import { Link, useParams, useNavigate, Outlet } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { useGlobalContext } from '../../provider/GlobalProvider'
 import { IoIosPersonAdd } from "react-icons/io";
-import SearchMember from '../../components/Others/OtherBoard/SearchMember';
 import { addOfTeamMember, leftTeamMember, removeFromTeam, requestWithDraw, teamRequestSendInfo, updateTeamDetails, updateTeamForPromoteDemote } from '../../store/teamSlice';
 import toast from 'react-hot-toast'
-import { currUserteamDetailsUpdate , leftFromTeamUpdate } from '../../store/userSlice';
+import { currUserteamDetailsUpdate, leftFromTeamUpdate } from '../../store/userSlice';
 import { MdExitToApp } from "react-icons/md";
+
+const SearchMember = lazy(() => import("../../components/Others/OtherBoard/SearchMember"))
+
+
+const isTeamLeaderFound = (userId, teamDetails) => {
+
+    if (!userId || !teamDetails || !Array.isArray(teamDetails)) return false
+
+    return teamDetails.some((v) => userId === v.userId && v.role === "LEADER")
+}
 
 
 const TeamBoard = () => {
@@ -18,13 +27,14 @@ const TeamBoard = () => {
     const [exitWindow, setExitWindow] = useState(false)
 
     const [teamLeftLoading, setTeamLeftLoading] = useState(false)
+    const [isLeader, setIsLeader] = useState(false)
 
     const user = useSelector(state => state?.user)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    const { fetchTeamDetails, socketConnection, isTeamLeader } = useGlobalContext()
+    const { fetchTeamDetails, socketConnection } = useGlobalContext()
 
     const handleLeftTeam = async () => {
 
@@ -60,6 +70,10 @@ const TeamBoard = () => {
     useEffect(() => {
         fetchTeamDetails(params?.team)
     }, [params])
+
+    useEffect(() => {
+        setIsLeader(isTeamLeaderFound(user?._id, team?.member))
+    }, [user, team])
 
     useEffect(() => {
         if (!socketConnection) return
@@ -185,7 +199,6 @@ const TeamBoard = () => {
 
     }, [socketConnection, dispatch])
 
-
     return (
         <section className='h-full w-full grid-rows-2'>
 
@@ -208,7 +221,7 @@ const TeamBoard = () => {
 
                 <div className={`flex gap-x-4 sm:gap-x-8`}>
 
-                    <Link to={`/board/${params.user}/${params.team}/edit`} className={`bg-blue-700  transition-colors duration-200 px-3 text-white py-1 rounded-md cursor-pointer border border-white ${isTeamLeader ? "block" : "hidden"}`}>Edit</Link>
+                    <Link to={`/board/${params.user}/${params.team}/edit`} className={`bg-blue-700  transition-colors duration-200 px-3 text-white py-1 rounded-md cursor-pointer border border-white ${isLeader ? "block" : "hidden"}`}>Edit</Link>
 
                     <div className='cursor-pointer text-[#E2E8F0] hover:text-blue-400' title='add member' onClick={() => setOpenSearchMember(true)}>
                         <IoIosPersonAdd size={32} />
@@ -230,7 +243,9 @@ const TeamBoard = () => {
 
             {
                 openSearchMember && (
-                    <SearchMember close={() => setOpenSearchMember(false)} />
+                    <Suspense fallback={null}>
+                        <SearchMember close={() => setOpenSearchMember(false)} />
+                    </Suspense>
                 )
             }
 

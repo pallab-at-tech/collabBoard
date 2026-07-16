@@ -9,6 +9,22 @@ import { setUserDetails } from "../../../store/userSlice";
 import fetchUserDetails from "../../../utils/fetchUserDetails";
 
 
+const allOrganizationTypes = [
+    "Engineering-IT", "Student", "Healthcare-Dept", "Government employee", "Manufacturing-Dept", "other"
+]
+
+const handleOnChange = (e, setData) => {
+
+    const { name, value } = e.target
+
+    setData((preve) => {
+        return {
+            ...preve,
+            [name]: value
+        }
+    })
+}
+
 const CreateTeam = ({ close }) => {
 
     const [data, setData] = useState({
@@ -18,22 +34,6 @@ const CreateTeam = ({ close }) => {
     })
     const [activeButton, setactiveButton] = useState(true)
     const dispatch = useDispatch()
-
-    const allOrganizationTypes = [
-        "Engineering-IT", "Student", "Healthcare-Dept", "Government employee", "Manufacturing-Dept", "other"
-    ]
-
-    const handleOnChange = (e) => {
-
-        const { name, value } = e.target
-
-        setData((preve) => {
-            return {
-                ...preve,
-                [name]: value
-            }
-        })
-    }
 
     const handleOnSubmit = async (e) => {
         e.preventDefault()
@@ -93,7 +93,7 @@ const CreateTeam = ({ close }) => {
 
                         <div>
                             <p className='font-semibold pb-1'>Team Name : </p>
-                            <input onChange={handleOnChange} type="text" placeholder='Enter team name...' name='name' value={data.name} required className='border-[1px] px-2 py-0.5 rounded border-black/50 w-full' />
+                            <input onChange={() => handleOnChange(e, setData)} type="text" placeholder='Enter team name...' name='name' value={data.name} required className='border-[1px] px-2 py-0.5 rounded border-black/50 w-full' />
                         </div>
 
                         <div>
@@ -126,7 +126,7 @@ const CreateTeam = ({ close }) => {
 
                         <div>
                             <p className='font-semibold pb-1'>Team description <span className='text-black/50 select-none'>optional</span></p>
-                            <textarea onChange={handleOnChange} name="description" value={data.description} className='border-[1px] px-2 py-2 rounded border-black/50 w-full max-h-[80px] min-h-[80px]' placeholder='Enter description...'></textarea>
+                            <textarea onChange={() => handleOnChange(e, setData)} name="description" value={data.description} className='border-[1px] px-2 py-2 rounded border-black/50 w-full max-h-[80px] min-h-[80px]' placeholder='Enter description...'></textarea>
                         </div>
 
                         <button className={`${activeButton ? "bg-[#086444]   hover:bg-[#07583c] transition-colors duration-150 cursor-pointer" : "bg-[#0b855a] hover:bg-[#09714d] pointer-events-none"} py-2 rounded mt-1  font-semibold text-gray-200`}>Continue</button>

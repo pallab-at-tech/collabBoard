@@ -5,6 +5,22 @@ import { useGlobalContext } from '../../provider/GlobalProvider';
 import toast from 'react-hot-toast';
 
 
+// copy in clipBoard
+const copyInClipBoard = async (text) => {
+    if (!text) return;
+
+    try {
+        await navigator.clipboard.writeText(text);
+        setCopied(true)
+        setTimeout(() => setCopied(false), 1500)
+        toast.success("Copied to clipboard!")
+    } catch (err) {
+        console.error("Failed to copy:", err);
+        toast.error("Failed to copy")
+    }
+}
+
+
 const TeamBoardEdit = () => {
 
     const teamDetails = useSelector(state => state?.team)
@@ -76,7 +92,7 @@ const TeamBoardEdit = () => {
         else {
             setCurrUserLeader(false)
         }
-    }, [teamDetails])
+    }, [teamDetails, user])
 
     // edit the team info
     const handleSave = async (e) => {
@@ -240,21 +256,6 @@ const TeamBoardEdit = () => {
         }
     }
 
-    // copy in clipBoard
-    const copyInClipBoard = async (text) => {
-        if (!text) return;
-
-        try {
-            await navigator.clipboard.writeText(text);
-            setCopied(true)
-            setTimeout(() => setCopied(false), 1500)
-            toast.success("Copied to clipboard!")
-        } catch (err) {
-            console.error("Failed to copy:", err);
-            toast.error("Failed to copy")
-        }
-    }
-
     useEffect(() => {
         setGeneratingInvite((prev) => {
             return {
@@ -373,7 +374,6 @@ const TeamBoardEdit = () => {
             <div>
                 <h2 className='text-xl font-semibold text-white mb-2'>Team Members</h2>
                 <ul className='space-y-2'>
-
                     {
                         teamDetails?.member.map((m, i) => {
                             return (
@@ -448,7 +448,6 @@ const TeamBoardEdit = () => {
                             )
                         })
                     }
-
                 </ul>
             </div>
 
