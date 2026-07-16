@@ -33,6 +33,7 @@ const MainTeamBoard = lazy(() => import("../pages/BoardPage/MainTeamBoard"))
 const TeamBoardEdit = lazy(() => import("../components/BoardComponent/TeamBoardEdit"))
 
 
+
 const router = createBrowserRouter([
     {
         path: "/",
