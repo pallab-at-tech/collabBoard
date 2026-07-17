@@ -8,14 +8,14 @@ import { useGlobalContext } from '../../provider/GlobalProvider';
 
 
 const ShowColumnForTrack = () => {
+    
     const location = useLocation().state;
     const column = location?.data;
 
     const today = new Date().toISOString().split("T")[0];
-
     const [submitted, setSubmitted] = useState(new Set())
-
     const { slideExpand } = useGlobalContext()
+
 
     useEffect(() => {
         const set = new Set()

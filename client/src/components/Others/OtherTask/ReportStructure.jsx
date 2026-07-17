@@ -4,7 +4,54 @@ import { useGlobalContext } from '../../../provider/GlobalProvider'
 import { useSearchParams } from 'react-router-dom'
 import generateContent from '../../../utils/GenerateText'
 import html2pdf from "html2pdf.js"
+import toast from 'react-hot-toast'
 
+
+const generateText = async (setGeneratingForAll, setConclusion, data, task) => {
+    setGeneratingForAll(true)
+    try {
+        const stats = data
+        const columnsOfTask = task?.column || []
+
+        const res = await generateContent(stats, columnsOfTask)
+        setGeneratingForAll(false)
+
+        if (res) {
+            toast.success("Report Generated")
+            setConclusion(res)
+        }
+        else {
+            toast.error("Some error occured ! try again.")
+        }
+    } catch (error) {
+        setGeneratingForAll(false)
+        toast.error("Some error occured ! try again.")
+        console.log("Text genating error", error)
+    }
+}
+
+const handleDownloadReport = () => {
+    const element = document.getElementById("report")
+    html2pdf()
+        .from(element)
+        .set({
+            margin: [10, 10, 10, 10],
+            filename: "Overall_Report.pdf",
+            html2canvas: {
+                scale: 3,            //KEY FOR SHARP TEXT
+                useCORS: true,
+                scrollY: 0,
+                windowWidth: element.scrollWidth,
+                windowHeight: element.scrollHeight
+            },
+            jsPDF: {
+                unit: "mm",
+                format: "a4",
+                orientation: "portrait"
+            }
+        })
+        .save();
+}
 
 const ReportStructure = () => {
 
@@ -20,50 +67,6 @@ const ReportStructure = () => {
     const teamId = searchParams.get("teamId") || null
     const task = useSelector(state => state.task)
 
-    const generateText = async () => {
-        setGeneratingForAll(true)
-        try {
-            const stats = data
-            const columnsOfTask = task?.column || []
-
-            const res = await generateContent(stats, columnsOfTask)
-            setGeneratingForAll(false)
-
-            if (res) {
-                setConclusion(res)
-            }
-            else {
-                toast.error("Some error occured ! try again.")
-            }
-        } catch (error) {
-            setGeneratingForAll(false)
-            toast.error("Some error occured ! try again.")
-            console.log("Text genating error", error)
-        }
-    }
-
-    const handleDownloadReport = () => {
-        const element = document.getElementById("report")
-        html2pdf()
-            .from(element)
-            .set({
-                margin: [10, 10, 10, 10],
-                filename: "Overall_Report.pdf",
-                html2canvas: {
-                    scale: 3,            //KEY FOR SHARP TEXT
-                    useCORS: true,
-                    scrollY: 0,
-                    windowWidth: element.scrollWidth,
-                    windowHeight: element.scrollHeight
-                },
-                jsPDF: {
-                    unit: "mm",
-                    format: "a4",
-                    orientation: "portrait"
-                }
-            })
-            .save();
-    }
 
     useEffect(() => {
         if (!teamId) return
@@ -342,7 +345,7 @@ const ReportStructure = () => {
                                         ${generatingForAll ? "cursor-not-allowed" : "cursor-pointer"}
                                     `}
                                     disabled={generatingForAll}
-                                    onClick={() => generateText()}
+                                    onClick={() => generateText(setGeneratingForAll, setConclusion, data, task)}
                                     data-html2canvas-ignore
                                 >
                                     {generatingForAll ? "Generating..." : "Add Conclusion"}

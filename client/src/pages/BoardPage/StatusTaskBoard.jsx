@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaCheckCircle, FaUsers, FaDownload, FaExclamationTriangle, FaClipboardList, FaChartPie } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { useLocation, Link } from "react-router-dom";
@@ -11,21 +11,20 @@ const StatusTaskBoard = () => {
     const { fetchTaskDetails } = useGlobalContext()
     const teamId = useLocation().state?.teamId
 
-    const [data, setData] = useState(null)
-
     useEffect(() => {
         if (!teamId) return
         fetchTaskDetails(teamId)
     }, [])
 
-    useEffect(() => {
+    const data = useMemo(() => {
+
         const filteredData = {
             total_submitted: { number: 0, taskIds: [] },
             total_task: { number: 0, taskIds: [] },
-            total_overDue: { number: 0, taskIds: [] }, // 👈 new global overdue tracker
+            total_overDue: { number: 0, taskIds: [] }, // new global overdue tracker
         };
 
-        const currDate = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
+        const currDate = new Date().toISOString().split("T")[0];
 
         task?.column.forEach((c) => {
             const submit = new Set(c.reportSubmit.map(v => v?.taskId));
@@ -94,8 +93,9 @@ const StatusTaskBoard = () => {
             });
         });
 
-        setData(filteredData);
-    }, [task]);
+        return filteredData
+
+    }, [task])
 
     const completionRate = ((data?.total_submitted.number / data?.total_task.number) * 100).toFixed(0);
 
@@ -145,11 +145,6 @@ const StatusTaskBoard = () => {
                 </div>
                 <p className="text-sm text-gray-400 mt-1">{completionRate}% completed</p>
             </div>
-
-            {/* 
-                target="_blank"
-                rel="noopener noreferrer"
-            */}
 
             {/* Generate report buttons */}
             <div className="mb-6 flex flex-col sm:flex-row gap-4">
