@@ -27,8 +27,6 @@ io.use((socket, next) => {
 
     const token = socket.handshake.auth?.token
 
-    console.log("Token userd", token)
-
     if (!token) {
         return next(new Error("Not authenticated")); // reject connection
     }
