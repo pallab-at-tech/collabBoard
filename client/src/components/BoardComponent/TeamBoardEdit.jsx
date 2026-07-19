@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 
 // copy in clipBoard
-const copyInClipBoard = async (text) => {
+const copyInClipBoard = async (text , setCopied) => {
     if (!text) return;
 
     try {
@@ -349,7 +349,7 @@ const TeamBoardEdit = () => {
 
                                     </div>
                                     <button
-                                        onClick={() => copyInClipBoard(generatingInvite.token)}
+                                        onClick={() => copyInClipBoard(generatingInvite.token , setCopied)}
                                         className={`px-4 py-3 bg-green-600 text-white rounded-lg transition cursor-pointer duration-300 relative 
                                 ${copied ? "bg-green-700 scale-105" : "hover:bg-green-700"}
                               `}

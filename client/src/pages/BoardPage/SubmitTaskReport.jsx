@@ -8,6 +8,54 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 
+const addLink = (setLinks, links) => setLinks([...links, { name: "", url: "" }]);
+const removeLink = (index, setLinks, links) => setLinks(links.filter((_, i) => i !== index));
+
+const handleLinkChange = (index, field, value, links, setLinks) => {
+    const updatedLinks = [...links];
+    updatedLinks[index][field] = value;
+    setLinks(updatedLinks);
+};
+
+const handleOnPhoto = async (e, setloadingPhoto, setData) => {
+
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setloadingPhoto(true)
+
+    const response = await uploadFile(file)
+
+    setloadingPhoto(false)
+
+    setData((preve) => {
+        return {
+            ...preve,
+            image: response?.secure_url
+        }
+    })
+}
+
+const handleOnVideo = async (e, setloadingVideo, setData) => {
+
+    const file = e.target.files?.[0]
+
+    if (!file) return
+
+    setloadingVideo(true)
+
+    const response = await uploadFile(file)
+
+    setloadingVideo(false)
+
+    setData((preve) => {
+        return {
+            ...preve,
+            video: response?.secure_url
+        }
+    })
+}
+
 const SubmitTaskReport = () => {
 
     const [links, setLinks] = useState([{ name: "", url: "" }]);
@@ -42,53 +90,6 @@ const SubmitTaskReport = () => {
 
     const [loadingPhoto, setloadingPhoto] = useState(false)
     const [loadingVideo, setloadingVideo] = useState(false)
-
-    const handleLinkChange = (index, field, value) => {
-        const updatedLinks = [...links];
-        updatedLinks[index][field] = value;
-        setLinks(updatedLinks);
-    };
-
-    const addLink = () => setLinks([...links, { name: "", url: "" }]);
-    const removeLink = (index) => setLinks(links.filter((_, i) => i !== index));
-
-    const handleOnPhoto = async (e) => {
-        const file = e.target.files?.[0]
-
-        if (!file) return
-
-        setloadingPhoto(true)
-
-        const response = await uploadFile(file)
-
-        setloadingPhoto(false)
-
-        setData((preve) => {
-            return {
-                ...preve,
-                image: response?.secure_url
-            }
-        })
-    }
-
-    const handleOnVideo = async (e) => {
-        const file = e.target.files?.[0]
-
-        if (!file) return
-
-        setloadingVideo(true)
-
-        const response = await uploadFile(file)
-
-        setloadingVideo(false)
-
-        setData((preve) => {
-            return {
-                ...preve,
-                video: response?.secure_url
-            }
-        })
-    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -226,7 +227,7 @@ const SubmitTaskReport = () => {
 
                             {/* Hidden File Input */}
                             <input
-                                onChange={handleOnPhoto}
+                                onChange={(e) => handleOnPhoto(e, setloadingPhoto, setData)}
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
@@ -306,7 +307,7 @@ const SubmitTaskReport = () => {
 
                             {/* Hidden File Input */}
                             <input
-                                onChange={handleOnVideo}
+                                onChange={(e) => handleOnVideo(e, setloadingVideo, setData)}
                                 type="file"
                                 accept="video/*"
                                 className="hidden"
@@ -330,7 +331,7 @@ const SubmitTaskReport = () => {
                                 <input
                                     type="text"
                                     value={link.name}
-                                    onChange={(e) => handleLinkChange(index, "name", e.target.value)}
+                                    onChange={(e) => handleLinkChange(index, "name", e.target.value, links, setLinks)}
                                     placeholder="Link name"
                                     className="w-full sm:w-1/3 p-2 rounded-md bg-gray-800 text-gray-200 border border-gray-500 hover:border-[#6f89ef] outline-none"
                                 />
@@ -339,7 +340,7 @@ const SubmitTaskReport = () => {
                                 <input
                                     type="text"
                                     value={link.url}
-                                    onChange={(e) => handleLinkChange(index, "url", e.target.value)}
+                                    onChange={(e) => handleLinkChange(index, "url", e.target.value, links, setLinks)}
                                     placeholder="Link URL"
                                     className="w-full sm:flex-1 p-2 rounded-md bg-gray-800 text-gray-200 border border-gray-500 hover:border-[#6f89ef] outline-none"
                                 />
@@ -347,8 +348,8 @@ const SubmitTaskReport = () => {
                                 {/* Delete Button */}
                                 <div
                                     type="button"
-                                    onClick={() => removeLink(index)}
-                                    className="text-red-500 hover:text-red-400  self-start sm:self-center"
+                                    onClick={() => removeLink(index, setLinks, links)}
+                                    className="text-red-500 hover:text-red-400  self-start sm:self-center cursor-pointer"
                                 >
                                     <FaTrash className="sm:block hidden" />
                                     <button className="sm:hidden block">Delete</button>
@@ -359,7 +360,7 @@ const SubmitTaskReport = () => {
                         {/* Add Button */}
                         <button
                             type="button"
-                            onClick={addLink}
+                            onClick={() => addLink(setLinks, links)}
                             className="mt-2 flex items-center gap-2 text-[#6f89ef] hover:text-[#5d77dd] cursor-pointer"
                         >
                             <FaPlus /> Add Link

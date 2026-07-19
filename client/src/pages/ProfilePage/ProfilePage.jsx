@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector , useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import profile from "../../assets/profile.png"
-import { FaEdit, FaEye , FaEnvelopeOpenText , FaCamera } from "react-icons/fa";
+import { FaEdit, FaEye, FaEnvelopeOpenText, FaCamera } from "react-icons/fa";
 import { NavLink, Outlet, useParams, useLocation, useNavigate } from 'react-router-dom'
 import Axios from '../../utils/Axios';
 import SummaryApi from '../../common/SummaryApi';
-import { imageAndNameUpdate , setUserLogout } from '../../store/userSlice';
+import { imageAndNameUpdate, setUserLogout } from '../../store/userSlice';
 import { setChatLogOut } from '../../store/chatSlice';
 import { setTaskLogOut } from '../../store/taskSlice';
 import { setTeamLogOut } from '../../store/teamSlice';
@@ -16,6 +16,26 @@ import { IoClose } from "react-icons/io5";
 import defaultProfile from "../../assets/profile.png"
 import uploadFile from '../../utils/uploadFile';
 
+
+const handleProfilePicUpload = async (e, setloaderForImg, setData) => {
+
+    setloaderForImg(true)
+
+    const file = e.target.files?.[0]
+
+    if (!file) return
+
+    const response = await uploadFile(file)
+
+    setData((preve) => {
+        return {
+            ...preve,
+            image: response?.secure_url
+        }
+    })
+
+    setloaderForImg(false)
+}
 
 const ProfilePage = () => {
 
@@ -75,26 +95,6 @@ const ProfilePage = () => {
         } catch (error) {
             console.log("from handleLogout", error)
         }
-    }
-
-    const handleProfilePicUpload = async (e) => {
-
-        setloaderForImg(true)
-
-        const file = e.target.files?.[0]
-
-        if (!file) return
-
-        const response = await uploadFile(file)
-
-        setData((preve) => {
-            return {
-                ...preve,
-                image: response?.secure_url
-            }
-        })
-
-        setloaderForImg(false)
     }
 
     const handleSave = () => {
@@ -238,7 +238,7 @@ const ProfilePage = () => {
                     <div className=''>
 
                         <h1 className='pt-[40px] font-bold text-[45px]'>{user?.name}</h1>
-                        <h2 className='font-semibold pl-1'>student</h2>
+                        <h2 className='font-semibold pl-1'>Collaborator</h2>
 
                         <div className='pt-[35px] flex items-center gap-x-10 pb-[10px] '>
 
@@ -329,7 +329,7 @@ const ProfilePage = () => {
                                         id="profile-picture-upload"
                                         type="file"
                                         accept="image/*"
-                                        onChange={handleProfilePicUpload}
+                                        onChange={(e) => handleProfilePicUpload(e, setloaderForImg, setData)}
                                         className="hidden"
                                     />
                                 </label>

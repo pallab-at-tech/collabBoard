@@ -75,7 +75,7 @@ const TrackTaskBoard = () => {
     useEffect(() => {
         if (!teamId) return
         fetchTaskDetails(teamId)
-    }, [x.length])
+    }, [teamId])
 
     useEffect(() => {
         const newData = manageTask()
@@ -83,7 +83,7 @@ const TrackTaskBoard = () => {
     }, [task])
 
     // sort data
-    useMemo(() => {
+    const a = useMemo(() => {
         if (!sortOption) return
         if (!data) return
 
@@ -122,6 +122,8 @@ const TrackTaskBoard = () => {
         }
 
         setData(newData)
+
+        return newData
 
     }, [sortOption])
 

@@ -170,6 +170,7 @@ const ChatPage = () => {
         }
 
     }, [socketConnection, dispatch])
+    
 
     return (
         <section className='min-h-[calc(100vh-60px)] '>

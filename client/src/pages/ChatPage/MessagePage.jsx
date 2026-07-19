@@ -17,6 +17,58 @@ import { AiOutlineClose } from "react-icons/ai";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 
 
+// Handle external files and media
+const handleAllAtachFile = async (e, setLoading, setAttachData, setOpenAttach) => {
+
+    try {
+        setLoading(true)
+
+        const { name } = e.target
+        const file = e.target.files?.[0]
+
+        if (!file) return
+
+        const response = await uploadFile(file)
+
+        setAttachData((preve) => {
+            return {
+                ...preve,
+                [name]: response?.secure_url
+            }
+        })
+
+        if (name === "image") {
+            const img = new Image();
+            img.src = response?.secure_url;
+
+            img.onload = () => setLoading(false);
+            img.onerror = () => {
+                console.error("Image failed to load");
+                setLoading(false);
+            };
+
+        } else if (name === "video") {
+            const video = document.createElement("video");
+            video.src = response?.secure_url;
+
+            video.onloadeddata = () => setLoading(false);
+            video.onerror = () => {
+                console.error("Video failed to load");
+                setLoading(false);
+            };
+
+        } else {
+            setLoading(false);
+        }
+
+        setOpenAttach(false)
+
+    } catch (error) {
+        console.log("Error from handleAllAtachFile", error)
+    }
+}
+
+
 const MessagePage = () => {
 
     const { socketConnection } = useGlobalContext()
@@ -70,57 +122,6 @@ const MessagePage = () => {
     const [hasMore, setHasMore] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [openAttach, setOpenAttach] = useState(false)
-
-    // Handle external files and media
-    const handleAllAtachFile = async (e) => {
-
-        try {
-            setLoading(true)
-
-            const { name } = e.target
-            const file = e.target.files?.[0]
-
-            if (!file) return
-
-            const response = await uploadFile(file)
-
-            setAttachData((preve) => {
-                return {
-                    ...preve,
-                    [name]: response?.secure_url
-                }
-            })
-
-            if (name === "image") {
-                const img = new Image();
-                img.src = response?.secure_url;
-
-                img.onload = () => setLoading(false);
-                img.onerror = () => {
-                    console.error("Image failed to load");
-                    setLoading(false);
-                };
-
-            } else if (name === "video") {
-                const video = document.createElement("video");
-                video.src = response?.secure_url;
-
-                video.onloadeddata = () => setLoading(false);
-                video.onerror = () => {
-                    console.error("Video failed to load");
-                    setLoading(false);
-                };
-
-            } else {
-                setLoading(false);
-            }
-
-            setOpenAttach(false)
-
-        } catch (error) {
-            console.log("Error from handleAllAtachFile", error)
-        }
-    }
 
     // send private message
     const handleOnClick = async () => {
@@ -784,19 +785,19 @@ const MessagePage = () => {
                                 <label htmlFor="image" className="cursor-pointer flex flex-col items-center">
                                     <IoImage size={32} />
                                     <p className="text-xs">Image</p>
-                                    <input onChange={handleAllAtachFile} type="file" accept="image/*" id='image' name="image" hidden />
+                                    <input onChange={(e) => handleAllAtachFile(e, setLoading, setAttachData, setOpenAttach)} type="file" accept="image/*" id='image' name="image" hidden />
                                 </label>
 
                                 <label htmlFor="video">
                                     <RiFolderVideoFill size={32} />
                                     <p className="text-xs">Video</p>
-                                    <input onChange={handleAllAtachFile} type="file" accept="video/*" id='video' name="video" hidden />
+                                    <input onChange={(e) => handleAllAtachFile(e, setLoading, setAttachData, setOpenAttach)} type="file" accept="video/*" id='video' name="video" hidden />
                                 </label>
 
                                 {/* <label htmlFor="other_fileUrl_or_external_link">
                                     <FaFileAlt size={32} />
                                     <p className="text-xs">File</p>
-                                    <input onChange={handleAllAtachFile} type="file" accept="application/pdf" id='other_fileUrl_or_external_link' name="other_fileUrl_or_external_link" hidden />
+                                    <input onChange={(e) => handleAllAtachFile(e , setLoading, setAttachData , setOpenAttach)} type="file" accept="application/pdf" id='other_fileUrl_or_external_link' name="other_fileUrl_or_external_link" hidden />
                                 </label> */}
                             </div>
                         )}

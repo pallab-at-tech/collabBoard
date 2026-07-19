@@ -17,6 +17,27 @@ const RenameCollabDesk = lazy(() => import("../../components/Others/OtherBoard/R
 const DeleteCollabDesk = lazy(() => import("../../components/Others/OtherBoard/DeleteCollabDesk"))
 
 
+const isLeaderFunc = (member, userId) => {
+
+    if (!member || !Array.isArray(member)) return false
+
+    for (let index = 0; index < member.length; index++) {
+
+        if (userId === member[index]?.userId) {
+
+            if (member[index]?.role === "LEADER") {
+                return true
+            }
+            else {
+                return false
+            }
+        }
+    }
+
+    return false
+}
+
+
 const MainTeamBoard = () => {
 
     const task = useSelector(state => state.task)
@@ -193,15 +214,10 @@ const MainTeamBoard = () => {
     }, [sortData, task])
 
     useEffect(() => {
-        if (!team || !user || !Array.isArray(team?.member)) return
+        if (!team || !user) return
 
-        for (let index = 0; index < team?.member.length; index++) {
+        setIsTeamLeader(isLeaderFunc(team?.member, user?._id))
 
-            if (user?._id === team?.member[index]?.userId) {
-                setIsTeamLeader(true)
-                break
-            }
-        }
     }, [team, user])
 
 

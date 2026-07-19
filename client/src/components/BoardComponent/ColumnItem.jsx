@@ -158,7 +158,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting , isTeamLeader }) => {
                             <p className='text-[#dbdbdb] font-semibold text-lg'>No task assigned yet ?!</p>
                         </div>
                     ) : (
-                        <div className={`sm:ml-10 transition-opacity duration-500 ease-in-out bg-[#1c1c21] xl:bg-[#1c1c26] border-gray-700 border-2  backdrop-blur-md min-h-[150px] min-w-10 sm:max-w-[550px] xl:max-w-[640px]  rounded-md pr-8 pt-2 pb-6 ${taskOpen ? "opacity-100" : "opacity-0 h-0"}`}>
+                        <div className={`sm:ml-10 transition-opacity duration-500 ease-in-out bg-[#1c1c21] xl:bg-[#1c1c26] border-gray-700 border-2  backdrop-blur-md min-h-[150px] min-w-10 sm:max-w-[550px] xl:max-w-[620px]  rounded-md pr-8 pt-2 pb-6 ${taskOpen ? "opacity-100" : "opacity-0 h-0"}`}>
 
                             {
                                 val?.tasks?.map((v, idx) => {
@@ -210,7 +210,7 @@ const ColumnItem = ({ val, isOpen, setColumnSetting , isTeamLeader }) => {
                                             </div>
 
                                             {/* edit options */}
-                                            <div className='text-white absolute lg-real:-right-[30px] custom-sm:top-2 custom-sm:-right-2.5 top-0 -right-6 flex sm:flex-col flex-row items-center'>
+                                            <div className='text-white px-0.5 absolute lg-real:-right-[30px] custom-sm:top-2 custom-sm:-right-2.5 top-0 -right-6 flex sm:flex-col flex-row items-center'>
 
                                                 <Link to={`/task/task-assign-${v?._id}`} state={{ val: v, columnId: val?._id, teamId: team?._id, report: val?.reportSubmit || [], isLeader: isTeamLeader || false }} className={`h-fit w-fit`}>
                                                     <FaExternalLinkAlt
