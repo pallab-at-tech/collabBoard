@@ -6,6 +6,8 @@ import FeaturePage from '../pages/OtherPage/FeaturePage'
 import AboutPage from '../pages/OtherPage/AboutPage'
 
 import { lazy } from 'react'
+import ErrorPage from '../pages/ErrorPage'
+import PageNotFound from '../pages/PageNotFound'
 
 const Home = lazy(() => import("../pages/Home"))
 const CollabBoard = lazy(() => import("../pages/BoardPage/CollabBoard"))
@@ -32,15 +34,16 @@ const router = createBrowserRouter([
     {
         path: "/",
         element: <App />,
-
         children: [
             {
                 path: '',
-                element: <Home />
+                element: <Home />,
+                errorElement: <ErrorPage />
             },
             {
                 path: '/board/:user',
                 element: <CollabBoard />,
+                errorElement: <ErrorPage />,
                 children: [
                     {
                         path: '',
@@ -80,14 +83,17 @@ const router = createBrowserRouter([
             {
                 path: "/task/:id",
                 element: <SeparateTabForTask />,
+                errorElement: <ErrorPage />
             },
             {
                 path: "/task/:id/report",
-                element: <SubmitTaskReport />
+                element: <SubmitTaskReport />,
+                errorElement: <ErrorPage />
             },
             {
                 path: "/profile/:user",
                 element: <ProfilePage />,
+                errorElement: <ErrorPage />,
                 children: [
                     {
                         path: "",
@@ -98,6 +104,7 @@ const router = createBrowserRouter([
             {
                 path: "/chat",
                 element: <ChatPage />,
+                errorElement: <ErrorPage />,
                 children: [
                     {
                         path: "/chat/:conversation",
@@ -113,19 +120,23 @@ const router = createBrowserRouter([
             },
             {
                 path: "/notifications",
-                element: <NotificationPage />
+                element: <NotificationPage />,
+                errorElement: <ErrorPage />
             },
             {
                 path: "/features",
-                element: <FeaturePage />
+                element: <FeaturePage />,
+                errorElement: <ErrorPage />
             },
             {
                 path: "/about",
-                element: <AboutPage />
+                element: <AboutPage />,
+                errorElement: <ErrorPage />
             },
             {
                 path: "/report-download",
-                element: <ReportStructure />
+                element: <ReportStructure />,
+                errorElement: <ErrorPage />
             }
         ]
     },
@@ -136,6 +147,10 @@ const router = createBrowserRouter([
     {
         path: "/signup",
         element: <SignupPage />
+    },
+    {
+        path: "*",
+        element: <PageNotFound />
     }
 ])
 

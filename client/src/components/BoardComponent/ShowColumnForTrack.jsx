@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { BsColumnsGap } from "react-icons/bs";
-import { FaClock , FaExclamationTriangle } from 'react-icons/fa';
+import { FaClock, FaExclamationTriangle } from 'react-icons/fa';
 import { FaRegFaceDizzy } from "react-icons/fa6";
 import { useGlobalContext } from '../../provider/GlobalProvider';
 
 
 
 const ShowColumnForTrack = () => {
-    
     const location = useLocation().state;
     const column = location?.data;
 
