@@ -94,6 +94,13 @@ export const getTaskDetailsController = async (request, response) => {
         const userName = user.userId
         const isLeader = team.member.some(c => c.userId.toString() === userId && c.role.toString() !== "MEMBER")
 
+        data.column.sort((a, b) => {
+            const aTime = new Date(a.updatedAt)
+            const bTime = new Date(b.updatedAt)
+
+            return bTime - aTime;
+        });
+
         if (!isLeader && data !== null) {
 
             const filterData = {
@@ -105,7 +112,7 @@ export const getTaskDetailsController = async (request, response) => {
                 column: data.column.map(c => {
                     const userTask = c.tasks.filter(t => t.assignTo.includes(userName))
                     return userTask.length ? { ...c.toObject?.() || c, tasks: userTask } : null
-                }).filter(Boolean) || []
+                }) || []
             }
 
             return response.json({

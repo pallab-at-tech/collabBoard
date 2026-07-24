@@ -64,20 +64,22 @@ const columnSchema = new mongoose.Schema({
         required: true
     },
     tasks: [taskSchema],
-    reportSubmit : [
+    reportSubmit: [
         {
-            report_id : {
-                type : mongoose.Schema.ObjectId,
-                ref : "report",
-                default : null
+            report_id: {
+                type: mongoose.Schema.ObjectId,
+                ref: "report",
+                default: null
             },
-            taskId : {
-                type : mongoose.Schema.ObjectId,
-                default : null
+            taskId: {
+                type: mongoose.Schema.ObjectId,
+                default: null
             }
         }
     ]
-})
+},
+    { timestamps: true }
+)
 
 const submitReport = new mongoose.Schema({
     text: {
@@ -128,9 +130,9 @@ const taskBoardSchema = new mongoose.Schema({
 })
 
 const taskModel = mongoose.model("taskboard", taskBoardSchema)
-const reportModel = mongoose.model("report",submitReport)
+const reportModel = mongoose.model("report", submitReport)
 
 export default taskModel
-export  {
+export {
     reportModel
 }
