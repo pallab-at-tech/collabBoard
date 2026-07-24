@@ -121,6 +121,8 @@ const ColumnItem = ({ val, isOpen, setColumnSetting , isTeamLeader }) => {
     const [taskLabel, setTaskLabel] = useState(new Set())
 
 
+    // console.log("Val" , val)
+
     return (
         <section>
 

@@ -4,17 +4,17 @@ import { useSelector } from 'react-redux'
 import Axios from '../../../utils/Axios'
 import SummaryApi from '../../../common/SummaryApi'
 import toast from 'react-hot-toast'
-import { useGlobalContext } from '../../../provider/GlobalProvider'
-
+import { UpdateColumnByDeleteColumn } from '../../../store/taskSlice';
+import { useDispatch } from 'react-redux';
 
 const DeleteColumn = ({ close, columnId, columnName }) => {
 
-    const task = useSelector(state => state.task)
-    const { fetchTaskDetails } = useGlobalContext()
+    const taskId = useSelector(state => state.task?._id)
+    const dispatch = useDispatch()
+    const params = useParams()
 
     const [loading, setloading] = useState(false)
 
-    const params = useParams()
 
     const handleDelete = async () => {
         try {
@@ -24,7 +24,7 @@ const DeleteColumn = ({ close, columnId, columnName }) => {
             const response = await Axios({
                 ...SummaryApi.task_column_delete,
                 data: {
-                    taskId: task?._id,
+                    taskId: taskId,
                     columnId: columnId,
                     teamId: params?.team
                 }
@@ -37,7 +37,10 @@ const DeleteColumn = ({ close, columnId, columnName }) => {
 
             if (response?.data?.success) {
                 toast.success(response?.data?.message)
-                fetchTaskDetails(task?.teamId)
+                dispatch(UpdateColumnByDeleteColumn({
+                    columnId: columnId
+                }))
+
                 setloading(false)
                 close()
             }

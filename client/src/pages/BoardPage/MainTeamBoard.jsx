@@ -220,7 +220,6 @@ const MainTeamBoard = () => {
 
     }, [team, user])
 
-
     return (
         <section className='relative'>
 

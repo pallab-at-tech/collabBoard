@@ -18,7 +18,7 @@ const taskSlice = createSlice({
             state.column = action.payload?.column
         },
         updateColumnByTaskAssign: (state, action) => {
-            const { task, columnId , columnName } = action.payload
+            const { task, columnId, columnName } = action.payload
             const columnIdx = state.column.findIndex(c => c._id === columnId)
 
             if (columnIdx !== -1) {
@@ -28,9 +28,9 @@ const taskSlice = createSlice({
             }
             else {
                 state.column.push({
-                    _id : columnId,
-                    name : columnName || "Untitled",
-                    tasks : [task]
+                    _id: columnId,
+                    name: columnName || "Untitled",
+                    tasks: [task]
                 })
             }
         },
@@ -66,10 +66,7 @@ const taskSlice = createSlice({
             })
 
             state.column.sort((a, b) => {
-                const aDate = a.tasks.length > 0 ? new Date(a.tasks[0].createdAt) : -Infinity
-                const bDate = b.tasks.length > 0 ? new Date(b.tasks[0].createdAt) : -Infinity
-
-                return bDate - aDate
+                return new Date(b.createdAt) - new Date(a.createdAt)
             })
 
         },
@@ -80,10 +77,7 @@ const taskSlice = createSlice({
             })
 
             state.column.sort((a, b) => {
-                const aDate = a.tasks.length > 0 ? new Date(a.tasks[0].updatedAt) : -Infinity
-                const bDate = b.tasks.length > 0 ? new Date(b.tasks[0].updatedAt) : -Infinity
-
-                return bDate - aDate
+                return new Date(b.updatedAt) - new Date(a.updatedAt)
             })
 
         },
@@ -100,6 +94,14 @@ const taskSlice = createSlice({
                 return aDate - bDate
             })
         },
+        UpdateColumnByDeleteColumn: (state, action) => {
+
+            const { columnId } = action.payload
+
+            if (!columnId) return
+
+            state.column = state.column.filter((v) => v?._id !== columnId)
+        },
         setTaskLogOut: (state, action) => {
             state._id = ""
             state.teamId = ""
@@ -115,7 +117,7 @@ const taskSlice = createSlice({
 
 export const { setTask, updateColumnByTaskAssign, updateColumnByTaskUnAssign,
     updateColumn, sortColumnByCreatedAt, sortColumnByUpdatedAt, sortColumnByDeadLine,
-    setTaskLogOut, taskBoardNameChange
+    setTaskLogOut, taskBoardNameChange, UpdateColumnByDeleteColumn
 } = taskSlice.actions
 
 export default taskSlice.reducer

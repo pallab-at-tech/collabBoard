@@ -101,6 +101,10 @@ const GlobalProvider = ({ children }) => {
         }
     }
 
+    const updateTaskDetails = async () => {
+        
+    }
+
     useEffect(() => {
         fetchUserAllDetails()
     }, [])
